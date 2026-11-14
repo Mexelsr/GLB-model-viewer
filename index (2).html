@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prism 3D — GLB / GLTF Studio Viewer</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            studio: {
+              950: '#090b0f',
+              900: '#10131a',
+              850: '#161a24',
+              800: '#1e2433',
+              700: '#2b3347',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Custom Styles for Range Sliders, Scrollbars & Glassmorphism -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0b0d12;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Custom sleek scrollbar for floating panels */
+    .studio-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .studio-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .studio-scroll::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.2);
+      border-radius: 9999px;
+    }
+    .studio-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.38);
+    }
+
+    /* Custom range slider styling */
+    input[type="range"].studio-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"].studio-slider::-webkit-slider-runnable-track {
+      height: 5px;
+      border-radius: 9999px;
+      background: rgba(148, 163, 184, 0.22);
+    }
+    input[type="range"].studio-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 9999px;
+      background: #6366f1;
+      border: 2px solid #e0e7ff;
+      margin-top: -4.5px;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.55);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    input[type="range"].studio-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #818cf8;
+    }
+    input[type="range"].studio-slider::-moz-range-track {
+      height: 5px;
+      border-radius: 9999px;
+      background: rgba(148, 163, 184, 0.22);
+    }
+    input[type="range"].studio-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 9999px;
+      background: #6366f1;
+      border: 2px solid #e0e7ff;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.55);
+    }
+  </style>
+
+  <!-- ES Module Import Map for Three.js & Addons -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body class="font-sans text-slate-100 antialiased">
+
+  <!-- Full-Viewport 3D Canvas Container -->
+  <div id="viewport-container" class="relative w-full h-full overflow-hidden">
+    <canvas id="three-canvas" class="block w-full h-full outline-none"></canvas>
+  </div>
+
+  <!-- Full-Screen Drag & Drop Overlay -->
+  <div id="drop-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-md transition-opacity duration-200 pointer-events-none">
+    <div class="mx-4 max-w-md w-full rounded-3xl border-2 border-dashed border-indigo-400/80 bg-studio-900/90 p-8 text-center shadow-2xl shadow-indigo-500/20">
+      <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-400/30">
+        <svg class="h-8 w-8 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-white">Drop 3D Model to Inspect</h2>
+      <p class="mt-2 text-sm text-slate-300">Supports <span class="font-mono text-indigo-300">.glb</span> and <span class="font-mono text-indigo-300">.gltf</span> files (including Draco compressed meshes &amp; animations)</p>
+    </div>
+  </div>
+
+  <!-- Top Navigation & Camera Controls Bar -->
+  <header class="fixed top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+    <!-- Left Cluster: Brand + Models Toggle -->
+    <div class="flex items-center gap-2 pointer-events-auto">
+      <div class="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-studio-900/80 px-3.5 py-2 backdrop-blur-xl shadow-lg shadow-black/30">
+        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-inner">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <span class="text-sm font-semibold tracking-tight text-white">Prism 3D</span>
+          <span class="hidden sm:inline-block ml-1.5 rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-400">Studio</span>
+        </div>
+      </div>
+
+      <!-- Toggle Models Drawer Button -->
+      <button id="toggle-models-btn" type="button" title="Toggle Models List"
+        class="flex items-center gap-2 rounded-2xl border border-white/10 bg-studio-900/80 px-3 py-2 text-xs font-medium text-slate-200 backdrop-blur-xl shadow-lg shadow-black/30 hover:bg-studio-800/90 hover:border-white/20 transition">
+        <svg class="h-4 w-4 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+        <span class="hidden md:inline">Models</span>
+        <span id="model-count-badge" class="rounded-full bg-indigo-500/20 px-1.5 py-0.5 text-[10px] font-mono text-indigo-300">1</span>
+      </button>
+    </div>
+
+    <!-- Center Cluster: Camera View Presets -->
+    <div class="hidden lg:flex items-center gap-1 rounded-2xl border border-white/10 bg-studio-900/80 p-1 backdrop-blur-xl shadow-lg shadow-black/30 pointer-events-auto">
+      <button type="button" data-view="fit" title="Reset & Fit Camera (R)"
+        class="camera-preset-btn flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/10 hover:text-white transition">
+        <svg class="h-3.5 w-3.5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>
+        </svg>
+        <span>Fit View</span>
+      </button>
+      <div class="h-4 w-px bg-white/10 mx-0.5"></div>
+      <button type="button" data-view="front" title="Front View (1)"
+        class="camera-preset-btn rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">Front</button>
+      <button type="button" data-view="right" title="Right View (2)"
+        class="camera-preset-btn rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">Right</button>
+      <button type="button" data-view="top" title="Top View (3)"
+        class="camera-preset-btn rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">Top</button>
+      <button type="button" data-view="iso" title="Isometric View (4)"
+        class="camera-preset-btn rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">Iso</button>
+    </div>
+
+    <!-- Right Cluster: Upload Button + Studio Panel Toggle -->
+    <div class="flex items-center gap-2 pointer-events-auto">
+      <!-- Hidden File Input -->
+      <input id="file-input" type="file" accept=".glb,.gltf,.bin,image/*" multiple class="hidden" />
+
+      <!-- Primary Upload CTA -->
+      <button id="upload-btn" type="button"
+        class="flex items-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 ring-1 ring-indigo-400/40 transition">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span>Upload GLB</span>
+      </button>
+
+      <!-- Toggle Studio Controls Drawer -->
+      <button id="toggle-studio-btn" type="button" title="Toggle Studio & Inspector"
+        class="flex items-center gap-2 rounded-2xl border border-white/10 bg-studio-900/80 px-3 py-2 text-xs font-medium text-slate-200 backdrop-blur-xl shadow-lg shadow-black/30 hover:bg-studio-800/90 hover:border-white/20 transition">
+        <svg class="h-4 w-4 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
+          <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+          <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>
+          <line x1="17" y1="16" x2="23" y2="16"/>
+        </svg>
+        <span class="hidden md:inline">Studio</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Left Collapsible Panel: Models List -->
+  <aside id="models-panel"
+    class="fixed top-16 left-3 z-20 w-72 max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-8.5rem)] flex flex-col rounded-2xl border border-white/10 bg-studio-900/82 backdrop-blur-xl shadow-2xl shadow-black/40 transition-all duration-250">
+    <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Scene Models</span>
+      </div>
+      <button id="close-models-btn" type="button" title="Collapse Panel" class="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white transition">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Model List Items Container -->
+    <div id="models-list" class="studio-scroll flex-1 overflow-y-auto p-2.5 space-y-1.5">
+      <!-- Dynamically populated by JS -->
+    </div>
+
+    <!-- Quick Drop Hint Footer -->
+    <div class="border-t border-white/10 p-3">
+      <button id="panel-upload-btn" type="button"
+        class="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.03] hover:bg-indigo-500/10 hover:border-indigo-400/40 py-2.5 text-xs font-medium text-slate-300 hover:text-indigo-300 transition">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>Add .GLB / .GLTF File</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Right Collapsible Panel: Studio Controls & Model Inspector -->
+  <aside id="studio-panel"
+    class="fixed top-16 right-3 z-20 w-80 max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-8.5rem)] flex flex-col rounded-2xl border border-white/10 bg-studio-900/82 backdrop-blur-xl shadow-2xl shadow-black/40 transition-all duration-250">
+    <!-- Panel Header -->
+    <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Studio &amp; Inspector</span>
+      <button id="close-studio-btn" type="button" title="Collapse Panel" class="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white transition">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="studio-scroll flex-1 overflow-y-auto p-4 space-y-5">
+      <!-- Mobile/Tablet Camera Presets (visible below lg breakpoint) -->
+      <div class="lg:hidden space-y-2">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Camera Views</div>
+        <div class="grid grid-cols-5 gap-1 rounded-xl bg-black/30 p-1 border border-white/5">
+          <button type="button" data-view="fit" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-indigo-300 hover:bg-white/10">Fit</button>
+          <button type="button" data-view="front" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10">Front</button>
+          <button type="button" data-view="right" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10">Right</button>
+          <button type="button" data-view="top" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10">Top</button>
+          <button type="button" data-view="iso" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10">Iso</button>
+        </div>
+      </div>
+
+      <!-- Viewport Controls Section -->
+      <div class="space-y-3">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Viewport Settings</div>
+
+        <!-- Auto-Rotate Toggle -->
+        <div class="rounded-xl border border-white/5 bg-white/[0.03] p-3 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label for="auto-rotate-toggle" class="text-xs font-medium text-slate-200 cursor-pointer">Auto-Rotate</label>
+            <button id="auto-rotate-toggle" type="button" role="switch" aria-checked="true"
+              class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-indigo-600 transition-colors duration-200 focus:outline-none">
+              <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 translate-x-4"></span>
+            </button>
+          </div>
+          <!-- Auto-Rotate Speed Slider -->
+          <div id="rotate-speed-row" class="flex items-center justify-between gap-3 pt-0.5">
+            <span class="text-[11px] text-slate-400">Speed</span>
+            <input id="rotate-speed-slider" type="range" min="0.5" max="6" step="0.5" value="1.5" class="studio-slider flex-1" />
+            <span id="rotate-speed-val" class="w-8 text-right font-mono text-[11px] text-slate-300">1.5x</span>
+          </div>
+        </div>
+
+        <!-- Wireframe Mode Toggle -->
+        <div class="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5">
+          <label for="wireframe-toggle" class="text-xs font-medium text-slate-200 cursor-pointer">Wireframe Mode</label>
+          <button id="wireframe-toggle" type="button" role="switch" aria-checked="false"
+            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-700 transition-colors duration-200 focus:outline-none">
+            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 translate-x-0"></span>
+          </button>
+        </div>
+
+        <!-- Ground Grid Toggle -->
+        <div class="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5">
+          <label for="grid-toggle" class="text-xs font-medium text-slate-200 cursor-pointer">Ground Grid &amp; Shadow</label>
+          <button id="grid-toggle" type="button" role="switch" aria-checked="true"
+            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-indigo-600 transition-colors duration-200 focus:outline-none">
+            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 translate-x-4"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Environment & Lighting Section -->
+      <div class="space-y-3 border-t border-white/10 pt-4">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Environment &amp; Lighting</div>
+
+        <!-- Background Presets -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-300">Background</span>
+            <span id="bg-label" class="text-[11px] font-medium text-slate-400">Dark Studio</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" data-bg="dark-studio" title="Dark Studio"
+              class="bg-preset-btn group flex flex-col items-center gap-1 rounded-xl border-2 border-indigo-500 bg-white/5 p-1.5 transition">
+              <span class="h-5 w-full rounded-md bg-[#0f1218] ring-1 ring-white/15"></span>
+              <span class="text-[10px] text-slate-300">Studio</span>
+            </button>
+            <button type="button" data-bg="charcoal" title="Charcoal"
+              class="bg-preset-btn group flex flex-col items-center gap-1 rounded-xl border-2 border-transparent bg-white/5 p-1.5 hover:border-white/20 transition">
+              <span class="h-5 w-full rounded-md bg-[#232730] ring-1 ring-white/15"></span>
+              <span class="text-[10px] text-slate-400">Charcoal</span>
+            </button>
+            <button type="button" data-bg="light-gray" title="Light Gray"
+              class="bg-preset-btn group flex flex-col items-center gap-1 rounded-xl border-2 border-transparent bg-white/5 p-1.5 hover:border-white/20 transition">
+              <span class="h-5 w-full rounded-md bg-[#dfe4ec] ring-1 ring-black/15"></span>
+              <span class="text-[10px] text-slate-400">Light</span>
+            </button>
+            <button type="button" data-bg="deep-navy" title="Deep Navy"
+              class="bg-preset-btn group flex flex-col items-center gap-1 rounded-xl border-2 border-transparent bg-white/5 p-1.5 hover:border-white/20 transition">
+              <span class="h-5 w-full rounded-md bg-[#0a1428] ring-1 ring-white/15"></span>
+              <span class="text-[10px] text-slate-400">Navy</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Exposure / Lighting Slider -->
+        <div class="rounded-xl border border-white/5 bg-white/[0.03] p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-200">Exposure</span>
+            <span id="exposure-val" class="font-mono text-[11px] text-indigo-300">1.10 EV</span>
+          </div>
+          <input id="exposure-slider" type="range" min="0.2" max="2.5" step="0.05" value="1.1" class="studio-slider w-full" />
+        </div>
+      </div>
+
+      <!-- Model Info Inspector Section -->
+      <div class="space-y-2.5 border-t border-white/10 pt-4">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Model Inspector</span>
+          <span id="inspector-badge" class="rounded bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[10px] text-emerald-300">READY</span>
+        </div>
+
+        <div class="rounded-xl border border-white/5 bg-black/25 p-3 space-y-2 text-xs">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-slate-400">File Name</span>
+            <span id="info-name" class="truncate max-w-[165px] font-medium text-slate-100" title="Studio Showcase Core">Studio Showcase Core</span>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-slate-400">File Size</span>
+            <span id="info-size" class="font-mono text-slate-200">Procedural</span>
+          </div>
+          <div class="h-px bg-white/5 my-1"></div>
+          <div class="grid grid-cols-2 gap-2 pt-0.5">
+            <div class="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400">Meshes</div>
+              <div id="info-meshes" class="font-mono text-sm font-semibold text-white">0</div>
+            </div>
+            <div class="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400">Materials</div>
+              <div id="info-materials" class="font-mono text-sm font-semibold text-white">0</div>
+            </div>
+            <div class="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400">Triangles</div>
+              <div id="info-triangles" class="font-mono text-sm font-semibold text-indigo-300">0</div>
+            </div>
+            <div class="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400">Vertices</div>
+              <div id="info-vertices" class="font-mono text-sm font-semibold text-slate-200">0</div>
+            </div>
+          </div>
+          <div class="pt-1 flex items-center justify-between gap-2">
+            <span class="text-slate-400">Dimensions</span>
+            <span id="info-dimensions" class="font-mono text-[11px] text-slate-300">0.00 × 0.00 × 0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Bottom Floating Animation Playback Bar (Visible when model contains animations) -->
+  <div id="animation-bar"
+    class="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 hidden w-[calc(100%-1.5rem)] max-w-2xl rounded-2xl border border-white/10 bg-studio-900/85 px-3.5 py-2.5 backdrop-blur-xl shadow-2xl shadow-black/50 transition-all duration-200">
+    <div class="flex flex-wrap sm:flex-nowrap items-center gap-3">
+      <!-- Play / Pause Button -->
+      <button id="anim-play-btn" type="button" title="Play / Pause (Space)"
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition">
+        <!-- Pause Icon (default playing) -->
+        <svg id="icon-pause" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
+        </svg>
+        <!-- Play Icon -->
+        <svg id="icon-play" class="h-4 w-4 hidden ml-0.5" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </button>
+
+      <!-- Animation Clip Selector -->
+      <select id="anim-clip-select" aria-label="Animation Clip"
+        class="max-w-[140px] sm:max-w-[170px] truncate rounded-xl border border-white/10 bg-studio-850 px-2.5 py-1.5 text-xs font-medium text-slate-200 focus:border-indigo-500 focus:outline-none">
+      </select>
+
+      <!-- Timeline Scrubber & Timecode -->
+      <div class="flex flex-1 items-center gap-2.5 min-w-[160px]">
+        <input id="anim-scrubber" type="range" min="0" max="1" step="0.001" value="0" class="studio-slider flex-1" />
+        <span id="anim-timecode" class="shrink-0 font-mono text-[11px] text-slate-300">0.0s / 0.0s</span>
+      </div>
+
+      <!-- Playback Speed Selector -->
+      <div class="flex items-center rounded-xl border border-white/10 bg-black/30 p-0.5 shrink-0">
+        <button type="button" data-speed="0.5" class="anim-speed-btn rounded-lg px-2 py-1 font-mono text-[11px] text-slate-400 hover:text-white transition">0.5x</button>
+        <button type="button" data-speed="1" class="anim-speed-btn rounded-lg bg-indigo-600 px-2 py-1 font-mono text-[11px] font-semibold text-white transition">1x</button>
+        <button type="button" data-speed="2" class="anim-speed-btn rounded-lg px-2 py-1 font-mono text-[11px] text-slate-400 hover:text-white transition">2x</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Indicator Pill -->
+  <div id="loading-pill" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden items-center gap-2.5 rounded-full border border-indigo-400/30 bg-studio-900/90 px-4 py-2 text-xs font-medium text-indigo-200 backdrop-blur-xl shadow-xl">
+    <svg class="h-4 w-4 animate-spin text-indigo-400" viewBox="0 0 24 24" fill="none">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+    <span id="loading-text">Loading 3D asset...</span>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Application Logic -->
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    // =========================================================================
+    // 1. STATE & CONFIGURATION
+    // =========================================================================
+    const state = {
+      models: [],               // Array of { id, name, sizeLabel, group, animations, stats, isDefault, blobUrls }
+      activeModelId: null,
+      autoRotate: true,
+      autoRotateSpeed: 1.5,
+      wireframe: false,
+      showGrid: true,
+      bgPreset: 'dark-studio',
+      exposure: 1.1,
+      // Animation state
+      mixer: null,
+      activeAction: null,
+      isPlaying: true,
+      playbackSpeed: 1.0,
+      isScrubbing: false,
+      // Smooth camera transition
+      cameraTransition: null,   // { startPos, endPos, startTarget, endTarget, progress, duration }
+    };
+
+    const BG_PRESETS = {
+      'dark-studio': { color: 0x0f1218, label: 'Dark Studio', gridCenter: 0x3b4254, gridLine: 0x1e2330 },
+      'charcoal':    { color: 0x232730, label: 'Charcoal',    gridCenter: 0x525b70, gridLine: 0x323846 },
+      'light-gray':  { color: 0xdfe4ec, label: 'Light Gray',  gridCenter: 0x94a3b8, gridLine: 0xcbd5e1 },
+      'deep-navy':   { color: 0x0a1428, label: 'Deep Navy',   gridCenter: 0x2b4570, gridLine: 0x152544 },
+    };
+
+    // =========================================================================
+    // 2. DOM REFERENCES
+    // =========================================================================
+    const container = document.getElementById('viewport-container');
+    const canvas = document.getElementById('three-canvas');
+    const dropOverlay = document.getElementById('drop-overlay');
+    const fileInput = document.getElementById('file-input');
+    const modelsPanel = document.getElementById('models-panel');
+    const studioPanel = document.getElementById('studio-panel');
+    const modelsListEl = document.getElementById('models-list');
+    const modelCountBadge = document.getElementById('model-count-badge');
+    const loadingPill = document.getElementById('loading-pill');
+    const loadingText = document.getElementById('loading-text');
+    const toastContainer = document.getElementById('toast-container');
+
+    // Animation UI
+    const animationBar = document.getElementById('animation-bar');
+    const animPlayBtn = document.getElementById('anim-play-btn');
+    const iconPause = document.getElementById('icon-pause');
+    const iconPlay = document.getElementById('icon-play');
+    const animClipSelect = document.getElementById('anim-clip-select');
+    const animScrubber = document.getElementById('anim-scrubber');
+    const animTimecode = document.getElementById('anim-timecode');
+
+    // =========================================================================
+    // 3. THREE.JS SCENE, RENDERER, LIGHTING & CONTROLS SETUP
+    // =========================================================================
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = state.exposure;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(BG_PRESETS[state.bgPreset].color);
+
+    // Environment reflections via RoomEnvironment
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    const roomEnvTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = roomEnvTexture;
+    scene.environmentIntensity = 0.85;
+
+    // Camera & OrbitControls
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.05, 500);
+    camera.position.set(3.2, 2.2, 3.8);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.screenSpacePanning = true;
+    controls.minDistance = 0.2;
+    controls.maxDistance = 100;
+    controls.autoRotate = state.autoRotate;
+    controls.autoRotateSpeed = state.autoRotateSpeed;
+    controls.target.set(0, 1.0, 0);
+
+    // Cancel programmatic camera transition if user manually grabs viewport
+    controls.addEventListener('start', () => {
+      state.cameraTransition = null;
+    });
+
+    // Studio Lighting Rig (Key Light with soft shadows + Rim/Fill)
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x262b38, 0.45);
+    hemiLight.position.set(0, 10, 0);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.6);
+    dirLight.position.set(4.5, 7.5, 5.5);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.set(2048, 2048);
+    dirLight.shadow.camera.near = 0.5;
+    dirLight.shadow.camera.far = 25;
+    const d = 4.5;
+    dirLight.shadow.camera.left = -d;
+    dirLight.shadow.camera.right = d;
+    dirLight.shadow.camera.top = d;
+    dirLight.shadow.camera.bottom = -d;
+    dirLight.shadow.bias = -0.0005;
+    scene.add(dirLight);
+
+    const rimLight = new THREE.DirectionalLight(0x818cf8, 0.65);
+    rimLight.position.set(-5, 3, -5);
+    scene.add(rimLight);
+
+    // Ground Grid & Contact Shadow Receiver
+    let gridHelper = new THREE.GridHelper(10, 20, BG_PRESETS['dark-studio'].gridCenter, BG_PRESETS['dark-studio'].gridLine);
+    gridHelper.material.opacity = 0.55;
+    gridHelper.material.transparent = true;
+    scene.add(gridHelper);
+
+    const shadowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(16, 16),
+      new THREE.ShadowMaterial({ opacity: 0.28 })
+    );
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.receiveShadow = true;
+    scene.add(shadowPlane);
+
+    // Configure GLTFLoader + DRACOLoader
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://unpkg.com/three@0.170.0/examples/jsm/libs/draco/gltf/');
+
+    // =========================================================================
+    // 4. PROCEDURAL SHOWCASE MODEL (ACTIVE ON INITIAL LOAD)
+    // =========================================================================
+    function createShowcaseModel() {
+      const root = new THREE.Group();
+      root.name = 'StudioShowcaseCore';
+
+      // Sleek anodized & brushed metal materials
+      const darkTitaniumMat = new THREE.MeshStandardMaterial({
+        color: 0x1e2430,
+        metalness: 0.85,
+        roughness: 0.26,
+      });
+      const brushedSilverMat = new THREE.MeshStandardMaterial({
+        color: 0xdbe2ef,
+        metalness: 0.92,
+        roughness: 0.18,
+      });
+      const accentIndigoMat = new THREE.MeshStandardMaterial({
+        color: 0x6366f1,
+        emissive: 0x312e81,
+        emissiveIntensity: 0.55,
+        metalness: 0.35,
+        roughness: 0.2,
+      });
+      const glassCoreMat = new THREE.MeshPhysicalMaterial({
+        color: 0xa5b4fc,
+        metalness: 0.05,
+        roughness: 0.08,
+        transmission: 0.72,
+        thickness: 0.8,
+        ior: 1.48,
+      });
+
+      // Pedestal Base
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.3, 0.14, 64), darkTitaniumMat);
+      base.position.y = 0.07;
+      base.castShadow = true;
+      base.receiveShadow = true;
+      root.add(base);
+
+      const baseRing = new THREE.Mesh(new THREE.TorusGeometry(1.16, 0.02, 24, 64), accentIndigoMat);
+      baseRing.rotation.x = Math.PI / 2;
+      baseRing.position.y = 0.14;
+      root.add(baseRing);
+
+      // Kinetic Gimbal Assembly
+      const gimbalPivot = new THREE.Group();
+      gimbalPivot.name = 'GimbalPivot';
+      gimbalPivot.position.y = 1.35;
+      root.add(gimbalPivot);
+
+      const outerRing = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.055, 32, 80), brushedSilverMat);
+      outerRing.castShadow = true;
+      gimbalPivot.add(outerRing);
+
+      const midRing = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.045, 28, 72), darkTitaniumMat);
+      midRing.name = 'MidRing';
+      midRing.rotation.y = Math.PI / 4;
+      midRing.castShadow = true;
+      gimbalPivot.add(midRing);
+
+      // Central Faceted Octahedron Core
+      const coreMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 1), glassCoreMat);
+      coreMesh.name = 'CrystalCore';
+      coreMesh.castShadow = true;
+      gimbalPivot.add(coreMesh);
+
+      const innerCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), accentIndigoMat);
+      innerCore.name = 'InnerEnergyCore';
+      gimbalPivot.add(innerCore);
+
+      // Build a real Three.js AnimationClip so user can test animation bar immediately
+      const times = [0, 3, 6];
+      const midRingTrack = new THREE.QuaternionKeyframeTrack(
+        'MidRing.quaternion',
+        times,
+        [
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)).toArray(),
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI, Math.PI, 0)).toArray(),
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI * 2, Math.PI * 2, 0)).toArray(),
+        ]
+      );
+      const coreTrack = new THREE.QuaternionKeyframeTrack(
+        'CrystalCore.quaternion',
+        times,
+        [
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)).toArray(),
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI, Math.PI, Math.PI * 0.5)).toArray(),
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI * 2, Math.PI * 2, Math.PI)).toArray(),
+        ]
+      );
+      const clip = new THREE.AnimationClip('Kinetic Idle Loop', 6, [midRingTrack, coreTrack]);
+
+      return { group: root, animations: [clip] };
+    }
+
+    // =========================================================================
+    // 5. NORMALIZATION, STATS EXTRACTION & MODEL MANAGEMENT
+    // =========================================================================
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+    }
+
+    function normalizeAndInspectModel(rawScene) {
+      // Compute raw bounding box before normalization to capture native dimensions
+      rawScene.updateMatrixWorld(true);
+      const rawBox = new THREE.Box3().setFromObject(rawScene);
+      const rawSize = new THREE.Vector3();
+      const rawCenter = new THREE.Vector3();
+
+      if (rawBox.isEmpty()) {
+        rawSize.set(1, 1, 1);
+        rawCenter.set(0, 0, 0);
+      } else {
+        rawBox.getSize(rawSize);
+        rawBox.getCenter(rawCenter);
+      }
+
+      const maxDim = Math.max(rawSize.x, rawSize.y, rawSize.z) || 1;
+      const targetSize = 2.4;
+      const scaleFactor = targetSize / maxDim;
+
+      // Wrap in a normalized container so internal animations on rawScene stay intact
+      const wrapper = new THREE.Group();
+      rawScene.scale.multiplyScalar(scaleFactor);
+
+      // Recompute scaled bounds to center horizontally and rest base at y = 0
+      rawScene.updateMatrixWorld(true);
+      const scaledBox = new THREE.Box3().setFromObject(rawScene);
+      const scaledCenter = new THREE.Vector3();
+      scaledBox.getCenter(scaledCenter);
+
+      rawScene.position.x -= scaledCenter.x;
+      rawScene.position.z -= scaledCenter.z;
+      rawScene.position.y -= scaledBox.min.y;
+
+      wrapper.add(rawScene);
+
+      // Extract Geometry & Material Statistics + Enable Shadows
+      let meshCount = 0;
+      let triangleCount = 0;
+      let vertexCount = 0;
+      const uniqueMaterials = new Set();
+
+      wrapper.traverse((child) => {
+        if (child.isMesh) {
+          meshCount++;
+          child.castShadow = true;
+          child.receiveShadow = true;
+
+          const geom = child.geometry;
+          if (geom) {
+            const posAttr = geom.attributes.position;
+            if (posAttr) {
+              vertexCount += posAttr.count;
+            }
+            if (geom.index) {
+              triangleCount += Math.round(geom.index.count / 3);
+            } else if (posAttr) {
+              triangleCount += Math.round(posAttr.count / 3);
+            }
+          }
+
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach((mat) => {
+            if (mat) {
+              uniqueMaterials.add(mat);
+              if (mat.userData.originalWireframe === undefined) {
+                mat.userData.originalWireframe = Boolean(mat.wireframe);
+              }
+            }
+          });
+        }
+      });
+
+      // Compute normalized height for optimal camera target framing
+      wrapper.updateMatrixWorld(true);
+      const normBox = new THREE.Box3().setFromObject(wrapper);
+      const normSize = new THREE.Vector3();
+      normBox.getSize(normSize);
+
+      return {
+        wrapper,
+        normalizedHeight: normSize.y || 1.5,
+        stats: {
+          meshes: meshCount,
+          materials: uniqueMaterials.size,
+          triangles: triangleCount,
+          vertices: vertexCount,
+          dimensions: `${rawSize.x.toFixed(2)} × ${rawSize.y.toFixed(2)} × ${rawSize.z.toFixed(2)}`,
+        }
+      };
+    }
+
+    function applyWireframeToModel(group, enabled) {
+      if (!group) return;
+      group.traverse((child) => {
+        if (child.isMesh && child.material) {
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach((mat) => {
+            mat.wireframe = enabled ? true : Boolean(mat.userData.originalWireframe);
+          });
+        }
+      });
+    }
+
+    function disposeObject(obj) {
+      if (!obj) return;
+      obj.traverse((child) => {
+        if (child.isMesh) {
+          if (child.geometry) child.geometry.dispose();
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach((mat) => {
+            if (!mat) return;
+            for (const key in mat) {
+              const val = mat[key];
+              if (val && typeof val === 'object' && val.isTexture) {
+                val.dispose();
+              }
+            }
+            mat.dispose();
+          });
+        }
+      });
+    }
+
+    function activateModel(modelId) {
+      const targetModel = state.models.find((m) => m.id === modelId);
+      if (!targetModel) return;
+
+      // Hide/remove previous active model from scene
+      state.models.forEach((m) => {
+        if (m.group.parent === scene) {
+          scene.remove(m.group);
+        }
+      });
+
+      // Stop existing animation mixer
+      if (state.mixer) {
+        state.mixer.stopAllAction();
+        state.mixer = null;
+        state.activeAction = null;
+      }
+
+      state.activeModelId = targetModel.id;
+      scene.add(targetModel.group);
+      applyWireframeToModel(targetModel.group, state.wireframe);
+
+      // Update Inspector Panel
+      document.getElementById('info-name').textContent = targetModel.name;
+      document.getElementById('info-name').title = targetModel.name;
+      document.getElementById('info-size').textContent = targetModel.sizeLabel;
+      document.getElementById('info-meshes').textContent = targetModel.stats.meshes.toLocaleString();
+      document.getElementById('info-materials').textContent = targetModel.stats.materials.toLocaleString();
+      document.getElementById('info-triangles').textContent = targetModel.stats.triangles.toLocaleString();
+      document.getElementById('info-vertices').textContent = targetModel.stats.vertices.toLocaleString();
+      document.getElementById('info-dimensions').textContent = targetModel.stats.dimensions;
+
+      // Setup Animation Bar if animations exist
+      setupAnimationsForModel(targetModel);
+
+      // Frame camera smoothly
+      setCameraPreset('fit', true);
+      renderModelsList();
+    }
+
+    function removeModel(modelId) {
+      const idx = state.models.findIndex((m) => m.id === modelId);
+      if (idx === -1) return;
+      const model = state.models[idx];
+      if (model.isDefault) return;
+
+      if (model.group.parent === scene) {
+        scene.remove(model.group);
+      }
+      disposeObject(model.group);
+      if (model.blobUrls) {
+        model.blobUrls.forEach((u) => URL.revokeObjectURL(u));
+      }
+
+      state.models.splice(idx, 1);
+      showToast(`Removed "${model.name}"`, 'info');
+
+      if (state.activeModelId === modelId) {
+        const fallback = state.models[state.models.length - 1];
+        if (fallback) activateModel(fallback.id);
+      } else {
+        renderModelsList();
+      }
+    }
+
+    function renderModelsList() {
+      modelCountBadge.textContent = state.models.length;
+      modelsListEl.innerHTML = '';
+
+      state.models.forEach((model) => {
+        const isActive = model.id === state.activeModelId;
+        const item = document.createElement('div');
+        item.className = `group flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 cursor-pointer transition ${
+          isActive
+            ? 'bg-indigo-600/20 border border-indigo-500/40 text-white'
+            : 'border border-transparent hover:bg-white/[0.05] text-slate-300'
+        }`;
+
+        item.innerHTML = `
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+              isActive ? 'bg-indigo-500 text-white' : 'bg-white/5 text-slate-400 group-hover:text-slate-200'
+            }">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="truncate text-xs font-medium ${isActive ? 'text-white' : 'text-slate-200'}">${escapeHtml(model.name)}</div>
+              <div class="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                <span>${escapeHtml(model.sizeLabel)}</span>
+                ${model.animations.length > 0 ? `<span class="text-indigo-300">• ${model.animations.length} anim</span>` : ''}
+              </div>
+            </div>
+          </div>
+          ${
+            !model.isDefault
+              ? `<button type="button" data-delete-id="${model.id}" title="Remove Model"
+                  class="delete-model-btn rounded-lg p-1.5 text-slate-400 opacity-70 hover:opacity-100 hover:bg-rose-500/20 hover:text-rose-300 transition">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>`
+              : `<span class="rounded bg-white/5 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-slate-400">Demo</span>`
+          }
+        `;
+
+        item.addEventListener('click', (e) => {
+          if (e.target.closest('.delete-model-btn')) return;
+          activateModel(model.id);
+        });
+
+        const delBtn = item.querySelector('.delete-model-btn');
+        if (delBtn) {
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeModel(model.id);
+          });
+        }
+
+        modelsListEl.appendChild(item);
+      });
+    }
+
+    // =========================================================================
+    // 6. ANIMATION PLAYBACK ENGINE
+    // =========================================================================
+    function setupAnimationsForModel(model) {
+      const clips = model.animations || [];
+      if (clips.length === 0) {
+        animationBar.classList.add('hidden');
+        return;
+      }
+
+      animationBar.classList.remove('hidden');
+      state.mixer = new THREE.AnimationMixer(model.group);
+      state.mixer.timeScale = state.playbackSpeed;
+
+      // Populate clip dropdown
+      animClipSelect.innerHTML = '';
+      clips.forEach((clip, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = clip.name || `Animation ${idx + 1}`;
+        animClipSelect.appendChild(opt);
+      });
+
+      playClipAtIndex(0);
+    }
+
+    function playClipAtIndex(index) {
+      const model = state.models.find((m) => m.id === state.activeModelId);
+      if (!model || !state.mixer || !model.animations[index]) return;
+
+      state.mixer.stopAllAction();
+      const clip = model.animations[index];
+      const action = state.mixer.clipAction(clip);
+      action.reset();
+      action.play();
+      action.paused = !state.isPlaying;
+
+      state.activeAction = action;
+      animScrubber.value = 0;
+      updatePlayPauseUI();
+    }
+
+    function updatePlayPauseUI() {
+      if (state.isPlaying) {
+        iconPause.classList.remove('hidden');
+        iconPlay.classList.add('hidden');
+      } else {
+        iconPause.classList.add('hidden');
+        iconPlay.classList.remove('hidden');
+      }
+    }
+
+    animPlayBtn.addEventListener('click', () => {
+      if (!state.activeAction) return;
+      state.isPlaying = !state.isPlaying;
+      state.activeAction.paused = !state.isPlaying;
+      updatePlayPauseUI();
+    });
+
+    animClipSelect.addEventListener('change', (e) => {
+      playClipAtIndex(Number(e.target.value));
+    });
+
+    animScrubber.addEventListener('input', (e) => {
+      if (!state.activeAction || !state.mixer) return;
+      state.isScrubbing = true;
+      const clip = state.activeAction.getClip();
+      const ratio = parseFloat(e.target.value);
+      state.activeAction.time = ratio * clip.duration;
+      state.mixer.update(0);
+      updateTimecodeUI(state.activeAction.time, clip.duration);
+    });
+
+    animScrubber.addEventListener('change', () => {
+      state.isScrubbing = false;
+    });
+
+    document.querySelectorAll('.anim-speed-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const speed = parseFloat(btn.dataset.speed);
+        state.playbackSpeed = speed;
+        if (state.mixer) {
+          state.mixer.timeScale = speed;
+        }
+        document.querySelectorAll('.anim-speed-btn').forEach((b) => {
+          const active = parseFloat(b.dataset.speed) === speed;
+          b.className = active
+            ? 'anim-speed-btn rounded-lg bg-indigo-600 px-2 py-1 font-mono text-[11px] font-semibold text-white transition'
+            : 'anim-speed-btn rounded-lg px-2 py-1 font-mono text-[11px] text-slate-400 hover:text-white transition';
+        });
+      });
+    });
+
+    function updateTimecodeUI(current, total) {
+      animTimecode.textContent = `${current.toFixed(1)}s / ${total.toFixed(1)}s`;
+    }
+
+    // =========================================================================
+    // 7. FILE UPLOAD & DRAG-AND-DROP PIPELINE
+    // =========================================================================
+    async function handleUploadedFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (files.length === 0) return;
+
+      // Map companion files (.bin, textures) by filename in case user drops a multi-file .gltf folder/selection
+      const resourceMap = new Map();
+      const blobUrls = [];
+      files.forEach((f) => {
+        const url = URL.createObjectURL(f);
+        blobUrls.push(url);
+        resourceMap.set(f.name, url);
+      });
+
+      const modelFiles = files.filter((f) => /\.(glb|gltf)$/i.test(f.name));
+      if (modelFiles.length === 0) {
+        blobUrls.forEach((u) => URL.revokeObjectURL(u));
+        showToast('Unsupported file format. Please upload .glb or .gltf files.', 'error');
+        return;
+      }
+
+      for (const file of modelFiles) {
+        await loadSingleModelFile(file, resourceMap, blobUrls);
+      }
+    }
+
+    function loadSingleModelFile(file, resourceMap, sharedBlobUrls) {
+      return new Promise((resolve) => {
+        setLoading(true, `Loading ${file.name}...`);
+
+        const manager = new THREE.LoadingManager();
+        manager.setURLModifier((url) => {
+          const cleanName = decodeURIComponent(url.split('/').pop().split('?')[0]);
+          if (resourceMap.has(cleanName)) {
+            return resourceMap.get(cleanName);
+          }
+          return url;
+        });
+
+        const loader = new GLTFLoader(manager);
+        loader.setDRACOLoader(dracoLoader);
+
+        const mainUrl = resourceMap.get(file.name) || URL.createObjectURL(file);
+
+        loader.load(
+          mainUrl,
+          (gltf) => {
+            try {
+              const { wrapper, normalizedHeight, stats } = normalizeAndInspectModel(gltf.scene);
+              const newModel = {
+                id: `model-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                name: file.name,
+                sizeLabel: formatBytes(file.size),
+                group: wrapper,
+                normalizedHeight,
+                animations: gltf.animations || [],
+                stats,
+                isDefault: false,
+                blobUrls: sharedBlobUrls,
+              };
+
+              state.models.push(newModel);
+              activateModel(newModel.id);
+              setLoading(false);
+              showToast(`Loaded "${file.name}"`, 'success');
+            } catch (err) {
+              console.error(err);
+              setLoading(false);
+              showToast(`Failed to process "${file.name}".`, 'error');
+            }
+            resolve();
+          },
+          undefined,
+          (error) => {
+            console.error('GLTF Load Error:', error);
+            setLoading(false);
+            const isGltf = /\.gltf$/i.test(file.name);
+            showToast(
+              isGltf
+                ? `Could not load "${file.name}". If it references external .bin/textures, drop all files together or use a self-contained .glb.`
+                : `Failed to parse "${file.name}". Ensure it is a valid GLB file.`,
+              'error'
+            );
+            resolve();
+          }
+        );
+      });
+    }
+
+    // Upload Button Triggers
+    document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
+    document.getElementById('panel-upload-btn').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      handleUploadedFiles(e.target.files);
+      fileInput.value = '';
+    });
+
+    // Full-Viewport Drag & Drop Handlers
+    let dragDepth = 0;
+    window.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      dragDepth++;
+      if (e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files')) {
+        dropOverlay.classList.remove('hidden');
+        dropOverlay.classList.add('flex');
+      }
+    });
+
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'copy';
+      }
+    });
+
+    window.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dragDepth = Math.max(0, dragDepth - 1);
+      if (dragDepth === 0) {
+        dropOverlay.classList.add('hidden');
+        dropOverlay.classList.remove('flex');
+      }
+    });
+
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dragDepth = 0;
+      dropOverlay.classList.add('hidden');
+      dropOverlay.classList.remove('flex');
+
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleUploadedFiles(e.dataTransfer.files);
+      }
+    });
+
+    // =========================================================================
+    // 8. CAMERA PRESETS & STUDIO CONTROLS
+    // =========================================================================
+    function setCameraPreset(preset, smooth = true) {
+      const activeModel = state.models.find((m) => m.id === state.activeModelId);
+      const centerY = activeModel ? (activeModel.normalizedHeight * 0.48) : 1.0;
+      const target = new THREE.Vector3(0, centerY, 0);
+      const dist = 3.9;
+
+      let endPos = new THREE.Vector3();
+      switch (preset) {
+        case 'front':
+          endPos.set(0, centerY, dist);
+          break;
+        case 'right':
+          endPos.set(dist, centerY, 0);
+          break;
+        case 'top':
+          endPos.set(0, centerY + dist * 1.15, 0.001);
+          break;
+        case 'iso':
+        case 'fit':
+        default:
+          endPos.set(dist * 0.72, centerY + dist * 0.52, dist * 0.78);
+          break;
+      }
+
+      if (!smooth) {
+        camera.position.copy(endPos);
+        controls.target.copy(target);
+        controls.update();
+        return;
+      }
+
+      state.cameraTransition = {
+        startPos: camera.position.clone(),
+        endPos,
+        startTarget: controls.target.clone(),
+        endTarget: target,
+        progress: 0,
+        duration: 0.45,
+      };
+    }
+
+    document.querySelectorAll('.camera-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        setCameraPreset(btn.dataset.view, true);
+      });
+    });
+
+    // Helper to toggle switch styling
+    function setSwitchState(btnEl, isOn) {
+      btnEl.setAttribute('aria-checked', String(isOn));
+      const knob = btnEl.querySelector('span');
+      if (isOn) {
+        btnEl.classList.remove('bg-slate-700');
+        btnEl.classList.add('bg-indigo-600');
+        knob.classList.remove('translate-x-0');
+        knob.classList.add('translate-x-4');
+      } else {
+        btnEl.classList.remove('bg-indigo-600');
+        btnEl.classList.add('bg-slate-700');
+        knob.classList.remove('translate-x-4');
+        knob.classList.add('translate-x-0');
+      }
+    }
+
+    // Auto-Rotate Controls
+    const autoRotateToggle = document.getElementById('auto-rotate-toggle');
+    const rotateSpeedSlider = document.getElementById('rotate-speed-slider');
+    const rotateSpeedVal = document.getElementById('rotate-speed-val');
+
+    autoRotateToggle.addEventListener('click', () => {
+      state.autoRotate = !state.autoRotate;
+      controls.autoRotate = state.autoRotate;
+      setSwitchState(autoRotateToggle, state.autoRotate);
+    });
+
+    rotateSpeedSlider.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      state.autoRotateSpeed = val;
+      controls.autoRotateSpeed = val;
+      rotateSpeedVal.textContent = `${val.toFixed(1)}x`;
+    });
+
+    // Wireframe Toggle
+    const wireframeToggle = document.getElementById('wireframe-toggle');
+    wireframeToggle.addEventListener('click', () => {
+      state.wireframe = !state.wireframe;
+      setSwitchState(wireframeToggle, state.wireframe);
+      const activeModel = state.models.find((m) => m.id === state.activeModelId);
+      if (activeModel) {
+        applyWireframeToModel(activeModel.group, state.wireframe);
+      }
+    });
+
+    // Ground Grid Toggle
+    const gridToggle = document.getElementById('grid-toggle');
+    gridToggle.addEventListener('click', () => {
+      state.showGrid = !state.showGrid;
+      setSwitchState(gridToggle, state.showGrid);
+      gridHelper.visible = state.showGrid;
+      shadowPlane.visible = state.showGrid;
+    });
+
+    // Background Preset Selector
+    document.querySelectorAll('.bg-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.bg;
+        const preset = BG_PRESETS[key];
+        if (!preset) return;
+
+        state.bgPreset = key;
+        scene.background = new THREE.Color(preset.color);
+        document.getElementById('bg-label').textContent = preset.label;
+
+        // Rebuild grid with matching contrast colors
+        scene.remove(gridHelper);
+        gridHelper.geometry.dispose();
+        gridHelper.material.dispose();
+        gridHelper = new THREE.GridHelper(10, 20, preset.gridCenter, preset.gridLine);
+        gridHelper.material.opacity = 0.55;
+        gridHelper.material.transparent = true;
+        gridHelper.visible = state.showGrid;
+        scene.add(gridHelper);
+
+        // Update active border ring
+        document.querySelectorAll('.bg-preset-btn').forEach((b) => {
+          const active = b.dataset.bg === key;
+          b.classList.toggle('border-indigo-500', active);
+          b.classList.toggle('border-transparent', !active);
+        });
+      });
+    });
+
+    // Exposure Slider
+    const exposureSlider = document.getElementById('exposure-slider');
+    const exposureVal = document.getElementById('exposure-val');
+    exposureSlider.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      state.exposure = val;
+      renderer.toneMappingExposure = val;
+      exposureVal.textContent = `${val.toFixed(2)} EV`;
+    });
+
+    // =========================================================================
+    // 9. COLLAPSIBLE PANELS & KEYBOARD SHORTCUTS
+    // =========================================================================
+    function togglePanel(panelEl, side) {
+      const isHidden = panelEl.classList.contains('hidden');
+      if (isHidden) {
+        panelEl.classList.remove('hidden');
+      } else {
+        panelEl.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('toggle-models-btn').addEventListener('click', () => togglePanel(modelsPanel, 'left'));
+    document.getElementById('close-models-btn').addEventListener('click', () => modelsPanel.classList.add('hidden'));
+    document.getElementById('toggle-studio-btn').addEventListener('click', () => togglePanel(studioPanel, 'right'));
+    document.getElementById('close-studio-btn').addEventListener('click', () => studioPanel.classList.add('hidden'));
+
+    // Auto-collapse side drawers on compact mobile screens initially so viewport shines
+    if (window.innerWidth < 768) {
+      modelsPanel.classList.add('hidden');
+      studioPanel.classList.add('hidden');
+    }
+
+    // Keyboard shortcuts (R = Fit View, 1-4 = Camera Presets, Space = Play/Pause)
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      if (e.key === 'r' || e.key === 'R') {
+        setCameraPreset('fit', true);
+      } else if (e.key === '1') {
+        setCameraPreset('front', true);
+      } else if (e.key === '2') {
+        setCameraPreset('right', true);
+      } else if (e.key === '3') {
+        setCameraPreset('top', true);
+      } else if (e.key === '4') {
+        setCameraPreset('iso', true);
+      } else if (e.code === 'Space' && state.activeAction) {
+        e.preventDefault();
+        animPlayBtn.click();
+      }
+    });
+
+    // =========================================================================
+    // 10. TOAST NOTIFICATIONS & LOADING HELPERS
+    // =========================================================================
+    function setLoading(isLoading, message = 'Loading...') {
+      if (isLoading) {
+        loadingText.textContent = message;
+        loadingPill.classList.remove('hidden');
+        loadingPill.classList.add('flex');
+      } else {
+        loadingPill.classList.add('hidden');
+        loadingPill.classList.remove('flex');
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const colors = {
+        success: 'border-emerald-500/40 bg-studio-900/95 text-emerald-200',
+        error:   'border-rose-500/40 bg-studio-900/95 text-rose-200',
+        info:    'border-indigo-500/40 bg-studio-900/95 text-slate-200',
+      };
+      const dotColors = {
+        success: 'bg-emerald-400',
+        error:   'bg-rose-400',
+        info:    'bg-indigo-400',
+      };
+
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto flex items-start gap-2.5 rounded-2xl border px-4 py-3 text-xs font-medium backdrop-blur-xl shadow-2xl transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+      toast.innerHTML = `
+        <span class="mt-1 h-2 w-2 shrink-0 rounded-full ${dotColors[type] || dotColors.info}"></span>
+        <span class="leading-relaxed">${escapeHtml(message)}</span>
+      `;
+
+      toastContainer.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 4200);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // =========================================================================
+    // 11. RESPONSIVE RESIZING & RENDER LOOP
+    // =========================================================================
+    function handleResize() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      if (width === 0 || height === 0) return;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    }
+
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(container);
+    window.addEventListener('resize', handleResize);
+
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+
+      // Update GLTF AnimationMixer & sync scrubber
+      if (state.mixer && state.activeAction) {
+        if (!state.isScrubbing && state.isPlaying) {
+          state.mixer.update(delta);
+        }
+        const clip = state.activeAction.getClip();
+        if (clip && clip.duration > 0) {
+          const wrappedTime = state.activeAction.time % clip.duration;
+          if (!state.isScrubbing) {
+            animScrubber.value = (wrappedTime / clip.duration).toFixed(4);
+          }
+          updateTimecodeUI(wrappedTime, clip.duration);
+        }
+      }
+
+      // Smooth Camera Preset Transition (Cubic Ease-Out)
+      if (state.cameraTransition) {
+        const t = state.cameraTransition;
+        t.progress = Math.min(1, t.progress + delta / t.duration);
+        const ease = 1 - Math.pow(1 - t.progress, 3);
+
+        camera.position.lerpVectors(t.startPos, t.endPos, ease);
+        controls.target.lerpVectors(t.startTarget, t.endTarget, ease);
+
+        if (t.progress >= 1) {
+          state.cameraTransition = null;
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // =========================================================================
+    // 12. INITIALIZE DEFAULT SHOWCASE SCENE ON LOAD
+    // =========================================================================
+    window.addEventListener('load', () => {
+      const showcase = createShowcaseModel();
+      const { wrapper, normalizedHeight, stats } = normalizeAndInspectModel(showcase.group);
+
+      const defaultModel = {
+        id: 'default-showcase',
+        name: 'Studio Showcase Core',
+        sizeLabel: 'Procedural',
+        group: wrapper,
+        normalizedHeight,
+        animations: showcase.animations,
+        stats,
+        isDefault: true,
+        blobUrls: [],
+      };
+
+      state.models.push(defaultModel);
+      activateModel(defaultModel.id);
+      setCameraPreset('fit', false);
+      animate();
+    });
+  </script>
+</body>
+</html>
