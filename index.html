@@ -45,13 +45,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .glass-panel {
-      background: rgba(17, 20, 28, 0.82);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
     .studio-scroll::-webkit-scrollbar {
       width: 5px;
       height: 5px;
@@ -60,11 +53,11 @@
       background: transparent;
     }
     .studio-scroll::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.22);
+      background: rgba(148, 163, 184, 0.2);
       border-radius: 9999px;
     }
     .studio-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(148, 163, 184, 0.4);
+      background: rgba(148, 163, 184, 0.38);
     }
 
     input[type="range"].studio-slider {
@@ -74,115 +67,38 @@
       cursor: pointer;
     }
     input[type="range"].studio-slider::-webkit-slider-runnable-track {
-      height: 4px;
+      height: 5px;
       border-radius: 9999px;
       background: rgba(148, 163, 184, 0.22);
     }
     input[type="range"].studio-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 13px;
-      height: 13px;
+      width: 14px;
+      height: 14px;
       border-radius: 9999px;
-      background: #38bdf8;
-      border: 2px solid #e0f2fe;
+      background: #6366f1;
+      border: 2px solid #e0e7ff;
       margin-top: -4.5px;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.55);
-      transition: transform 0.12s ease, background-color 0.12s ease;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.55);
+      transition: transform 0.15s ease, background-color 0.15s ease;
     }
     input[type="range"].studio-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.16);
-      background: #7dd3fc;
+      transform: scale(1.15);
+      background: #818cf8;
     }
     input[type="range"].studio-slider::-moz-range-track {
-      height: 4px;
+      height: 5px;
       border-radius: 9999px;
       background: rgba(148, 163, 184, 0.22);
     }
     input[type="range"].studio-slider::-moz-range-thumb {
-      width: 13px;
-      height: 13px;
+      width: 14px;
+      height: 14px;
       border-radius: 9999px;
-      background: #38bdf8;
-      border: 2px solid #e0f2fe;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.55);
-    }
-
-    input[type="number"].studio-num::-webkit-inner-spin-button,
-    input[type="number"].studio-num::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type="number"].studio-num {
-      -moz-appearance: textfield;
-    }
-
-    .timeline-track-bg {
-      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-      background-size: 25px 100%;
-    }
-
-    .keyframe-diamond {
-      position: absolute;
-      top: 50%;
-      width: 11px;
-      height: 11px;
-      margin-left: -5.5px;
-      margin-top: -5.5px;
-      transform: rotate(45deg);
-      border-radius: 2px;
-      cursor: pointer;
-      transition: transform 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
-      z-index: 15;
-    }
-    .keyframe-diamond:hover {
-      transform: rotate(45deg) scale(1.28);
-      z-index: 25;
-    }
-    .keyframe-diamond.active-node {
-      background-color: #f59e0b;
-      border: 1.5px solid #fef3c7;
-      box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
-    }
-    .keyframe-diamond.active-node.at-playhead {
-      background-color: #38bdf8;
-      border-color: #e0f2fe;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.85);
-    }
-    .keyframe-diamond.other-node {
-      width: 8px;
-      height: 8px;
-      margin-left: -4px;
-      margin-top: -4px;
-      background-color: rgba(148, 163, 184, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      z-index: 10;
-    }
-    .keyframe-diamond.other-node:hover {
-      background-color: rgba(56, 189, 248, 0.75);
-    }
-
-    #timeline-playhead {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 2px;
-      background-color: #38bdf8;
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
-      pointer-events: none;
-      will-change: transform;
-      z-index: 30;
-    }
-    #timeline-playhead::before {
-      content: '';
-      position: absolute;
-      top: -1px;
-      left: -5px;
-      width: 12px;
-      height: 10px;
-      background-color: #38bdf8;
-      clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%);
+      background: #6366f1;
+      border: 2px solid #e0e7ff;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.55);
     }
   </style>
 
@@ -202,23 +118,23 @@
   </div>
 
   <div id="drop-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-md transition-opacity duration-200 pointer-events-none">
-    <div class="mx-4 max-w-md w-full rounded-3xl border-2 border-dashed border-sky-400/80 bg-studio-900/90 p-8 text-center shadow-2xl shadow-sky-500/20">
-      <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-500/20 text-sky-400 ring-1 ring-sky-400/30">
+    <div class="mx-4 max-w-md w-full rounded-3xl border-2 border-dashed border-indigo-400/80 bg-studio-900/90 p-8 text-center shadow-2xl shadow-indigo-500/20">
+      <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-400/30">
         <svg class="h-8 w-8 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
       </div>
-      <h2 class="text-xl font-semibold text-white">Drop 3D Model to Pose &amp; Animate</h2>
-      <p class="mt-2 text-sm text-slate-300">Supports <span class="font-mono text-sky-300">.glb</span> and multi-file <span class="font-mono text-sky-300">.gltf</span> + <span class="font-mono text-sky-300">.bin</span> / textures</p>
+      <h2 class="text-xl font-semibold text-white">Drop 3D Model to Inspect</h2>
+      <p class="mt-2 text-sm text-slate-300">Supports <span class="font-mono text-indigo-300">.glb</span> and <span class="font-mono text-indigo-300">.gltf</span> files (including Draco compressed meshes &amp; animations)</p>
     </div>
   </div>
 
   <header class="fixed top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
     <div class="flex items-center gap-2 pointer-events-auto">
-      <div class="glass-panel flex items-center gap-2.5 rounded-2xl px-3.5 py-2 shadow-lg shadow-black/35">
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-inner">
+      <div class="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-studio-900/80 px-3.5 py-2 backdrop-blur-xl shadow-lg shadow-black/30">
+        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-inner">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
@@ -227,101 +143,57 @@
         </div>
         <div class="leading-tight">
           <span class="text-sm font-semibold tracking-tight text-white">Prism 3D</span>
-          <span class="hidden sm:inline-block ml-1.5 rounded-md bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-sky-300">Studio</span>
+          <span class="hidden sm:inline-block ml-1.5 rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-400">Studio</span>
         </div>
       </div>
 
-      <button id="toggle-left-btn" type="button" title="Toggle Models & Hierarchy Drawer"
-        class="glass-panel flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-medium text-slate-200 shadow-lg shadow-black/35 hover:bg-studio-800/90 hover:border-white/20 transition">
-        <svg class="h-4 w-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button id="toggle-models-btn" type="button" title="Toggle Models List"
+        class="flex items-center gap-2 rounded-2xl border border-white/10 bg-studio-900/80 px-3 py-2 text-xs font-medium text-slate-200 backdrop-blur-xl shadow-lg shadow-black/30 hover:bg-studio-800/90 hover:border-white/20 transition">
+        <svg class="h-4 w-4 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="12 2 2 7 12 12 22 7 12 2"/>
           <polyline points="2 17 12 22 22 17"/>
           <polyline points="2 12 12 17 22 12"/>
         </svg>
-        <span class="hidden md:inline">Scene</span>
-        <span id="model-count-badge" class="rounded-full bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-mono text-sky-300">1</span>
+        <span class="hidden md:inline">Models</span>
+        <span id="model-count-badge" class="rounded-full bg-indigo-500/20 px-1.5 py-0.5 text-[10px] font-mono text-indigo-300">1</span>
       </button>
     </div>
 
-    <div class="glass-panel flex items-center gap-1 rounded-2xl p-1 shadow-lg shadow-black/35 pointer-events-auto">
-      <button type="button" data-gizmo="select" title="Select Only (Q)"
-        class="gizmo-mode-btn flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+    <div class="hidden lg:flex items-center gap-1 rounded-2xl border border-white/10 bg-studio-900/80 p-1 backdrop-blur-xl shadow-lg shadow-black/30 pointer-events-auto">
+      <button type="button" data-view="fit" title="Reset & Fit Camera (R)"
+        class="camera-preset-btn flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/10 hover:text-white transition">
+        <svg class="h-3.5 w-3.5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>
         </svg>
-        <span class="hidden sm:inline">Select</span>
+        <span>Fit View</span>
       </button>
-
-      <button type="button" data-gizmo="translate" title="Move Gizmo (W)"
-        class="gizmo-mode-btn flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/>
-          <polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/>
-          <line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/>
-        </svg>
-        <span class="hidden sm:inline">Move</span>
-      </button>
-
-      <button type="button" data-gizmo="rotate" title="Rotate Gizmo (E)"
-        class="gizmo-mode-btn flex items-center gap-1.5 rounded-xl bg-sky-500/20 text-sky-300 ring-1 ring-sky-400/40 px-2.5 py-1.5 text-xs font-medium transition">
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-        </svg>
-        <span class="hidden sm:inline">Rotate</span>
-      </button>
-
-      <button type="button" data-gizmo="scale" title="Scale Gizmo (S)"
-        class="gizmo-mode-btn flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-          <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-        </svg>
-        <span class="hidden sm:inline">Scale</span>
-      </button>
-
       <div class="h-4 w-px bg-white/10 mx-0.5"></div>
-
-      <button id="gizmo-space-btn" type="button" title="Toggle Local / World Space"
-        class="rounded-xl px-2.5 py-1.5 font-mono text-[11px] font-medium text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/25 transition">
-        Local
-      </button>
-
-      <button id="reset-pose-btn" type="button" title="Reset Model to Rest Pose"
-        class="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">
-        <svg class="h-3.5 w-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-          <path d="M3 3v5h5"/>
-        </svg>
-        <span class="hidden md:inline">Reset Pose</span>
-      </button>
+      <button type="button" data-view="front" title="Front View (1)"
+        class="camera-preset-btn rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">Front</button>
+      <button type="button" data-view="right" title="Right View (2)"
+        class="camera-preset-btn rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">Right</button>
+      <button type="button" data-view="top" title="Top View (3)"
+        class="camera-preset-btn rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">Top</button>
+      <button type="button" data-view="iso" title="Isometric View (4)"
+        class="camera-preset-btn rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition">Iso</button>
     </div>
 
     <div class="flex items-center gap-2 pointer-events-auto">
       <input id="file-input" type="file" accept=".glb,.gltf,.bin,image/*" multiple class="hidden" />
 
       <button id="upload-btn" type="button"
-        class="flex items-center gap-1.5 rounded-2xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-600/25 ring-1 ring-sky-400/40 transition">
+        class="flex items-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 ring-1 ring-indigo-400/40 transition">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
-        <span>Upload</span>
+        <span>Upload GLB</span>
       </button>
 
-      <button id="export-glb-btn" type="button" title="Export Model + Manual Animation as .GLB"
-        class="glass-panel flex items-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-500/15 hover:border-amber-400/40 shadow-lg shadow-black/35 transition">
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        <span class="hidden sm:inline">Export GLB</span>
-      </button>
-
-      <button id="toggle-right-btn" type="button" title="Toggle Studio, Transform & Inspector"
-        class="glass-panel flex items-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-medium text-slate-200 shadow-lg shadow-black/35 hover:bg-studio-800/90 hover:border-white/20 transition">
-        <svg class="h-4 w-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button id="toggle-studio-btn" type="button" title="Toggle Studio & Inspector"
+        class="flex items-center gap-2 rounded-2xl border border-white/10 bg-studio-900/80 px-3 py-2 text-xs font-medium text-slate-200 backdrop-blur-xl shadow-lg shadow-black/30 hover:bg-studio-800/90 hover:border-white/20 transition">
+        <svg class="h-4 w-4 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
           <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
           <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
@@ -333,211 +205,75 @@
     </div>
   </header>
 
-  <aside id="left-drawer"
-    class="glass-panel fixed top-16 left-3 z-20 w-72 max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-11.5rem)] flex flex-col rounded-2xl shadow-2xl shadow-black/45 transition-all duration-200">
-    <div class="flex items-center justify-between border-b border-white/10 px-2.5 py-2">
-      <div class="flex items-center gap-1 rounded-xl bg-black/35 p-1 flex-1 mr-1.5">
-        <button id="tab-models-btn" type="button"
-          class="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-sky-500/20 text-sky-300 py-1.5 text-xs font-semibold transition">
-          <span>Models</span>
-          <span id="tab-models-count" class="rounded bg-sky-500/20 px-1.5 py-0.2 font-mono text-[10px]">1</span>
-        </button>
-        <button id="tab-hierarchy-btn" type="button"
-          class="flex-1 flex items-center justify-center gap-1.5 rounded-lg text-slate-400 hover:text-slate-200 py-1.5 text-xs font-semibold transition">
-          <span>Hierarchy</span>
-          <span id="tab-nodes-count" class="rounded bg-white/5 px-1.5 py-0.2 font-mono text-[10px]">0</span>
-        </button>
+  <aside id="models-panel"
+    class="fixed top-16 left-3 z-20 w-72 max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-8.5rem)] flex flex-col rounded-2xl border border-white/10 bg-studio-900/82 backdrop-blur-xl shadow-2xl shadow-black/40 transition-all duration-250">
+    <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Scene Models</span>
       </div>
-      <button id="close-left-btn" type="button" title="Collapse Drawer" class="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white transition">
+      <button id="close-models-btn" type="button" title="Collapse Panel" class="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white transition">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
     </div>
 
-    <div id="view-models" class="flex-1 flex flex-col min-h-0">
-      <div id="models-list" class="studio-scroll flex-1 overflow-y-auto p-2.5 space-y-1.5"></div>
-      <div class="border-t border-white/10 p-2.5">
-        <button id="panel-upload-btn" type="button"
-          class="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.03] hover:bg-sky-500/10 hover:border-sky-400/40 py-2 text-xs font-medium text-slate-300 hover:text-sky-300 transition">
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          <span>Add .GLB / .GLTF File</span>
-        </button>
-      </div>
+    <div id="models-list" class="studio-scroll flex-1 overflow-y-auto p-2.5 space-y-1.5">
     </div>
 
-    <div id="view-hierarchy" class="hidden flex-1 flex-col min-h-0">
-      <div class="p-2.5 border-b border-white/10">
-        <div class="relative">
-          <input id="hierarchy-search" type="text" placeholder="Filter bones & nodes..."
-            class="w-full rounded-xl border border-white/10 bg-black/35 pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none" />
-          <svg class="h-3.5 w-3.5 text-slate-500 absolute left-2.5 top-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </div>
-      </div>
-      <div id="hierarchy-list" class="studio-scroll flex-1 overflow-y-auto p-2 space-y-0.5"></div>
+    <div class="border-t border-white/10 p-3">
+      <button id="panel-upload-btn" type="button"
+        class="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.03] hover:bg-indigo-500/10 hover:border-indigo-400/40 py-2.5 text-xs font-medium text-slate-300 hover:text-indigo-300 transition">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>Add .GLB / .GLTF File</span>
+      </button>
     </div>
   </aside>
 
-  <aside id="right-drawer"
-    class="glass-panel fixed top-16 right-3 z-20 w-80 max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-11.5rem)] flex flex-col rounded-2xl shadow-2xl shadow-black/45 transition-all duration-200">
-    <div class="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Pose &amp; Studio</span>
-      <button id="close-right-btn" type="button" title="Collapse Drawer" class="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white transition">
+  <aside id="studio-panel"
+    class="fixed top-16 right-3 z-20 w-80 max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-8.5rem)] flex flex-col rounded-2xl border border-white/10 bg-studio-900/82 backdrop-blur-xl shadow-2xl shadow-black/40 transition-all duration-250">
+    <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Studio &amp; Inspector</span>
+      <button id="close-studio-btn" type="button" title="Collapse Panel" class="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white transition">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
         </svg>
       </button>
     </div>
 
-    <div class="studio-scroll flex-1 overflow-y-auto p-3.5 space-y-4">
-      <div class="rounded-xl border border-white/10 bg-black/30 p-3 space-y-3">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span id="selected-node-badge" class="rounded bg-amber-500/20 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase text-amber-300">NONE</span>
-            <span id="selected-node-name" class="truncate text-xs font-semibold text-white">No Node Selected</span>
-          </div>
-          <button id="card-keyframe-btn" type="button" title="Insert Keyframe for Selected Node (K)" disabled
-            class="shrink-0 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 disabled:opacity-40 disabled:pointer-events-none border border-amber-400/30 px-2 py-1 font-mono text-[10px] font-semibold text-amber-300 transition">
-            + Key (K)
-          </button>
-        </div>
-
-        <div id="transform-empty-hint" class="text-[11px] leading-relaxed text-slate-400">
-          Click any part in the 3D viewport or <span class="text-sky-300 font-medium">Hierarchy</span> tab to pose with gizmos or numeric sliders.
-        </div>
-
-        <div id="transform-controls-grid" class="hidden space-y-2.5">
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Position</span>
-              <button type="button" data-reset-prop="position" class="reset-prop-btn text-[10px] text-slate-500 hover:text-sky-300 transition">Reset</button>
-            </div>
-            <div class="grid grid-cols-3 gap-1.5">
-              <div class="rounded-lg bg-white/[0.04] border border-white/5 px-1.5 py-1">
-                <div class="flex items-center justify-between text-[10px] font-mono">
-                  <span class="text-rose-400 font-bold">X</span>
-                  <input id="pos-x" type="number" step="0.01" class="studio-num w-14 bg-transparent text-right text-slate-100 focus:outline-none" />
-                </div>
-                <input id="pos-x-slider" type="range" min="-3" max="3" step="0.01" class="studio-slider w-full mt-1" />
-              </div>
-              <div class="rounded-lg bg-white/[0.04] border border-white/5 px-1.5 py-1">
-                <div class="flex items-center justify-between text-[10px] font-mono">
-                  <span class="text-emerald-400 font-bold">Y</span>
-                  <input id="pos-y" type="number" step="0.01" class="studio-num w-14 bg-transparent text-right text-slate-100 focus:outline-none" />
-                </div>
-                <input id="pos-y-slider" type="range" min="-3" max="3" step="0.01" class="studio-slider w-full mt-1" />
-              </div>
-              <div class="rounded-lg bg-white/[0.04] border border-white/5 px-1.5 py-1">
-                <div class="flex items-center justify-between text-[10px] font-mono">
-                  <span class="text-sky-400 font-bold">Z</span>
-                  <input id="pos-z" type="number" step="0.01" class="studio-num w-14 bg-transparent text-right text-slate-100 focus:outline-none" />
-                </div>
-                <input id="pos-z-slider" type="range" min="-3" max="3" step="0.01" class="studio-slider w-full mt-1" />
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Rotation (°)</span>
-              <button type="button" data-reset-prop="rotation" class="reset-prop-btn text-[10px] text-slate-500 hover:text-sky-300 transition">Reset</button>
-            </div>
-            <div class="grid grid-cols-3 gap-1.5">
-              <div class="rounded-lg bg-white/[0.04] border border-white/5 px-1.5 py-1">
-                <div class="flex items-center justify-between text-[10px] font-mono">
-                  <span class="text-rose-400 font-bold">X</span>
-                  <input id="rot-x" type="number" step="1" class="studio-num w-14 bg-transparent text-right text-slate-100 focus:outline-none" />
-                </div>
-                <input id="rot-x-slider" type="range" min="-180" max="180" step="1" class="studio-slider w-full mt-1" />
-              </div>
-              <div class="rounded-lg bg-white/[0.04] border border-white/5 px-1.5 py-1">
-                <div class="flex items-center justify-between text-[10px] font-mono">
-                  <span class="text-emerald-400 font-bold">Y</span>
-                  <input id="rot-y" type="number" step="1" class="studio-num w-14 bg-transparent text-right text-slate-100 focus:outline-none" />
-                </div>
-                <input id="rot-y-slider" type="range" min="-180" max="180" step="1" class="studio-slider w-full mt-1" />
-              </div>
-              <div class="rounded-lg bg-white/[0.04] border border-white/5 px-1.5 py-1">
-                <div class="flex items-center justify-between text-[10px] font-mono">
-                  <span class="text-sky-400 font-bold">Z</span>
-                  <input id="rot-z" type="number" step="1" class="studio-num w-14 bg-transparent text-right text-slate-100 focus:outline-none" />
-                </div>
-                <input id="rot-z-slider" type="range" min="-180" max="180" step="1" class="studio-slider w-full mt-1" />
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Scale</span>
-              <button type="button" data-reset-prop="scale" class="reset-prop-btn text-[10px] text-slate-500 hover:text-sky-300 transition">Reset</button>
-            </div>
-            <div class="grid grid-cols-3 gap-1.5">
-              <div class="rounded-lg bg-white/[0.04] border border-white/5 px-1.5 py-1">
-                <div class="flex items-center justify-between text-[10px] font-mono">
-                  <span class="text-rose-400 font-bold">X</span>
-                  <input id="scl-x" type="number" step="0.01" class="studio-num w-14 bg-transparent text-right text-slate-100 focus:outline-none" />
-                </div>
-                <input id="scl-x-slider" type="range" min="0.1" max="3" step="0.01" class="studio-slider w-full mt-1" />
-              </div>
-              <div class="rounded-lg bg-white/[0.04] border border-white/5 px-1.5 py-1">
-                <div class="flex items-center justify-between text-[10px] font-mono">
-                  <span class="text-emerald-400 font-bold">Y</span>
-                  <input id="scl-y" type="number" step="0.01" class="studio-num w-14 bg-transparent text-right text-slate-100 focus:outline-none" />
-                </div>
-                <input id="scl-y-slider" type="range" min="0.1" max="3" step="0.01" class="studio-slider w-full mt-1" />
-              </div>
-              <div class="rounded-lg bg-white/[0.04] border border-white/5 px-1.5 py-1">
-                <div class="flex items-center justify-between text-[10px] font-mono">
-                  <span class="text-sky-400 font-bold">Z</span>
-                  <input id="scl-z" type="number" step="0.01" class="studio-num w-14 bg-transparent text-right text-slate-100 focus:outline-none" />
-                </div>
-                <input id="scl-z-slider" type="range" min="0.1" max="3" step="0.01" class="studio-slider w-full mt-1" />
-              </div>
-            </div>
-          </div>
+    <div class="studio-scroll flex-1 overflow-y-auto p-4 space-y-5">
+      <div class="lg:hidden space-y-2">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Camera Views</div>
+        <div class="grid grid-cols-5 gap-1 rounded-xl bg-black/30 p-1 border border-white/5">
+          <button type="button" data-view="fit" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-indigo-300 hover:bg-white/10">Fit</button>
+          <button type="button" data-view="front" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10">Front</button>
+          <button type="button" data-view="right" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10">Right</button>
+          <button type="button" data-view="top" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10">Top</button>
+          <button type="button" data-view="iso" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10">Iso</button>
         </div>
       </div>
 
-      <div class="space-y-2.5 border-t border-white/10 pt-3">
-        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Camera &amp; Viewport</div>
+      <div class="space-y-3">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Viewport Settings</div>
 
-        <div class="grid grid-cols-5 gap-1 rounded-xl bg-black/35 p-1 border border-white/5">
-          <button type="button" data-view="fit" title="Fit View (R)" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-semibold text-sky-300 hover:bg-white/10 transition">Fit</button>
-          <button type="button" data-view="front" title="Front View (1)" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10 transition">Front</button>
-          <button type="button" data-view="right" title="Right View (2)" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10 transition">Right</button>
-          <button type="button" data-view="top" title="Top View (3)" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10 transition">Top</button>
-          <button type="button" data-view="iso" title="Iso View (4)" class="camera-preset-btn rounded-lg py-1.5 text-[11px] font-medium text-slate-300 hover:bg-white/10 transition">Iso</button>
-        </div>
-
-        <div class="rounded-xl border border-white/5 bg-white/[0.03] p-2.5 space-y-2">
+        <div class="rounded-xl border border-white/5 bg-white/[0.03] p-3 space-y-2.5">
           <div class="flex items-center justify-between">
-            <label for="auto-rotate-toggle" class="text-xs font-medium text-slate-200 cursor-pointer">Turntable Auto-Rotate</label>
-            <button id="auto-rotate-toggle" type="button" role="switch" aria-checked="false"
-              class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-700 transition-colors duration-200 focus:outline-none">
-              <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 translate-x-0"></span>
+            <label for="auto-rotate-toggle" class="text-xs font-medium text-slate-200 cursor-pointer">Auto-Rotate</label>
+            <button id="auto-rotate-toggle" type="button" role="switch" aria-checked="true"
+              class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-indigo-600 transition-colors duration-200 focus:outline-none">
+              <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 translate-x-4"></span>
             </button>
           </div>
-          <div class="flex items-center justify-between gap-3">
+          <div id="rotate-speed-row" class="flex items-center justify-between gap-3 pt-0.5">
             <span class="text-[11px] text-slate-400">Speed</span>
             <input id="rotate-speed-slider" type="range" min="0.5" max="6" step="0.5" value="1.5" class="studio-slider flex-1" />
             <span id="rotate-speed-val" class="w-8 text-right font-mono text-[11px] text-slate-300">1.5x</span>
           </div>
         </div>
 
-        <div class="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2">
-          <label for="skeleton-toggle" class="text-xs font-medium text-slate-200 cursor-pointer">Skeleton Bone Overlay</label>
-          <button id="skeleton-toggle" type="button" role="switch" aria-checked="true"
-            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-sky-600 transition-colors duration-200 focus:outline-none">
-            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 translate-x-4"></span>
-          </button>
-        </div>
-
-        <div class="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2">
+        <div class="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5">
           <label for="wireframe-toggle" class="text-xs font-medium text-slate-200 cursor-pointer">Wireframe Mode</label>
           <button id="wireframe-toggle" type="button" role="switch" aria-checked="false"
             class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-700 transition-colors duration-200 focus:outline-none">
@@ -545,88 +281,91 @@
           </button>
         </div>
 
-        <div class="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2">
+        <div class="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5">
           <label for="grid-toggle" class="text-xs font-medium text-slate-200 cursor-pointer">Ground Grid &amp; Shadow</label>
           <button id="grid-toggle" type="button" role="switch" aria-checked="true"
-            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-sky-600 transition-colors duration-200 focus:outline-none">
+            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-indigo-600 transition-colors duration-200 focus:outline-none">
             <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 translate-x-4"></span>
           </button>
         </div>
+      </div>
 
-        <div class="space-y-2 pt-1">
+      <div class="space-y-3 border-t border-white/10 pt-4">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Environment &amp; Lighting</div>
+
+        <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs text-slate-300">Environment</span>
+            <span class="text-xs text-slate-300">Background</span>
             <span id="bg-label" class="text-[11px] font-medium text-slate-400">Dark Studio</span>
           </div>
-          <div class="grid grid-cols-4 gap-1.5">
-            <button type="button" data-bg="dark-studio" class="bg-preset-btn flex flex-col items-center gap-1 rounded-xl border-2 border-sky-500 bg-white/5 p-1.5 transition">
-              <span class="h-4 w-full rounded bg-[#0f1218] ring-1 ring-white/15"></span>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" data-bg="dark-studio" title="Dark Studio"
+              class="bg-preset-btn group flex flex-col items-center gap-1 rounded-xl border-2 border-indigo-500 bg-white/5 p-1.5 transition">
+              <span class="h-5 w-full rounded-md bg-[#0f1218] ring-1 ring-white/15"></span>
               <span class="text-[10px] text-slate-300">Studio</span>
             </button>
-            <button type="button" data-bg="charcoal" class="bg-preset-btn flex flex-col items-center gap-1 rounded-xl border-2 border-transparent bg-white/5 p-1.5 hover:border-white/20 transition">
-              <span class="h-4 w-full rounded bg-[#232730] ring-1 ring-white/15"></span>
+            <button type="button" data-bg="charcoal" title="Charcoal"
+              class="bg-preset-btn group flex flex-col items-center gap-1 rounded-xl border-2 border-transparent bg-white/5 p-1.5 hover:border-white/20 transition">
+              <span class="h-5 w-full rounded-md bg-[#232730] ring-1 ring-white/15"></span>
               <span class="text-[10px] text-slate-400">Charcoal</span>
             </button>
-            <button type="button" data-bg="light-gray" class="bg-preset-btn flex flex-col items-center gap-1 rounded-xl border-2 border-transparent bg-white/5 p-1.5 hover:border-white/20 transition">
-              <span class="h-4 w-full rounded bg-[#dfe4ec] ring-1 ring-black/15"></span>
+            <button type="button" data-bg="light-gray" title="Light Gray"
+              class="bg-preset-btn group flex flex-col items-center gap-1 rounded-xl border-2 border-transparent bg-white/5 p-1.5 hover:border-white/20 transition">
+              <span class="h-5 w-full rounded-md bg-[#dfe4ec] ring-1 ring-black/15"></span>
               <span class="text-[10px] text-slate-400">Light</span>
             </button>
-            <button type="button" data-bg="deep-navy" class="bg-preset-btn flex flex-col items-center gap-1 rounded-xl border-2 border-transparent bg-white/5 p-1.5 hover:border-white/20 transition">
-              <span class="h-4 w-full rounded bg-[#0a1428] ring-1 ring-white/15"></span>
+            <button type="button" data-bg="deep-navy" title="Deep Navy"
+              class="bg-preset-btn group flex flex-col items-center gap-1 rounded-xl border-2 border-transparent bg-white/5 p-1.5 hover:border-white/20 transition">
+              <span class="h-5 w-full rounded-md bg-[#0a1428] ring-1 ring-white/15"></span>
               <span class="text-[10px] text-slate-400">Navy</span>
             </button>
           </div>
         </div>
 
-        <div class="rounded-xl border border-white/5 bg-white/[0.03] p-2.5 space-y-1.5">
+        <div class="rounded-xl border border-white/5 bg-white/[0.03] p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-medium text-slate-200">Exposure</span>
-            <span id="exposure-val" class="font-mono text-[11px] text-sky-300">1.10 EV</span>
+            <span id="exposure-val" class="font-mono text-[11px] text-indigo-300">1.10 EV</span>
           </div>
           <input id="exposure-slider" type="range" min="0.2" max="2.5" step="0.05" value="1.1" class="studio-slider w-full" />
         </div>
       </div>
 
-      <div class="space-y-2 border-t border-white/10 pt-3">
+      <div class="space-y-2.5 border-t border-white/10 pt-4">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Model Inspector</span>
-          <span class="rounded bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[10px] text-emerald-300">READY</span>
+          <span id="inspector-badge" class="rounded bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[10px] text-emerald-300">READY</span>
         </div>
 
-        <div class="rounded-xl border border-white/5 bg-black/25 p-2.5 space-y-2 text-xs">
+        <div class="rounded-xl border border-white/5 bg-black/25 p-3 space-y-2 text-xs">
           <div class="flex items-center justify-between gap-2">
-            <span class="text-slate-400">File</span>
-            <span id="info-name" class="truncate max-w-[165px] font-medium text-slate-100">Kinetic Drone Rig</span>
+            <span class="text-slate-400">File Name</span>
+            <span id="info-name" class="truncate max-w-[165px] font-medium text-slate-100" title="Studio Showcase Core">Studio Showcase Core</span>
           </div>
           <div class="flex items-center justify-between gap-2">
-            <span class="text-slate-400">Size</span>
+            <span class="text-slate-400">File Size</span>
             <span id="info-size" class="font-mono text-slate-200">Procedural</span>
           </div>
-          <div class="grid grid-cols-3 gap-1.5 pt-1">
-            <div class="rounded-lg bg-white/[0.03] px-2 py-1">
-              <div class="text-[9px] uppercase tracking-wider text-slate-400">Meshes</div>
-              <div id="info-meshes" class="font-mono text-xs font-semibold text-white">0</div>
+          <div class="h-px bg-white/5 my-1"></div>
+          <div class="grid grid-cols-2 gap-2 pt-0.5">
+            <div class="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400">Meshes</div>
+              <div id="info-meshes" class="font-mono text-sm font-semibold text-white">0</div>
             </div>
-            <div class="rounded-lg bg-white/[0.03] px-2 py-1">
-              <div class="text-[9px] uppercase tracking-wider text-slate-400">Bones</div>
-              <div id="info-bones" class="font-mono text-xs font-semibold text-amber-300">0</div>
+            <div class="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400">Materials</div>
+              <div id="info-materials" class="font-mono text-sm font-semibold text-white">0</div>
             </div>
-            <div class="rounded-lg bg-white/[0.03] px-2 py-1">
-              <div class="text-[9px] uppercase tracking-wider text-slate-400">Materials</div>
-              <div id="info-materials" class="font-mono text-xs font-semibold text-white">0</div>
+            <div class="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400">Triangles</div>
+              <div id="info-triangles" class="font-mono text-sm font-semibold text-indigo-300">0</div>
             </div>
-          </div>
-          <div class="grid grid-cols-2 gap-1.5">
-            <div class="rounded-lg bg-white/[0.03] px-2 py-1">
-              <div class="text-[9px] uppercase tracking-wider text-slate-400">Triangles</div>
-              <div id="info-triangles" class="font-mono text-xs font-semibold text-sky-300">0</div>
-            </div>
-            <div class="rounded-lg bg-white/[0.03] px-2 py-1">
-              <div class="text-[9px] uppercase tracking-wider text-slate-400">Vertices</div>
-              <div id="info-vertices" class="font-mono text-xs font-semibold text-slate-200">0</div>
+            <div class="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400">Vertices</div>
+              <div id="info-vertices" class="font-mono text-sm font-semibold text-slate-200">0</div>
             </div>
           </div>
-          <div class="pt-0.5 flex items-center justify-between gap-2">
+          <div class="pt-1 flex items-center justify-between gap-2">
             <span class="text-slate-400">Dimensions</span>
             <span id="info-dimensions" class="font-mono text-[11px] text-slate-300">0.00 × 0.00 × 0.00</span>
           </div>
@@ -635,159 +374,67 @@
     </div>
   </aside>
 
-  <section id="timeline-dock"
-    class="glass-panel fixed bottom-3 left-3 right-3 z-30 mx-auto max-w-5xl rounded-2xl shadow-2xl shadow-black/60 transition-all duration-200">
-    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-3 py-2">
-      <div class="flex items-center gap-1.5">
-        <select id="clip-select" aria-label="Animation Clip"
-          class="max-w-[175px] sm:max-w-[215px] truncate rounded-xl border border-white/10 bg-studio-850 px-2.5 py-1.5 text-xs font-medium text-slate-100 focus:border-sky-500 focus:outline-none">
-        </select>
-        <button id="new-clip-btn" type="button" title="Create New Custom Animation Clip"
-          class="rounded-xl border border-white/10 bg-white/[0.04] hover:bg-sky-500/20 hover:border-sky-400/40 px-2.5 py-1.5 text-xs font-medium text-sky-300 transition">
-          + New Clip
-        </button>
+  <div id="animation-bar"
+    class="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 hidden w-[calc(100%-1.5rem)] max-w-2xl rounded-2xl border border-white/10 bg-studio-900/85 px-3.5 py-2.5 backdrop-blur-xl shadow-2xl shadow-black/50 transition-all duration-200">
+    <div class="flex flex-wrap sm:flex-nowrap items-center gap-3">
+      <button id="anim-play-btn" type="button" title="Play / Pause (Space)"
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition">
+        <svg id="icon-pause" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
+        </svg>
+        <svg id="icon-play" class="h-4 w-4 hidden ml-0.5" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </button>
+
+      <select id="anim-clip-select" aria-label="Animation Clip"
+        class="max-w-[140px] sm:max-w-[170px] truncate rounded-xl border border-white/10 bg-studio-850 px-2.5 py-1.5 text-xs font-medium text-slate-200 focus:border-indigo-500 focus:outline-none">
+      </select>
+
+      <div class="flex flex-1 items-center gap-2.5 min-w-[160px]">
+        <input id="anim-scrubber" type="range" min="0" max="1" step="0.001" value="0" class="studio-slider flex-1" />
+        <span id="anim-timecode" class="shrink-0 font-mono text-[11px] text-slate-300">0.0s / 0.0s</span>
       </div>
 
-      <div class="flex items-center gap-1.5">
-        <button id="rewind-btn" type="button" title="Rewind to 0.00s"
-          class="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/10 text-slate-300 hover:text-white transition">
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="4" y="5" width="2.5" height="14" rx="0.5"/><polygon points="19 5 9 12 19 19 19 5"/>
-          </svg>
-        </button>
-
-        <button id="play-pause-btn" type="button" title="Play / Pause (Space)"
-          class="flex h-8 w-9 items-center justify-center rounded-xl bg-sky-600 hover:bg-sky-500 text-white shadow-md shadow-sky-600/30 transition">
-          <svg id="icon-play" class="h-4 w-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3"/>
-          </svg>
-          <svg id="icon-pause" class="h-4 w-4 hidden" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
-          </svg>
-        </button>
-
-        <button id="loop-toggle-btn" type="button" title="Toggle Loop Playback"
-          class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/20 text-sky-300 border border-sky-400/35 transition">
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-            <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-          </svg>
-        </button>
-
-        <div class="flex items-center gap-1 rounded-xl border border-white/10 bg-black/35 px-2.5 py-1 font-mono text-[11px]">
-          <span id="timecode-current" class="text-sky-300 font-semibold">0.00s</span>
-          <span class="text-slate-500">/</span>
-          <input id="clip-duration-input" type="number" min="1" max="30" step="0.5" value="4.0" title="Clip Duration (seconds)"
-            class="studio-num w-9 bg-transparent text-right text-slate-200 focus:text-amber-300 focus:outline-none" />
-          <span class="text-slate-400">s</span>
-        </div>
-
-        <div class="hidden md:flex items-center rounded-xl border border-white/10 bg-black/35 p-0.5">
-          <button type="button" data-speed="0.25" class="speed-btn rounded-lg px-1.5 py-1 font-mono text-[10px] text-slate-400 hover:text-white transition">0.25x</button>
-          <button type="button" data-speed="0.5" class="speed-btn rounded-lg px-1.5 py-1 font-mono text-[10px] text-slate-400 hover:text-white transition">0.5x</button>
-          <button type="button" data-speed="1" class="speed-btn rounded-lg bg-sky-600 px-1.5 py-1 font-mono text-[10px] font-semibold text-white transition">1x</button>
-          <button type="button" data-speed="2" class="speed-btn rounded-lg px-1.5 py-1 font-mono text-[10px] text-slate-400 hover:text-white transition">2x</button>
-        </div>
-      </div>
-
-      <div id="custom-key-actions" class="flex items-center gap-1.5">
-        <button id="add-keyframe-btn" type="button" title="Record Keyframe for Selected Node (K)"
-          class="flex items-center gap-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 px-2.5 py-1.5 text-xs font-semibold text-amber-300 transition">
-          <span class="inline-block h-2 w-2 rotate-45 bg-amber-400"></span>
-          <span>+ Keyframe (K)</span>
-        </button>
-
-        <button id="delete-keyframe-btn" type="button" title="Delete Keyframe at Current Time"
-          class="rounded-xl border border-white/10 bg-white/[0.04] hover:bg-rose-500/20 hover:border-rose-400/40 hover:text-rose-300 px-2 py-1.5 text-xs font-medium text-slate-300 transition">
-          Delete Key
-        </button>
-
-        <button id="clear-track-btn" type="button" title="Clear All Keyframes for Selected Node"
-          class="hidden sm:inline-block rounded-xl border border-white/10 bg-white/[0.04] hover:bg-rose-500/20 hover:border-rose-400/40 hover:text-rose-300 px-2 py-1.5 text-xs font-medium text-slate-400 transition">
-          Clear Track
-        </button>
-
-        <button id="auto-key-btn" type="button" title="Auto-Key: Automatically record keyframes when posing"
-          class="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:border-white/20 transition">
-          <span id="auto-key-dot" class="h-2 w-2 rounded-full bg-slate-500 transition-colors"></span>
-          <span>Auto-Key</span>
-        </button>
-
-        <button id="toggle-timeline-body-btn" type="button" title="Collapse/Expand Timeline Track"
-          class="rounded-xl p-1.5 text-slate-400 hover:bg-white/10 hover:text-white transition">
-          <svg id="timeline-chevron" class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </button>
+      <div class="flex items-center rounded-xl border border-white/10 bg-black/30 p-0.5 shrink-0">
+        <button type="button" data-speed="0.5" class="anim-speed-btn rounded-lg px-2 py-1 font-mono text-[11px] text-slate-400 hover:text-white transition">0.5x</button>
+        <button type="button" data-speed="1" class="anim-speed-btn rounded-lg bg-indigo-600 px-2 py-1 font-mono text-[11px] font-semibold text-white transition">1x</button>
+        <button type="button" data-speed="2" class="anim-speed-btn rounded-lg px-2 py-1 font-mono text-[11px] text-slate-400 hover:text-white transition">2x</button>
       </div>
     </div>
+  </div>
 
-    <div id="timeline-body" class="px-3.5 py-2.5 select-none">
-      <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
-        <span id="timeline-track-label">Track: <strong class="text-slate-200">Select a node to view keyframes</strong></span>
-        <span id="timeline-key-count" class="text-amber-300/90">0 keyframes</span>
-      </div>
-
-      <div id="timeline-scrubber-area" class="relative h-10 w-full rounded-xl border border-white/10 bg-black/45 timeline-track-bg cursor-ew-resize overflow-hidden">
-        <div id="timeline-ticks" class="absolute inset-x-0 top-0 h-4 border-b border-white/5 pointer-events-none"></div>
-
-        <div id="timeline-markers" class="absolute inset-x-0 top-3 bottom-0"></div>
-
-        <div id="timeline-playhead" style="transform: translateX(0px);"></div>
-      </div>
-    </div>
-  </section>
-
-  <div id="loading-pill" class="glass-panel fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden items-center gap-2.5 rounded-full border-sky-400/30 px-4 py-2 text-xs font-medium text-sky-200 shadow-xl">
-    <svg class="h-4 w-4 animate-spin text-sky-400" viewBox="0 0 24 24" fill="none">
+  <div id="loading-pill" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden items-center gap-2.5 rounded-full border border-indigo-400/30 bg-studio-900/90 px-4 py-2 text-xs font-medium text-indigo-200 backdrop-blur-xl shadow-xl">
+    <svg class="h-4 w-4 animate-spin text-indigo-400" viewBox="0 0 24 24" fill="none">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
     </svg>
     <span id="loading-text">Loading 3D asset...</span>
   </div>
 
-  <div id="toast-container" class="fixed bottom-32 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { TransformControls } from 'three/addons/controls/TransformControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-    import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
     import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-
-    const restPoseCache = new WeakMap();
 
     const state = {
       models: [],
       activeModelId: null,
-      selectedNode: null,
-      gizmoMode: 'rotate',
-      gizmoSpace: 'local',
-      isGizmoDragging: false,
-
-      autoRotate: false,
+      autoRotate: true,
       autoRotateSpeed: 1.5,
       wireframe: false,
       showGrid: true,
-      showSkeleton: true,
       bgPreset: 'dark-studio',
       exposure: 1.1,
-
-      customClips: [],
-      activeClipType: 'custom',
-      activeClipId: null,
-      currentTime: 0,
-      isPlaying: false,
-      isLooping: true,
-      playbackSpeed: 1.0,
-      autoKey: false,
-      isScrubbingTimeline: false,
-
       mixer: null,
       activeAction: null,
-
+      isPlaying: true,
+      playbackSpeed: 1.0,
+      isScrubbing: false,
       cameraTransition: null,
     };
 
@@ -798,38 +445,25 @@
       'deep-navy':   { color: 0x0a1428, label: 'Deep Navy',   gridCenter: 0x2b4570, gridLine: 0x152544 },
     };
 
-    const _posA = new THREE.Vector3();
-    const _posB = new THREE.Vector3();
-    const _scaleA = new THREE.Vector3();
-    const _scaleB = new THREE.Vector3();
-    const _quatA = new THREE.Quaternion();
-    const _quatB = new THREE.Quaternion();
-    const _eulerDeg = new THREE.Euler();
-
     const container = document.getElementById('viewport-container');
     const canvas = document.getElementById('three-canvas');
     const dropOverlay = document.getElementById('drop-overlay');
     const fileInput = document.getElementById('file-input');
-    const leftDrawer = document.getElementById('left-drawer');
-    const rightDrawer = document.getElementById('right-drawer');
+    const modelsPanel = document.getElementById('models-panel');
+    const studioPanel = document.getElementById('studio-panel');
     const modelsListEl = document.getElementById('models-list');
-    const hierarchyListEl = document.getElementById('hierarchy-list');
-    const hierarchySearchInput = document.getElementById('hierarchy-search');
+    const modelCountBadge = document.getElementById('model-count-badge');
     const loadingPill = document.getElementById('loading-pill');
     const loadingText = document.getElementById('loading-text');
     const toastContainer = document.getElementById('toast-container');
 
-    const clipSelect = document.getElementById('clip-select');
-    const clipDurationInput = document.getElementById('clip-duration-input');
-    const timecodeCurrentEl = document.getElementById('timecode-current');
-    const timelineScrubberArea = document.getElementById('timeline-scrubber-area');
-    const timelineTicksEl = document.getElementById('timeline-ticks');
-    const timelineMarkersEl = document.getElementById('timeline-markers');
-    const timelinePlayheadEl = document.getElementById('timeline-playhead');
-    const timelineTrackLabel = document.getElementById('timeline-track-label');
-    const timelineKeyCountEl = document.getElementById('timeline-key-count');
-
-    let cachedTimelineWidth = 0;
+    const animationBar = document.getElementById('animation-bar');
+    const animPlayBtn = document.getElementById('anim-play-btn');
+    const iconPause = document.getElementById('icon-pause');
+    const iconPlay = document.getElementById('icon-play');
+    const animClipSelect = document.getElementById('anim-clip-select');
+    const animScrubber = document.getElementById('anim-scrubber');
+    const animTimecode = document.getElementById('anim-timecode');
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -853,7 +487,7 @@
     scene.environmentIntensity = 0.85;
 
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.05, 500);
-    camera.position.set(3.0, 2.1, 3.6);
+    camera.position.set(3.2, 2.2, 3.8);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -869,37 +503,11 @@
       state.cameraTransition = null;
     });
 
-    const transformControls = new TransformControls(camera, renderer.domElement);
-    transformControls.setMode(state.gizmoMode === 'select' ? 'rotate' : state.gizmoMode);
-    transformControls.setSpace(state.gizmoSpace);
-    transformControls.setSize(0.85);
-    const gizmoHelper = typeof transformControls.getHelper === 'function'
-      ? transformControls.getHelper()
-      : transformControls;
-    scene.add(gizmoHelper);
-
-    transformControls.addEventListener('dragging-changed', (event) => {
-      state.isGizmoDragging = event.value;
-      controls.enabled = !event.value;
-      if (!event.value && state.autoKey && state.selectedNode && state.activeClipType === 'custom') {
-        recordKeyframeForSelectedNode(true);
-      }
-    });
-
-    transformControls.addEventListener('objectChange', () => {
-      if (state.selectedNode) {
-        syncTransformUI();
-        if (state.autoKey && state.activeClipType === 'custom') {
-          recordKeyframeForSelectedNode(true);
-        }
-      }
-    });
-
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0x262b38, 0.45);
     hemiLight.position.set(0, 10, 0);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.65);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.6);
     dirLight.position.set(4.5, 7.5, 5.5);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.set(2048, 2048);
@@ -913,7 +521,7 @@
     dirLight.shadow.bias = -0.0005;
     scene.add(dirLight);
 
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.65);
+    const rimLight = new THREE.DirectionalLight(0x818cf8, 0.65);
     rimLight.position.set(-5, 3, -5);
     scene.add(rimLight);
 
@@ -930,163 +538,96 @@
     shadowPlane.receiveShadow = true;
     scene.add(shadowPlane);
 
-    let activeSkeletonHelper = null;
-
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('https://unpkg.com/three@0.170.0/examples/jsm/libs/draco/gltf/');
 
-    function createArticulatedShowcaseRig() {
+    function createShowcaseModel() {
       const root = new THREE.Group();
-      root.name = 'KineticDroneRig';
+      root.name = 'StudioShowcaseCore';
 
-      const darkArmorMat = new THREE.MeshStandardMaterial({
-        color: 0x1a1f2b,
-        metalness: 0.82,
-        roughness: 0.28,
+      const darkTitaniumMat = new THREE.MeshStandardMaterial({
+        color: 0x1e2430,
+        metalness: 0.85,
+        roughness: 0.26,
       });
-      const silverAlloyMat = new THREE.MeshStandardMaterial({
+      const brushedSilverMat = new THREE.MeshStandardMaterial({
         color: 0xdbe2ef,
-        metalness: 0.9,
+        metalness: 0.92,
+        roughness: 0.18,
+      });
+      const accentIndigoMat = new THREE.MeshStandardMaterial({
+        color: 0x6366f1,
+        emissive: 0x312e81,
+        emissiveIntensity: 0.55,
+        metalness: 0.35,
         roughness: 0.2,
       });
-      const cyanGlowMat = new THREE.MeshStandardMaterial({
-        color: 0x38bdf8,
-        emissive: 0x0284c7,
-        emissiveIntensity: 0.85,
-        metalness: 0.2,
-        roughness: 0.15,
-      });
-      const amberAccentMat = new THREE.MeshStandardMaterial({
-        color: 0xf59e0b,
-        emissive: 0xd97706,
-        emissiveIntensity: 0.55,
-        metalness: 0.4,
-        roughness: 0.25,
+      const glassCoreMat = new THREE.MeshPhysicalMaterial({
+        color: 0xa5b4fc,
+        metalness: 0.05,
+        roughness: 0.08,
+        transmission: 0.72,
+        thickness: 0.8,
+        ior: 1.48,
       });
 
-      const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.1, 0.1, 48), darkArmorMat);
-      pedestal.name = 'PedestalBase';
-      pedestal.position.y = 0.05;
-      pedestal.receiveShadow = true;
-      root.add(pedestal);
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.3, 0.14, 64), darkTitaniumMat);
+      base.position.y = 0.07;
+      base.castShadow = true;
+      base.receiveShadow = true;
+      root.add(base);
 
-      const pedestalRing = new THREE.Mesh(new THREE.TorusGeometry(0.96, 0.016, 16, 64), cyanGlowMat);
-      pedestalRing.name = 'PedestalRing';
-      pedestalRing.rotation.x = Math.PI / 2;
-      pedestalRing.position.y = 0.1;
-      root.add(pedestalRing);
+      const baseRing = new THREE.Mesh(new THREE.TorusGeometry(1.16, 0.02, 24, 64), accentIndigoMat);
+      baseRing.rotation.x = Math.PI / 2;
+      baseRing.position.y = 0.14;
+      root.add(baseRing);
 
-      const rootBone = new THREE.Bone();
-      rootBone.name = 'Root';
-      rootBone.position.set(0, 0.1, 0);
-      root.add(rootBone);
+      const gimbalPivot = new THREE.Group();
+      gimbalPivot.name = 'GimbalPivot';
+      gimbalPivot.position.y = 1.35;
+      root.add(gimbalPivot);
 
-      const torsoBone = new THREE.Bone();
-      torsoBone.name = 'Torso';
-      torsoBone.position.set(0, 0.95, 0);
-      rootBone.add(torsoBone);
+      const outerRing = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.055, 32, 80), brushedSilverMat);
+      outerRing.castShadow = true;
+      gimbalPivot.add(outerRing);
 
-      const chest = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.26, 0.65, 24), darkArmorMat);
-      chest.name = 'TorsoChassis';
-      chest.castShadow = true;
-      torsoBone.add(chest);
+      const midRing = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.045, 28, 72), darkTitaniumMat);
+      midRing.name = 'MidRing';
+      midRing.rotation.y = Math.PI / 4;
+      midRing.castShadow = true;
+      gimbalPivot.add(midRing);
 
-      const coreCrystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), cyanGlowMat);
-      coreCrystal.name = 'ChestCore';
-      coreCrystal.position.set(0, 0.06, 0.28);
-      torsoBone.add(coreCrystal);
+      const coreMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 1), glassCoreMat);
+      coreMesh.name = 'CrystalCore';
+      coreMesh.castShadow = true;
+      gimbalPivot.add(coreMesh);
 
-      const coreRingBone = new THREE.Bone();
-      coreRingBone.name = 'CoreRing';
-      coreRingBone.position.set(0, 0.0, 0);
-      torsoBone.add(coreRingBone);
+      const innerCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), accentIndigoMat);
+      innerCore.name = 'InnerEnergyCore';
+      gimbalPivot.add(innerCore);
 
-      const haloRing = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.028, 20, 64), silverAlloyMat);
-      haloRing.name = 'GyroHaloMesh';
-      haloRing.rotation.x = Math.PI / 2.4;
-      coreRingBone.add(haloRing);
-
-      const headBone = new THREE.Bone();
-      headBone.name = 'Head';
-      headBone.position.set(0, 0.48, 0);
-      torsoBone.add(headBone);
-
-      const headPod = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.26, 0.34), silverAlloyMat);
-      headPod.name = 'HeadCasing';
-      headPod.position.set(0, 0.12, 0);
-      headPod.castShadow = true;
-      headBone.add(headPod);
-
-      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.09, 0.04), cyanGlowMat);
-      visor.name = 'OpticVisor';
-      visor.position.set(0, 0.13, 0.165);
-      headBone.add(visor);
-
-      const leftArmBone = new THREE.Bone();
-      leftArmBone.name = 'LeftArm';
-      leftArmBone.position.set(-0.48, 0.2, 0);
-      torsoBone.add(leftArmBone);
-
-      const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.11, 20, 20), amberAccentMat);
-      leftShoulder.name = 'LeftShoulderJoint';
-      leftArmBone.add(leftShoulder);
-
-      const leftPod = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.42, 12, 20), silverAlloyMat);
-      leftPod.name = 'LeftArmPod';
-      leftPod.position.set(-0.04, -0.26, 0);
-      leftPod.castShadow = true;
-      leftArmBone.add(leftPod);
-
-      const rightArmBone = new THREE.Bone();
-      rightArmBone.name = 'RightArm';
-      rightArmBone.position.set(0.48, 0.2, 0);
-      torsoBone.add(rightArmBone);
-
-      const rightShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.11, 20, 20), amberAccentMat);
-      rightShoulder.name = 'RightShoulderJoint';
-      rightArmBone.add(rightShoulder);
-
-      const rightPod = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.42, 12, 20), silverAlloyMat);
-      rightPod.name = 'RightArmPod';
-      rightPod.position.set(0.04, -0.26, 0);
-      rightPod.castShadow = true;
-      rightArmBone.add(rightPod);
-
-      const dummyGeo = new THREE.BufferGeometry();
-      dummyGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0], 3));
-      dummyGeo.setAttribute('skinIndex', new THREE.Uint16BufferAttribute([0, 0, 0, 0], 4));
-      dummyGeo.setAttribute('skinWeight', new THREE.Float32BufferAttribute([1, 0, 0, 0], 4));
-      const skeleton = new THREE.Skeleton([rootBone, torsoBone, headBone, leftArmBone, rightArmBone, coreRingBone]);
-      const skinnedAnchor = new THREE.SkinnedMesh(dummyGeo, darkArmorMat);
-      skinnedAnchor.name = 'ArmatureSkinAnchor';
-      skinnedAnchor.frustumCulled = false;
-      skinnedAnchor.bind(skeleton);
-      root.add(skinnedAnchor);
-
-      const starterTracks = new Map();
-
-      const q0 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)).toArray();
-      const qHeadTilt = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.12, 0.28, -0.14)).toArray();
-      starterTracks.set(headBone.uuid, {
-        object: headBone,
-        keyframes: [
-          { time: 0.0, pos: headBone.position.toArray(), quat: q0, scale: [1, 1, 1] },
-          { time: 2.0, pos: headBone.position.toArray(), quat: qHeadTilt, scale: [1, 1, 1] },
-          { time: 4.0, pos: headBone.position.toArray(), quat: q0, scale: [1, 1, 1] },
+      const times = [0, 3, 6];
+      const midRingTrack = new THREE.QuaternionKeyframeTrack(
+        'MidRing.quaternion',
+        times,
+        [
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)).toArray(),
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI, Math.PI, 0)).toArray(),
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI * 2, Math.PI * 2, 0)).toArray(),
         ]
-      });
-
-      const qArmWave = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.35, 0, 2.25)).toArray();
-      starterTracks.set(rightArmBone.uuid, {
-        object: rightArmBone,
-        keyframes: [
-          { time: 0.0, pos: rightArmBone.position.toArray(), quat: q0, scale: [1, 1, 1] },
-          { time: 2.0, pos: rightArmBone.position.toArray(), quat: qArmWave, scale: [1, 1, 1] },
-          { time: 4.0, pos: rightArmBone.position.toArray(), quat: q0, scale: [1, 1, 1] },
+      );
+      const coreTrack = new THREE.QuaternionKeyframeTrack(
+        'CrystalCore.quaternion',
+        times,
+        [
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)).toArray(),
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI, Math.PI, Math.PI * 0.5)).toArray(),
+          ...new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI * 2, Math.PI * 2, Math.PI)).toArray(),
         ]
-      });
+      );
+      const clip = new THREE.AnimationClip('Kinetic Idle Loop', 6, [midRingTrack, coreTrack]);
 
-      return { group: root, animations: [], starterTracks };
+      return { group: root, animations: [clip] };
     }
 
     function formatBytes(bytes) {
@@ -1101,11 +642,14 @@
       rawScene.updateMatrixWorld(true);
       const rawBox = new THREE.Box3().setFromObject(rawScene);
       const rawSize = new THREE.Vector3();
+      const rawCenter = new THREE.Vector3();
 
       if (rawBox.isEmpty()) {
         rawSize.set(1, 1, 1);
+        rawCenter.set(0, 0, 0);
       } else {
         rawBox.getSize(rawSize);
+        rawBox.getCenter(rawCenter);
       }
 
       const maxDim = Math.max(rawSize.x, rawSize.y, rawSize.z) || 1;
@@ -1113,7 +657,6 @@
       const scaleFactor = targetSize / maxDim;
 
       const wrapper = new THREE.Group();
-      wrapper.name = 'NormalizedModelRoot';
       rawScene.scale.multiplyScalar(scaleFactor);
 
       rawScene.updateMatrixWorld(true);
@@ -1126,55 +669,24 @@
       rawScene.position.y -= scaledBox.min.y;
 
       wrapper.add(rawScene);
-      wrapper.updateMatrixWorld(true);
 
       let meshCount = 0;
-      let boneCount = 0;
       let triangleCount = 0;
       let vertexCount = 0;
       const uniqueMaterials = new Set();
-      const usedNames = new Set();
-      const hierarchyNodes = [];
 
-      rawScene.traverse((child) => {
-        let baseName = (child.name || '').trim();
-        if (!baseName) {
-          baseName = child.isBone ? `Bone_${boneCount + 1}` : child.isMesh ? `Mesh_${meshCount + 1}` : 'Node';
-        }
-        let uniqueName = baseName;
-        let counter = 2;
-        while (usedNames.has(uniqueName)) {
-          uniqueName = `${baseName}_${counter++}`;
-        }
-        usedNames.add(uniqueName);
-        child.name = uniqueName;
-
-        restPoseCache.set(child, {
-          position: child.position.clone(),
-          quaternion: child.quaternion.clone(),
-          scale: child.scale.clone(),
-        });
-
-        let depth = 0;
-        let p = child.parent;
-        while (p && p !== rawScene) {
-          depth++;
-          p = p.parent;
-        }
-
-        if (child.isBone) {
-          boneCount++;
-          hierarchyNodes.push({ node: child, type: 'bone', depth });
-        } else if (child.isMesh && child.name !== 'ArmatureSkinAnchor') {
+      wrapper.traverse((child) => {
+        if (child.isMesh) {
           meshCount++;
-          hierarchyNodes.push({ node: child, type: 'mesh', depth });
           child.castShadow = true;
           child.receiveShadow = true;
 
           const geom = child.geometry;
           if (geom) {
             const posAttr = geom.attributes.position;
-            if (posAttr) vertexCount += posAttr.count;
+            if (posAttr) {
+              vertexCount += posAttr.count;
+            }
             if (geom.index) {
               triangleCount += Math.round(geom.index.count / 3);
             } else if (posAttr) {
@@ -1191,42 +703,25 @@
               }
             }
           });
-        } else if (child !== rawScene && child.children.length > 0 && child.name !== 'ArmatureSkinAnchor') {
-          hierarchyNodes.push({ node: child, type: 'group', depth });
         }
       });
 
+      wrapper.updateMatrixWorld(true);
       const normBox = new THREE.Box3().setFromObject(wrapper);
       const normSize = new THREE.Vector3();
       normBox.getSize(normSize);
 
       return {
         wrapper,
-        rawScene,
         normalizedHeight: normSize.y || 1.5,
-        hierarchyNodes,
         stats: {
           meshes: meshCount,
-          bones: boneCount,
           materials: uniqueMaterials.size,
           triangles: triangleCount,
           vertices: vertexCount,
           dimensions: `${rawSize.x.toFixed(2)} × ${rawSize.y.toFixed(2)} × ${rawSize.z.toFixed(2)}`,
         }
       };
-    }
-
-    function restoreModelRestPose(model) {
-      if (!model) return;
-      model.rawScene.traverse((child) => {
-        const rest = restPoseCache.get(child);
-        if (rest) {
-          child.position.copy(rest.position);
-          child.quaternion.copy(rest.quaternion);
-          child.scale.copy(rest.scale);
-        }
-      });
-      if (state.selectedNode) syncTransformUI();
     }
 
     function applyWireframeToModel(group, enabled) {
@@ -1265,16 +760,11 @@
       const targetModel = state.models.find((m) => m.id === modelId);
       if (!targetModel) return;
 
-      deselectNode();
-
       state.models.forEach((m) => {
-        if (m.group.parent === scene) scene.remove(m.group);
+        if (m.group.parent === scene) {
+          scene.remove(m.group);
+        }
       });
-      if (activeSkeletonHelper) {
-        scene.remove(activeSkeletonHelper);
-        activeSkeletonHelper.dispose();
-        activeSkeletonHelper = null;
-      }
 
       if (state.mixer) {
         state.mixer.stopAllAction();
@@ -1286,27 +776,19 @@
       scene.add(targetModel.group);
       applyWireframeToModel(targetModel.group, state.wireframe);
 
-      if (targetModel.stats.bones > 0) {
-        activeSkeletonHelper = new THREE.SkeletonHelper(targetModel.rawScene);
-        activeSkeletonHelper.visible = state.showSkeleton;
-        scene.add(activeSkeletonHelper);
-      }
-
       document.getElementById('info-name').textContent = targetModel.name;
       document.getElementById('info-name').title = targetModel.name;
       document.getElementById('info-size').textContent = targetModel.sizeLabel;
       document.getElementById('info-meshes').textContent = targetModel.stats.meshes.toLocaleString();
-      document.getElementById('info-bones').textContent = targetModel.stats.bones.toLocaleString();
       document.getElementById('info-materials').textContent = targetModel.stats.materials.toLocaleString();
       document.getElementById('info-triangles').textContent = targetModel.stats.triangles.toLocaleString();
       document.getElementById('info-vertices').textContent = targetModel.stats.vertices.toLocaleString();
       document.getElementById('info-dimensions').textContent = targetModel.stats.dimensions;
 
-      setupClipsForModel(targetModel);
+      setupAnimationsForModel(targetModel);
 
-      renderModelsList();
-      renderHierarchyList();
       setCameraPreset('fit', true);
+      renderModelsList();
     }
 
     function removeModel(modelId) {
@@ -1315,10 +797,13 @@
       const model = state.models[idx];
       if (model.isDefault) return;
 
-      if (state.activeModelId === modelId) deselectNode();
-      if (model.group.parent === scene) scene.remove(model.group);
+      if (model.group.parent === scene) {
+        scene.remove(model.group);
+      }
       disposeObject(model.group);
-      if (model.blobUrls) model.blobUrls.forEach((u) => URL.revokeObjectURL(u));
+      if (model.blobUrls) {
+        model.blobUrls.forEach((u) => URL.revokeObjectURL(u));
+      }
 
       state.models.splice(idx, 1);
       showToast(`Removed "${model.name}"`, 'info');
@@ -1332,46 +817,44 @@
     }
 
     function renderModelsList() {
-      const count = state.models.length;
-      document.getElementById('model-count-badge').textContent = count;
-      document.getElementById('tab-models-count').textContent = count;
+      modelCountBadge.textContent = state.models.length;
       modelsListEl.innerHTML = '';
 
       state.models.forEach((model) => {
         const isActive = model.id === state.activeModelId;
         const item = document.createElement('div');
-        item.className = `group flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 cursor-pointer transition ${
+        item.className = `group flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 cursor-pointer transition ${
           isActive
-            ? 'bg-sky-500/20 border border-sky-400/40 text-white'
+            ? 'bg-indigo-600/20 border border-indigo-500/40 text-white'
             : 'border border-transparent hover:bg-white/[0.05] text-slate-300'
         }`;
 
         item.innerHTML = `
           <div class="flex items-center gap-2.5 min-w-0 flex-1">
-            <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
-              isActive ? 'bg-sky-500 text-white' : 'bg-white/5 text-slate-400 group-hover:text-slate-200'
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+              isActive ? 'bg-indigo-500 text-white' : 'bg-white/5 text-slate-400 group-hover:text-slate-200'
             }">
-              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
               </svg>
             </div>
             <div class="min-w-0 flex-1">
               <div class="truncate text-xs font-medium ${isActive ? 'text-white' : 'text-slate-200'}">${escapeHtml(model.name)}</div>
-              <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono">
+              <div class="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
                 <span>${escapeHtml(model.sizeLabel)}</span>
-                ${model.stats.bones > 0 ? `<span class="text-amber-300">• ${model.stats.bones} bones</span>` : ''}
+                ${model.animations.length > 0 ? `<span class="text-indigo-300">• ${model.animations.length} anim</span>` : ''}
               </div>
             </div>
           </div>
           ${
             !model.isDefault
               ? `<button type="button" data-delete-id="${model.id}" title="Remove Model"
-                  class="delete-model-btn rounded-lg p-1 text-slate-400 opacity-75 hover:opacity-100 hover:bg-rose-500/20 hover:text-rose-300 transition">
-                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  class="delete-model-btn rounded-lg p-1.5 text-slate-400 opacity-70 hover:opacity-100 hover:bg-rose-500/20 hover:text-rose-300 transition">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                   </svg>
                 </button>`
-              : `<span class="rounded bg-white/5 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-slate-400">Rig</span>`
+              : `<span class="rounded bg-white/5 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-slate-400">Demo</span>`
           }
         `;
 
@@ -1392,677 +875,43 @@
       });
     }
 
-    function renderHierarchyList() {
-      const model = state.models.find((m) => m.id === state.activeModelId);
-      const nodes = model ? model.hierarchyNodes : [];
-      document.getElementById('tab-nodes-count').textContent = nodes.length;
-
-      const query = (hierarchySearchInput.value || '').trim().toLowerCase();
-      hierarchyListEl.innerHTML = '';
-
-      const filtered = query
-        ? nodes.filter((entry) => entry.node.name.toLowerCase().includes(query))
-        : nodes;
-
-      if (filtered.length === 0) {
-        hierarchyListEl.innerHTML = `<div class="py-6 text-center text-xs text-slate-500">No matching nodes found</div>`;
+    function setupAnimationsForModel(model) {
+      const clips = model.animations || [];
+      if (clips.length === 0) {
+        animationBar.classList.add('hidden');
         return;
       }
 
-      const activeClip = getActiveCustomClip();
+      animationBar.classList.remove('hidden');
+      state.mixer = new THREE.AnimationMixer(model.group);
+      state.mixer.timeScale = state.playbackSpeed;
 
-      filtered.forEach(({ node, type, depth }) => {
-        const isSelected = state.selectedNode === node;
-        const hasKeys = activeClip && activeClip.tracks.has(node.uuid) && activeClip.tracks.get(node.uuid).keyframes.length > 0;
-        const indentPx = Math.min(depth * 12, 60);
-
-        const row = document.createElement('button');
-        row.type = 'button';
-        row.dataset.nodeUuid = node.uuid;
-        row.style.paddingLeft = `${8 + indentPx}px`;
-        row.className = `w-full flex items-center justify-between gap-2 rounded-lg pr-2.5 py-1.5 text-left text-xs transition ${
-          isSelected
-            ? 'bg-sky-500/25 text-white ring-1 ring-sky-400/40 font-medium'
-            : 'text-slate-300 hover:bg-white/[0.06] hover:text-white'
-        }`;
-
-        const iconSvg = type === 'bone'
-          ? `<svg class="h-3.5 w-3.5 shrink-0 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 10c.7-.7 1.69 0 2.5 0a2.5 2.5 0 1 0 0-5 .5.5 0 0 1-.5-.5 2.5 2.5 0 1 0-5 0c0 .81.7 1.8 0 2.5l-7 7c-.7.7-1.69 0-2.5 0a2.5 2.5 0 0 0 0 5c.28 0 .5.22.5.5a2.5 2.5 0 1 0 5 0c0-.81-.7-1.8 0-2.5Z"/></svg>`
-          : type === 'mesh'
-            ? `<svg class="h-3.5 w-3.5 shrink-0 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>`
-            : `<svg class="h-3.5 w-3.5 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-
-        row.innerHTML = `
-          <div class="flex items-center gap-1.5 min-w-0">
-            ${iconSvg}
-            <span class="truncate">${escapeHtml(node.name)}</span>
-          </div>
-          ${hasKeys ? `<span class="h-2 w-2 shrink-0 rotate-45 bg-amber-400" title="Has Keyframes"></span>` : ''}
-        `;
-
-        row.addEventListener('click', () => selectNode(node));
-        hierarchyListEl.appendChild(row);
-      });
-    }
-
-    hierarchySearchInput.addEventListener('input', renderHierarchyList);
-
-    const tabModelsBtn = document.getElementById('tab-models-btn');
-    const tabHierarchyBtn = document.getElementById('tab-hierarchy-btn');
-    const viewModels = document.getElementById('view-models');
-    const viewHierarchy = document.getElementById('view-hierarchy');
-
-    function switchLeftTab(tabName) {
-      if (tabName === 'models') {
-        tabModelsBtn.className = 'flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-sky-500/20 text-sky-300 py-1.5 text-xs font-semibold transition';
-        tabHierarchyBtn.className = 'flex-1 flex items-center justify-center gap-1.5 rounded-lg text-slate-400 hover:text-slate-200 py-1.5 text-xs font-semibold transition';
-        viewModels.classList.remove('hidden');
-        viewModels.classList.add('flex');
-        viewHierarchy.classList.add('hidden');
-        viewHierarchy.classList.remove('flex');
-      } else {
-        tabHierarchyBtn.className = 'flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-sky-500/20 text-sky-300 py-1.5 text-xs font-semibold transition';
-        tabModelsBtn.className = 'flex-1 flex items-center justify-center gap-1.5 rounded-lg text-slate-400 hover:text-slate-200 py-1.5 text-xs font-semibold transition';
-        viewHierarchy.classList.remove('hidden');
-        viewHierarchy.classList.add('flex');
-        viewModels.classList.add('hidden');
-        viewModels.classList.remove('flex');
-      }
-    }
-
-    tabModelsBtn.addEventListener('click', () => switchLeftTab('models'));
-    tabHierarchyBtn.addEventListener('click', () => switchLeftTab('hierarchy'));
-
-    function selectNode(node) {
-      if (!node) {
-        deselectNode();
-        return;
-      }
-      state.selectedNode = node;
-
-      if (state.gizmoMode === 'select') {
-        transformControls.detach();
-      } else {
-        transformControls.setMode(state.gizmoMode);
-        transformControls.attach(node);
-      }
-
-      const badgeEl = document.getElementById('selected-node-badge');
-      badgeEl.textContent = node.isBone ? 'BONE' : node.isMesh ? 'MESH' : 'GROUP';
-      badgeEl.className = node.isBone
-        ? 'rounded bg-amber-500/20 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase text-amber-300'
-        : 'rounded bg-sky-500/20 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase text-sky-300';
-
-      document.getElementById('selected-node-name').textContent = node.name;
-      document.getElementById('card-keyframe-btn').disabled = state.activeClipType !== 'custom';
-      document.getElementById('transform-empty-hint').classList.add('hidden');
-      document.getElementById('transform-controls-grid').classList.remove('hidden');
-
-      syncTransformUI();
-      renderHierarchyList();
-      renderTimelineMarkers();
-    }
-
-    function deselectNode() {
-      state.selectedNode = null;
-      transformControls.detach();
-
-      const badgeEl = document.getElementById('selected-node-badge');
-      badgeEl.textContent = 'NONE';
-      badgeEl.className = 'rounded bg-white/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase text-slate-400';
-
-      document.getElementById('selected-node-name').textContent = 'No Node Selected';
-      document.getElementById('card-keyframe-btn').disabled = true;
-      document.getElementById('transform-empty-hint').classList.remove('hidden');
-      document.getElementById('transform-controls-grid').classList.add('hidden');
-
-      renderHierarchyList();
-      renderTimelineMarkers();
-    }
-
-    function syncTransformUI() {
-      const node = state.selectedNode;
-      if (!node) return;
-
-      document.getElementById('pos-x').value = node.position.x.toFixed(2);
-      document.getElementById('pos-y').value = node.position.y.toFixed(2);
-      document.getElementById('pos-z').value = node.position.z.toFixed(2);
-      document.getElementById('pos-x-slider').value = THREE.MathUtils.clamp(node.position.x, -3, 3);
-      document.getElementById('pos-y-slider').value = THREE.MathUtils.clamp(node.position.y, -3, 3);
-      document.getElementById('pos-z-slider').value = THREE.MathUtils.clamp(node.position.z, -3, 3);
-
-      _eulerDeg.setFromQuaternion(node.quaternion, 'XYZ');
-      const degX = Math.round(THREE.MathUtils.radToDeg(_eulerDeg.x));
-      const degY = Math.round(THREE.MathUtils.radToDeg(_eulerDeg.y));
-      const degZ = Math.round(THREE.MathUtils.radToDeg(_eulerDeg.z));
-
-      document.getElementById('rot-x').value = degX;
-      document.getElementById('rot-y').value = degY;
-      document.getElementById('rot-z').value = degZ;
-      document.getElementById('rot-x-slider').value = THREE.MathUtils.clamp(degX, -180, 180);
-      document.getElementById('rot-y-slider').value = THREE.MathUtils.clamp(degY, -180, 180);
-      document.getElementById('rot-z-slider').value = THREE.MathUtils.clamp(degZ, -180, 180);
-
-      document.getElementById('scl-x').value = node.scale.x.toFixed(2);
-      document.getElementById('scl-y').value = node.scale.y.toFixed(2);
-      document.getElementById('scl-z').value = node.scale.z.toFixed(2);
-      document.getElementById('scl-x-slider').value = THREE.MathUtils.clamp(node.scale.x, 0.1, 3);
-      document.getElementById('scl-y-slider').value = THREE.MathUtils.clamp(node.scale.y, 0.1, 3);
-      document.getElementById('scl-z-slider').value = THREE.MathUtils.clamp(node.scale.z, 0.1, 3);
-    }
-
-    function bindTransformInputs() {
-      const axes = ['x', 'y', 'z'];
-
-      axes.forEach((axis) => {
-        const posNum = document.getElementById(`pos-${axis}`);
-        const posSld = document.getElementById(`pos-${axis}-slider`);
-        const onPosChange = (val) => {
-          if (!state.selectedNode || Number.isNaN(val)) return;
-          state.selectedNode.position[axis] = val;
-          syncTransformUI();
-          if (state.autoKey && state.activeClipType === 'custom') recordKeyframeForSelectedNode(true);
-        };
-        posNum.addEventListener('input', (e) => onPosChange(parseFloat(e.target.value)));
-        posSld.addEventListener('input', (e) => onPosChange(parseFloat(e.target.value)));
-
-        const rotNum = document.getElementById(`rot-${axis}`);
-        const rotSld = document.getElementById(`rot-${axis}-slider`);
-        const onRotChange = (degVal) => {
-          if (!state.selectedNode || Number.isNaN(degVal)) return;
-          _eulerDeg.setFromQuaternion(state.selectedNode.quaternion, 'XYZ');
-          _eulerDeg[axis] = THREE.MathUtils.degToRad(degVal);
-          state.selectedNode.quaternion.setFromEuler(_eulerDeg);
-          syncTransformUI();
-          if (state.autoKey && state.activeClipType === 'custom') recordKeyframeForSelectedNode(true);
-        };
-        rotNum.addEventListener('input', (e) => onRotChange(parseFloat(e.target.value)));
-        rotSld.addEventListener('input', (e) => onRotChange(parseFloat(e.target.value)));
-
-        const sclNum = document.getElementById(`scl-${axis}`);
-        const sclSld = document.getElementById(`scl-${axis}-slider`);
-        const onSclChange = (val) => {
-          if (!state.selectedNode || Number.isNaN(val) || val <= 0.001) return;
-          state.selectedNode.scale[axis] = val;
-          syncTransformUI();
-          if (state.autoKey && state.activeClipType === 'custom') recordKeyframeForSelectedNode(true);
-        };
-        sclNum.addEventListener('input', (e) => onSclChange(parseFloat(e.target.value)));
-        sclSld.addEventListener('input', (e) => onSclChange(parseFloat(e.target.value)));
-      });
-
-      document.querySelectorAll('.reset-prop-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const node = state.selectedNode;
-          if (!node) return;
-          const rest = restPoseCache.get(node);
-          if (!rest) return;
-          const prop = btn.dataset.resetProp;
-          if (prop === 'position') node.position.copy(rest.position);
-          if (prop === 'rotation') node.quaternion.copy(rest.quaternion);
-          if (prop === 'scale') node.scale.copy(rest.scale);
-          syncTransformUI();
-          if (state.autoKey && state.activeClipType === 'custom') recordKeyframeForSelectedNode(true);
-        });
-      });
-    }
-    bindTransformInputs();
-
-    const raycaster = new THREE.Raycaster();
-    const pointerNDC = new THREE.Vector2();
-    let pointerDownPos = { x: 0, y: 0 };
-
-    canvas.addEventListener('pointerdown', (e) => {
-      pointerDownPos = { x: e.clientX, y: e.clientY };
-    });
-
-    canvas.addEventListener('pointerup', (e) => {
-      if (state.isGizmoDragging) return;
-      const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
-      if (dist > 5) return;
-
-      const model = state.models.find((m) => m.id === state.activeModelId);
-      if (!model) return;
-
-      const rect = canvas.getBoundingClientRect();
-      pointerNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      pointerNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-      raycaster.setFromCamera(pointerNDC, camera);
-      const intersects = raycaster.intersectObjects(model.rawScene.children, true);
-
-      if (intersects.length > 0) {
-        const hit = intersects[0];
-        let targetObj = hit.object;
-
-        if (targetObj.isSkinnedMesh && targetObj.skeleton && targetObj.skeleton.bones.length > 0) {
-          let closestBone = targetObj.skeleton.bones[0];
-          let minDist = Infinity;
-          const boneWorldPos = new THREE.Vector3();
-          targetObj.skeleton.bones.forEach((b) => {
-            b.getWorldPosition(boneWorldPos);
-            const d = boneWorldPos.distanceToSquared(hit.point);
-            if (d < minDist) {
-              minDist = d;
-              closestBone = b;
-            }
-          });
-          targetObj = closestBone;
-        } else {
-          let curr = targetObj.parent;
-          while (curr && curr !== model.rawScene) {
-            if (curr.isBone) {
-              targetObj = curr;
-              break;
-            }
-            curr = curr.parent;
-          }
-        }
-
-        selectNode(targetObj);
-      } else {
-        deselectNode();
-      }
-    });
-
-    function getActiveCustomClip() {
-      if (state.activeClipType !== 'custom') return null;
-      return state.customClips.find((c) => c.id === state.activeClipId) || null;
-    }
-
-    function setupClipsForModel(model) {
-      if (!model.customClips) {
-        const defaultCustom = {
-          id: `custom-${Date.now()}`,
-          name: 'Custom Manual Animation',
-          duration: 4.0,
-          tracks: model.starterTracks || new Map(),
-        };
-        model.customClips = [defaultCustom];
-      }
-
-      state.customClips = model.customClips;
-      state.activeClipType = 'custom';
-      state.activeClipId = state.customClips[0].id;
-      state.currentTime = 0;
-      state.isPlaying = false;
-
-      rebuildClipDropdown(model);
-      onClipSelectionChanged();
-    }
-
-    function rebuildClipDropdown(model) {
-      clipSelect.innerHTML = '';
-
-      state.customClips.forEach((clip) => {
+      animClipSelect.innerHTML = '';
+      clips.forEach((clip, idx) => {
         const opt = document.createElement('option');
-        opt.value = `custom:${clip.id}`;
-        opt.textContent = `★ ${clip.name}`;
-        clipSelect.appendChild(opt);
+        opt.value = idx;
+        opt.textContent = clip.name || `Animation ${idx + 1}`;
+        animClipSelect.appendChild(opt);
       });
 
-      (model.animations || []).forEach((clip, idx) => {
-        const opt = document.createElement('option');
-        opt.value = `embedded:${idx}`;
-        opt.textContent = `[GLB] ${clip.name || `Animation ${idx + 1}`}`;
-        clipSelect.appendChild(opt);
-      });
-
-      clipSelect.value = `${state.activeClipType}:${state.activeClipId}`;
+      playClipAtIndex(0);
     }
 
-    function onClipSelectionChanged() {
+    function playClipAtIndex(index) {
       const model = state.models.find((m) => m.id === state.activeModelId);
-      if (!model) return;
+      if (!model || !state.mixer || !model.animations[index]) return;
 
-      if (state.mixer) {
-        state.mixer.stopAllAction();
-        state.mixer = null;
-        state.activeAction = null;
-      }
+      state.mixer.stopAllAction();
+      const clip = model.animations[index];
+      const action = state.mixer.clipAction(clip);
+      action.reset();
+      action.play();
+      action.paused = !state.isPlaying;
 
-      restoreModelRestPose(model);
-      state.currentTime = 0;
-
-      const customActionsEl = document.getElementById('custom-key-actions');
-
-      if (state.activeClipType === 'custom') {
-        const clip = getActiveCustomClip();
-        clipDurationInput.disabled = false;
-        clipDurationInput.value = clip ? clip.duration.toFixed(1) : '4.0';
-        document.getElementById('card-keyframe-btn').disabled = !state.selectedNode;
-        ['add-keyframe-btn', 'delete-keyframe-btn', 'clear-track-btn', 'auto-key-btn'].forEach((id) => {
-          document.getElementById(id).classList.remove('opacity-40', 'pointer-events-none');
-        });
-        evaluateCustomClipAtTime(clip, 0);
-      } else {
-        const idx = Number(state.activeClipId);
-        const glbClip = model.animations[idx];
-        clipDurationInput.disabled = true;
-        clipDurationInput.value = glbClip ? glbClip.duration.toFixed(1) : '1.0';
-        document.getElementById('card-keyframe-btn').disabled = true;
-        ['add-keyframe-btn', 'delete-keyframe-btn', 'clear-track-btn', 'auto-key-btn'].forEach((id) => {
-          document.getElementById(id).classList.add('opacity-40', 'pointer-events-none');
-        });
-
-        if (glbClip) {
-          state.mixer = new THREE.AnimationMixer(model.group);
-          state.mixer.timeScale = state.playbackSpeed;
-          const action = state.mixer.clipAction(glbClip);
-          action.reset().play();
-          action.paused = !state.isPlaying;
-          state.activeAction = action;
-        }
-      }
-
+      state.activeAction = action;
+      animScrubber.value = 0;
       updatePlayPauseUI();
-      renderTimelineRuler();
-      renderTimelineMarkers();
-      updatePlayheadPosition();
     }
-
-    clipSelect.addEventListener('change', (e) => {
-      const [type, id] = e.target.value.split(':');
-      state.activeClipType = type;
-      state.activeClipId = id;
-      onClipSelectionChanged();
-    });
-
-    document.getElementById('new-clip-btn').addEventListener('click', () => {
-      const model = state.models.find((m) => m.id === state.activeModelId);
-      if (!model) return;
-      const num = state.customClips.length + 1;
-      const newClip = {
-        id: `custom-${Date.now()}`,
-        name: `Custom Pose Clip ${num}`,
-        duration: 4.0,
-        tracks: new Map(),
-      };
-      state.customClips.push(newClip);
-      state.activeClipType = 'custom';
-      state.activeClipId = newClip.id;
-      rebuildClipDropdown(model);
-      onClipSelectionChanged();
-      renderHierarchyList();
-      showToast(`Created "${newClip.name}"`, 'success');
-    });
-
-    clipDurationInput.addEventListener('change', (e) => {
-      const clip = getActiveCustomClip();
-      if (!clip) return;
-      const val = THREE.MathUtils.clamp(parseFloat(e.target.value) || 4.0, 1.0, 30.0);
-      clip.duration = val;
-      e.target.value = val.toFixed(1);
-      if (state.currentTime > val) state.currentTime = val;
-      renderTimelineRuler();
-      renderTimelineMarkers();
-      updatePlayheadPosition();
-    });
-
-    function recordKeyframeForSelectedNode(silent = false) {
-      if (state.activeClipType !== 'custom') return;
-      const clip = getActiveCustomClip();
-      const node = state.selectedNode;
-      if (!clip || !node) {
-        if (!silent) showToast('Select a bone or mesh first to record a keyframe.', 'info');
-        return;
-      }
-
-      const t = parseFloat(state.currentTime.toFixed(3));
-      let track = clip.tracks.get(node.uuid);
-      if (!track) {
-        track = { object: node, keyframes: [] };
-        clip.tracks.set(node.uuid, track);
-      }
-
-      const kfData = {
-        time: t,
-        pos: node.position.toArray(),
-        quat: node.quaternion.toArray(),
-        scale: node.scale.toArray(),
-      };
-
-      const existingIdx = track.keyframes.findIndex((k) => Math.abs(k.time - t) < 0.03);
-      if (existingIdx !== -1) {
-        track.keyframes[existingIdx] = kfData;
-      } else {
-        track.keyframes.push(kfData);
-        track.keyframes.sort((a, b) => a.time - b.time);
-      }
-
-      renderTimelineMarkers();
-      renderHierarchyList();
-      if (!silent) {
-        showToast(`Recorded keyframe on "${node.name}" at ${t.toFixed(2)}s`, 'success');
-      }
-    }
-
-    function deleteKeyframeAtPlayhead() {
-      const clip = getActiveCustomClip();
-      const node = state.selectedNode;
-      if (!clip || !node || !clip.tracks.has(node.uuid)) return;
-
-      const track = clip.tracks.get(node.uuid);
-      const before = track.keyframes.length;
-      track.keyframes = track.keyframes.filter((k) => Math.abs(k.time - state.currentTime) >= 0.05);
-
-      if (track.keyframes.length < before) {
-        if (track.keyframes.length === 0) clip.tracks.delete(node.uuid);
-        evaluateCustomClipAtTime(clip, state.currentTime);
-        renderTimelineMarkers();
-        renderHierarchyList();
-        showToast(`Deleted keyframe on "${node.name}"`, 'info');
-      } else {
-        showToast('Move playhead onto a keyframe diamond to delete it.', 'info');
-      }
-    }
-
-    function clearSelectedNodeTrack() {
-      const clip = getActiveCustomClip();
-      const node = state.selectedNode;
-      if (!clip || !node || !clip.tracks.has(node.uuid)) return;
-
-      clip.tracks.delete(node.uuid);
-      const rest = restPoseCache.get(node);
-      if (rest) {
-        node.position.copy(rest.position);
-        node.quaternion.copy(rest.quaternion);
-        node.scale.copy(rest.scale);
-        syncTransformUI();
-      }
-      renderTimelineMarkers();
-      renderHierarchyList();
-      showToast(`Cleared all keyframes for "${node.name}"`, 'info');
-    }
-
-    function evaluateCustomClipAtTime(clip, time) {
-      if (!clip) return;
-      const model = state.models.find((m) => m.id === state.activeModelId);
-      if (!model) return;
-
-      restoreModelRestPose(model);
-
-      clip.tracks.forEach(({ object, keyframes }) => {
-        const len = keyframes.length;
-        if (len === 0) return;
-
-        if (len === 1 || time <= keyframes[0].time) {
-          const k = keyframes[0];
-          object.position.fromArray(k.pos);
-          object.quaternion.fromArray(k.quat);
-          object.scale.fromArray(k.scale);
-          return;
-        }
-
-        if (time >= keyframes[len - 1].time) {
-          const k = keyframes[len - 1];
-          object.position.fromArray(k.pos);
-          object.quaternion.fromArray(k.quat);
-          object.scale.fromArray(k.scale);
-          return;
-        }
-
-        for (let i = 0; i < len - 1; i++) {
-          const k0 = keyframes[i];
-          const k1 = keyframes[i + 1];
-          if (time >= k0.time && time <= k1.time) {
-            const span = k1.time - k0.time;
-            const alpha = span > 0 ? (time - k0.time) / span : 0;
-
-            _posA.fromArray(k0.pos);
-            _posB.fromArray(k1.pos);
-            object.position.lerpVectors(_posA, _posB, alpha);
-
-            _quatA.fromArray(k0.quat);
-            _quatB.fromArray(k1.quat);
-            object.quaternion.slerpQuaternions(_quatA, _quatB, alpha);
-
-            _scaleA.fromArray(k0.scale);
-            _scaleB.fromArray(k1.scale);
-            object.scale.lerpVectors(_scaleA, _scaleB, alpha);
-            break;
-          }
-        }
-      });
-
-      if (state.selectedNode) {
-        syncTransformUI();
-      }
-    }
-
-    function getActiveDuration() {
-      if (state.activeClipType === 'custom') {
-        const clip = getActiveCustomClip();
-        return clip ? clip.duration : 4.0;
-      }
-      if (state.activeAction) {
-        return state.activeAction.getClip().duration || 1.0;
-      }
-      return 4.0;
-    }
-
-    function renderTimelineRuler() {
-      const duration = getActiveDuration();
-      timelineTicksEl.innerHTML = '';
-      const step = duration <= 5 ? 0.5 : duration <= 12 ? 1.0 : 2.0;
-
-      for (let t = 0; t <= duration + 0.001; t += step) {
-        const pct = (t / duration) * 100;
-        const isWhole = Math.abs(t - Math.round(t)) < 0.01;
-        const tick = document.createElement('div');
-        tick.style.left = `${pct}%`;
-        tick.className = `absolute top-0 ${isWhole ? 'h-3.5 border-l border-white/25' : 'h-2 border-l border-white/10'}`;
-        if (isWhole && pct < 98) {
-          tick.innerHTML = `<span class="ml-1 font-mono text-[9px] text-slate-400">${Math.round(t)}s</span>`;
-        }
-        timelineTicksEl.appendChild(tick);
-      }
-    }
-
-    function renderTimelineMarkers() {
-      timelineMarkersEl.innerHTML = '';
-      const clip = getActiveCustomClip();
-      const node = state.selectedNode;
-
-      if (state.activeClipType !== 'custom' || !clip) {
-        timelineTrackLabel.innerHTML = `Track: <strong class="text-slate-300">Embedded GLB Animation (Read-Only)</strong>`;
-        timelineKeyCountEl.textContent = 'Embedded';
-        return;
-      }
-
-      const duration = clip.duration;
-      const activeTrack = node ? clip.tracks.get(node.uuid) : null;
-      const keyCount = activeTrack ? activeTrack.keyframes.length : 0;
-
-      timelineTrackLabel.innerHTML = node
-        ? `Track: <strong class="text-sky-300">${escapeHtml(node.name)}</strong>`
-        : `Track: <strong class="text-slate-400">Select a node to view keyframes</strong>`;
-      timelineKeyCountEl.textContent = `${keyCount} keyframe${keyCount === 1 ? '' : 's'}`;
-
-      clip.tracks.forEach((track, uuid) => {
-        if (node && uuid === node.uuid) return;
-        track.keyframes.forEach((kf) => {
-          const pct = THREE.MathUtils.clamp((kf.time / duration) * 100, 0, 100);
-          const marker = document.createElement('div');
-          marker.style.left = `${pct}%`;
-          marker.className = 'keyframe-diamond other-node';
-          marker.title = `${track.object.name} @ ${kf.time.toFixed(2)}s`;
-          marker.addEventListener('pointerdown', (e) => {
-            e.stopPropagation();
-            selectNode(track.object);
-            seekTimelineToTime(kf.time);
-          });
-          timelineMarkersEl.appendChild(marker);
-        });
-      });
-
-      if (activeTrack) {
-        activeTrack.keyframes.forEach((kf) => {
-          const pct = THREE.MathUtils.clamp((kf.time / duration) * 100, 0, 100);
-          const isAtPlayhead = Math.abs(kf.time - state.currentTime) < 0.04;
-          const marker = document.createElement('div');
-          marker.style.left = `${pct}%`;
-          marker.className = `keyframe-diamond active-node ${isAtPlayhead ? 'at-playhead' : ''}`;
-          marker.title = `${node.name} @ ${kf.time.toFixed(2)}s`;
-          marker.addEventListener('pointerdown', (e) => {
-            e.stopPropagation();
-            seekTimelineToTime(kf.time);
-          });
-          timelineMarkersEl.appendChild(marker);
-        });
-      }
-    }
-
-    function updatePlayheadPosition() {
-      const duration = getActiveDuration();
-      const ratio = duration > 0 ? THREE.MathUtils.clamp(state.currentTime / duration, 0, 1) : 0;
-      const px = ratio * cachedTimelineWidth;
-      timelinePlayheadEl.style.transform = `translateX(${px.toFixed(2)}px)`;
-      timecodeCurrentEl.textContent = `${state.currentTime.toFixed(2)}s`;
-    }
-
-    function seekTimelineToTime(newTime) {
-      const duration = getActiveDuration();
-      state.currentTime = THREE.MathUtils.clamp(newTime, 0, duration);
-
-      if (state.activeClipType === 'custom') {
-        evaluateCustomClipAtTime(getActiveCustomClip(), state.currentTime);
-        renderTimelineMarkers();
-      } else if (state.activeAction && state.mixer) {
-        state.activeAction.time = state.currentTime;
-        state.mixer.update(0);
-      }
-
-      updatePlayheadPosition();
-    }
-
-    function scrubFromClientX(clientX) {
-      const rect = timelineScrubberArea.getBoundingClientRect();
-      cachedTimelineWidth = rect.width;
-      const ratio = THREE.MathUtils.clamp((clientX - rect.left) / (rect.width || 1), 0, 1);
-      seekTimelineToTime(ratio * getActiveDuration());
-    }
-
-    timelineScrubberArea.addEventListener('pointerdown', (e) => {
-      state.isScrubbingTimeline = true;
-      timelineScrubberArea.setPointerCapture(e.pointerId);
-      scrubFromClientX(e.clientX);
-    });
-
-    timelineScrubberArea.addEventListener('pointermove', (e) => {
-      if (!state.isScrubbingTimeline) return;
-      scrubFromClientX(e.clientX);
-    });
-
-    timelineScrubberArea.addEventListener('pointerup', (e) => {
-      if (!state.isScrubbingTimeline) return;
-      state.isScrubbingTimeline = false;
-      timelineScrubberArea.releasePointerCapture(e.pointerId);
-    });
-
-    const playPauseBtn = document.getElementById('play-pause-btn');
-    const iconPlay = document.getElementById('icon-play');
-    const iconPause = document.getElementById('icon-pause');
 
     function updatePlayPauseUI() {
       if (state.isPlaying) {
@@ -2074,174 +923,50 @@
       }
     }
 
-    playPauseBtn.addEventListener('click', () => {
+    animPlayBtn.addEventListener('click', () => {
+      if (!state.activeAction) return;
       state.isPlaying = !state.isPlaying;
-      if (state.isPlaying && state.currentTime >= getActiveDuration() - 0.01) {
-        state.currentTime = 0;
-      }
-      if (state.activeAction) {
-        state.activeAction.paused = !state.isPlaying;
-      }
+      state.activeAction.paused = !state.isPlaying;
       updatePlayPauseUI();
     });
 
-    document.getElementById('rewind-btn').addEventListener('click', () => {
-      seekTimelineToTime(0);
+    animClipSelect.addEventListener('change', (e) => {
+      playClipAtIndex(Number(e.target.value));
     });
 
-    const loopToggleBtn = document.getElementById('loop-toggle-btn');
-    loopToggleBtn.addEventListener('click', () => {
-      state.isLooping = !state.isLooping;
-      loopToggleBtn.className = state.isLooping
-        ? 'flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/20 text-sky-300 border border-sky-400/35 transition'
-        : 'flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.04] text-slate-400 border border-white/10 transition';
+    animScrubber.addEventListener('input', (e) => {
+      if (!state.activeAction || !state.mixer) return;
+      state.isScrubbing = true;
+      const clip = state.activeAction.getClip();
+      const ratio = parseFloat(e.target.value);
+      state.activeAction.time = ratio * clip.duration;
+      state.mixer.update(0);
+      updateTimecodeUI(state.activeAction.time, clip.duration);
     });
 
-    document.querySelectorAll('.speed-btn').forEach((btn) => {
+    animScrubber.addEventListener('change', () => {
+      state.isScrubbing = false;
+    });
+
+    document.querySelectorAll('.anim-speed-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const speed = parseFloat(btn.dataset.speed);
         state.playbackSpeed = speed;
-        if (state.mixer) state.mixer.timeScale = speed;
-        document.querySelectorAll('.speed-btn').forEach((b) => {
+        if (state.mixer) {
+          state.mixer.timeScale = speed;
+        }
+        document.querySelectorAll('.anim-speed-btn').forEach((b) => {
           const active = parseFloat(b.dataset.speed) === speed;
           b.className = active
-            ? 'speed-btn rounded-lg bg-sky-600 px-1.5 py-1 font-mono text-[10px] font-semibold text-white transition'
-            : 'speed-btn rounded-lg px-1.5 py-1 font-mono text-[10px] text-slate-400 hover:text-white transition';
+            ? 'anim-speed-btn rounded-lg bg-indigo-600 px-2 py-1 font-mono text-[11px] font-semibold text-white transition'
+            : 'anim-speed-btn rounded-lg px-2 py-1 font-mono text-[11px] text-slate-400 hover:text-white transition';
         });
       });
     });
 
-    document.getElementById('add-keyframe-btn').addEventListener('click', () => recordKeyframeForSelectedNode(false));
-    document.getElementById('card-keyframe-btn').addEventListener('click', () => recordKeyframeForSelectedNode(false));
-    document.getElementById('delete-keyframe-btn').addEventListener('click', deleteKeyframeAtPlayhead);
-    document.getElementById('clear-track-btn').addEventListener('click', clearSelectedNodeTrack);
-
-    const autoKeyBtn = document.getElementById('auto-key-btn');
-    const autoKeyDot = document.getElementById('auto-key-dot');
-    autoKeyBtn.addEventListener('click', () => {
-      state.autoKey = !state.autoKey;
-      if (state.autoKey) {
-        autoKeyBtn.classList.add('border-amber-400/50', 'bg-amber-500/15', 'text-amber-300');
-        autoKeyDot.classList.remove('bg-slate-500');
-        autoKeyDot.classList.add('bg-amber-400', 'animate-pulse');
-        showToast('Auto-Key enabled: moving gizmos or sliders will record keyframes.', 'info');
-      } else {
-        autoKeyBtn.classList.remove('border-amber-400/50', 'bg-amber-500/15', 'text-amber-300');
-        autoKeyDot.classList.add('bg-slate-500');
-        autoKeyDot.classList.remove('bg-amber-400', 'animate-pulse');
-      }
-    });
-
-    let isTimelineExpanded = true;
-    document.getElementById('toggle-timeline-body-btn').addEventListener('click', () => {
-      isTimelineExpanded = !isTimelineExpanded;
-      const bodyEl = document.getElementById('timeline-body');
-      const chevEl = document.getElementById('timeline-chevron');
-      if (isTimelineExpanded) {
-        bodyEl.classList.remove('hidden');
-        chevEl.classList.remove('rotate-180');
-        cachedTimelineWidth = timelineScrubberArea.getBoundingClientRect().width;
-        updatePlayheadPosition();
-      } else {
-        bodyEl.classList.add('hidden');
-        chevEl.classList.add('rotate-180');
-      }
-    });
-
-    function buildAnimationClipsFromCustomTracks() {
-      const generatedClips = [];
-
-      state.customClips.forEach((customClip) => {
-        const tracks = [];
-        customClip.tracks.forEach(({ object, keyframes }) => {
-          if (!keyframes || keyframes.length === 0) return;
-
-          const times = new Float32Array(keyframes.length);
-          const posValues = new Float32Array(keyframes.length * 3);
-          const quatValues = new Float32Array(keyframes.length * 4);
-          const scaleValues = new Float32Array(keyframes.length * 3);
-
-          keyframes.forEach((kf, i) => {
-            times[i] = kf.time;
-            posValues.set(kf.pos, i * 3);
-            quatValues.set(kf.quat, i * 4);
-            scaleValues.set(kf.scale, i * 3);
-          });
-
-          tracks.push(new THREE.VectorKeyframeTrack(`${object.name}.position`, times, posValues));
-          tracks.push(new THREE.QuaternionKeyframeTrack(`${object.name}.quaternion`, times, quatValues));
-          tracks.push(new THREE.VectorKeyframeTrack(`${object.name}.scale`, times, scaleValues));
-        });
-
-        if (tracks.length > 0) {
-          generatedClips.push(new THREE.AnimationClip(customClip.name, customClip.duration, tracks));
-        }
-      });
-
-      return generatedClips;
+    function updateTimecodeUI(current, total) {
+      animTimecode.textContent = `${current.toFixed(1)}s / ${total.toFixed(1)}s`;
     }
-
-    document.getElementById('export-glb-btn').addEventListener('click', () => {
-      const model = state.models.find((m) => m.id === state.activeModelId);
-      if (!model) return;
-
-      setLoading(true, 'Compiling animated .GLB...');
-
-      restoreModelRestPose(model);
-
-      const customAnimationClips = buildAnimationClipsFromCustomTracks();
-      const exportAnimations = [
-        ...(model.animations || []),
-        ...customAnimationClips,
-      ];
-
-      const exporter = new GLTFExporter();
-      try {
-        exporter.parse(
-          model.group,
-          (result) => {
-            if (state.activeClipType === 'custom') {
-              evaluateCustomClipAtTime(getActiveCustomClip(), state.currentTime);
-            }
-
-            setLoading(false);
-            if (!(result instanceof ArrayBuffer)) {
-              showToast('Unexpected export format generated.', 'error');
-              return;
-            }
-
-            const blob = new Blob([result], { type: 'model/gltf-binary' });
-            const url = URL.createObjectURL(blob);
-            const cleanBase = model.name.replace(/\.(glb|gltf)$/i, '');
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${cleanBase}_animated.glb`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 5000);
-
-            showToast(`Exported "${cleanBase}_animated.glb" (${exportAnimations.length} clip${exportAnimations.length === 1 ? '' : 's'})`, 'success');
-          },
-          (error) => {
-            console.error('GLTFExporter error:', error);
-            if (state.activeClipType === 'custom') {
-              evaluateCustomClipAtTime(getActiveCustomClip(), state.currentTime);
-            }
-            setLoading(false);
-            showToast('Failed to export .GLB file.', 'error');
-          },
-          {
-            binary: true,
-            animations: exportAnimations,
-          }
-        );
-      } catch (err) {
-        console.error(err);
-        setLoading(false);
-        showToast('Error initializing .GLB export.', 'error');
-      }
-    });
 
     async function handleUploadedFiles(fileList) {
       const files = Array.from(fileList || []);
@@ -2258,7 +983,7 @@
       const modelFiles = files.filter((f) => /\.(glb|gltf)$/i.test(f.name));
       if (modelFiles.length === 0) {
         blobUrls.forEach((u) => URL.revokeObjectURL(u));
-        showToast('Unsupported format. Please upload .glb or .gltf files.', 'error');
+        showToast('Unsupported file format. Please upload .glb or .gltf files.', 'error');
         return;
       }
 
@@ -2274,28 +999,30 @@
         const manager = new THREE.LoadingManager();
         manager.setURLModifier((url) => {
           const cleanName = decodeURIComponent(url.split('/').pop().split('?')[0]);
-          return resourceMap.has(cleanName) ? resourceMap.get(cleanName) : url;
+          if (resourceMap.has(cleanName)) {
+            return resourceMap.get(cleanName);
+          }
+          return url;
         });
 
         const loader = new GLTFLoader(manager);
         loader.setDRACOLoader(dracoLoader);
+
         const mainUrl = resourceMap.get(file.name) || URL.createObjectURL(file);
 
         loader.load(
           mainUrl,
           (gltf) => {
             try {
-              const normalized = normalizeAndInspectModel(gltf.scene);
+              const { wrapper, normalizedHeight, stats } = normalizeAndInspectModel(gltf.scene);
               const newModel = {
                 id: `model-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
                 name: file.name,
                 sizeLabel: formatBytes(file.size),
-                group: normalized.wrapper,
-                rawScene: normalized.rawScene,
-                normalizedHeight: normalized.normalizedHeight,
-                hierarchyNodes: normalized.hierarchyNodes,
+                group: wrapper,
+                normalizedHeight,
                 animations: gltf.animations || [],
-                stats: normalized.stats,
+                stats,
                 isDefault: false,
                 blobUrls: sharedBlobUrls,
               };
@@ -2315,7 +1042,13 @@
           (error) => {
             console.error('GLTF Load Error:', error);
             setLoading(false);
-            showToast(`Could not load "${file.name}". Ensure all external .bin/texture files are dropped together.`, 'error');
+            const isGltf = /\.gltf$/i.test(file.name);
+            showToast(
+              isGltf
+                ? `Could not load "${file.name}". If it references external .bin/textures, drop all files together or use a self-contained .glb.`
+                : `Failed to parse "${file.name}". Ensure it is a valid GLB file.`,
+              'error'
+            );
             resolve();
           }
         );
@@ -2338,10 +1071,14 @@
         dropOverlay.classList.add('flex');
       }
     });
+
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
-      if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'copy';
+      }
     });
+
     window.addEventListener('dragleave', (e) => {
       e.preventDefault();
       dragDepth = Math.max(0, dragDepth - 1);
@@ -2350,65 +1087,40 @@
         dropOverlay.classList.remove('flex');
       }
     });
+
     window.addEventListener('drop', (e) => {
       e.preventDefault();
       dragDepth = 0;
       dropOverlay.classList.add('hidden');
       dropOverlay.classList.remove('flex');
+
       if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         handleUploadedFiles(e.dataTransfer.files);
       }
     });
 
-    function setGizmoMode(mode) {
-      state.gizmoMode = mode;
-      document.querySelectorAll('.gizmo-mode-btn').forEach((btn) => {
-        const active = btn.dataset.gizmo === mode;
-        btn.className = active
-          ? 'gizmo-mode-btn flex items-center gap-1.5 rounded-xl bg-sky-500/20 text-sky-300 ring-1 ring-sky-400/40 px-2.5 py-1.5 text-xs font-medium transition'
-          : 'gizmo-mode-btn flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition';
-      });
-
-      if (mode === 'select') {
-        transformControls.detach();
-      } else {
-        transformControls.setMode(mode);
-        if (state.selectedNode) transformControls.attach(state.selectedNode);
-      }
-    }
-
-    document.querySelectorAll('.gizmo-mode-btn').forEach((btn) => {
-      btn.addEventListener('click', () => setGizmoMode(btn.dataset.gizmo));
-    });
-
-    const gizmoSpaceBtn = document.getElementById('gizmo-space-btn');
-    gizmoSpaceBtn.addEventListener('click', () => {
-      state.gizmoSpace = state.gizmoSpace === 'local' ? 'world' : 'local';
-      transformControls.setSpace(state.gizmoSpace);
-      gizmoSpaceBtn.textContent = state.gizmoSpace === 'local' ? 'Local' : 'World';
-    });
-
-    document.getElementById('reset-pose-btn').addEventListener('click', () => {
-      const model = state.models.find((m) => m.id === state.activeModelId);
-      if (!model) return;
-      restoreModelRestPose(model);
-      showToast('Restored model to initial rest pose.', 'info');
-    });
-
     function setCameraPreset(preset, smooth = true) {
       const activeModel = state.models.find((m) => m.id === state.activeModelId);
-      const centerY = activeModel ? activeModel.normalizedHeight * 0.48 : 1.0;
+      const centerY = activeModel ? (activeModel.normalizedHeight * 0.48) : 1.0;
       const target = new THREE.Vector3(0, centerY, 0);
-      const dist = 3.8;
+      const dist = 3.9;
 
-      const endPos = new THREE.Vector3();
+      let endPos = new THREE.Vector3();
       switch (preset) {
-        case 'front': endPos.set(0, centerY, dist); break;
-        case 'right': endPos.set(dist, centerY, 0); break;
-        case 'top':   endPos.set(0, centerY + dist * 1.15, 0.001); break;
+        case 'front':
+          endPos.set(0, centerY, dist);
+          break;
+        case 'right':
+          endPos.set(dist, centerY, 0);
+          break;
+        case 'top':
+          endPos.set(0, centerY + dist * 1.15, 0.001);
+          break;
         case 'iso':
         case 'fit':
-        default:      endPos.set(dist * 0.72, centerY + dist * 0.5, dist * 0.78); break;
+        default:
+          endPos.set(dist * 0.72, centerY + dist * 0.52, dist * 0.78);
+          break;
       }
 
       if (!smooth) {
@@ -2424,12 +1136,14 @@
         startTarget: controls.target.clone(),
         endTarget: target,
         progress: 0,
-        duration: 0.42,
+        duration: 0.45,
       };
     }
 
     document.querySelectorAll('.camera-preset-btn').forEach((btn) => {
-      btn.addEventListener('click', () => setCameraPreset(btn.dataset.view, true));
+      btn.addEventListener('click', () => {
+        setCameraPreset(btn.dataset.view, true);
+      });
     });
 
     function setSwitchState(btnEl, isOn) {
@@ -2437,11 +1151,11 @@
       const knob = btnEl.querySelector('span');
       if (isOn) {
         btnEl.classList.remove('bg-slate-700');
-        btnEl.classList.add('bg-sky-600');
+        btnEl.classList.add('bg-indigo-600');
         knob.classList.remove('translate-x-0');
         knob.classList.add('translate-x-4');
       } else {
-        btnEl.classList.remove('bg-sky-600');
+        btnEl.classList.remove('bg-indigo-600');
         btnEl.classList.add('bg-slate-700');
         knob.classList.remove('translate-x-4');
         knob.classList.add('translate-x-0');
@@ -2449,24 +1163,20 @@
     }
 
     const autoRotateToggle = document.getElementById('auto-rotate-toggle');
+    const rotateSpeedSlider = document.getElementById('rotate-speed-slider');
+    const rotateSpeedVal = document.getElementById('rotate-speed-val');
+
     autoRotateToggle.addEventListener('click', () => {
       state.autoRotate = !state.autoRotate;
       controls.autoRotate = state.autoRotate;
       setSwitchState(autoRotateToggle, state.autoRotate);
     });
 
-    document.getElementById('rotate-speed-slider').addEventListener('input', (e) => {
+    rotateSpeedSlider.addEventListener('input', (e) => {
       const val = parseFloat(e.target.value);
       state.autoRotateSpeed = val;
       controls.autoRotateSpeed = val;
-      document.getElementById('rotate-speed-val').textContent = `${val.toFixed(1)}x`;
-    });
-
-    const skeletonToggle = document.getElementById('skeleton-toggle');
-    skeletonToggle.addEventListener('click', () => {
-      state.showSkeleton = !state.showSkeleton;
-      setSwitchState(skeletonToggle, state.showSkeleton);
-      if (activeSkeletonHelper) activeSkeletonHelper.visible = state.showSkeleton;
+      rotateSpeedVal.textContent = `${val.toFixed(1)}x`;
     });
 
     const wireframeToggle = document.getElementById('wireframe-toggle');
@@ -2474,7 +1184,9 @@
       state.wireframe = !state.wireframe;
       setSwitchState(wireframeToggle, state.wireframe);
       const activeModel = state.models.find((m) => m.id === state.activeModelId);
-      if (activeModel) applyWireframeToModel(activeModel.group, state.wireframe);
+      if (activeModel) {
+        applyWireframeToModel(activeModel.group, state.wireframe);
+      }
     });
 
     const gridToggle = document.getElementById('grid-toggle');
@@ -2490,6 +1202,7 @@
         const key = btn.dataset.bg;
         const preset = BG_PRESETS[key];
         if (!preset) return;
+
         state.bgPreset = key;
         scene.background = new THREE.Color(preset.color);
         document.getElementById('bg-label').textContent = preset.label;
@@ -2505,47 +1218,56 @@
 
         document.querySelectorAll('.bg-preset-btn').forEach((b) => {
           const active = b.dataset.bg === key;
-          b.classList.toggle('border-sky-500', active);
+          b.classList.toggle('border-indigo-500', active);
           b.classList.toggle('border-transparent', !active);
         });
       });
     });
 
-    document.getElementById('exposure-slider').addEventListener('input', (e) => {
+    const exposureSlider = document.getElementById('exposure-slider');
+    const exposureVal = document.getElementById('exposure-val');
+    exposureSlider.addEventListener('input', (e) => {
       const val = parseFloat(e.target.value);
       state.exposure = val;
       renderer.toneMappingExposure = val;
-      document.getElementById('exposure-val').textContent = `${val.toFixed(2)} EV`;
+      exposureVal.textContent = `${val.toFixed(2)} EV`;
     });
 
-    document.getElementById('toggle-left-btn').addEventListener('click', () => leftDrawer.classList.toggle('hidden'));
-    document.getElementById('close-left-btn').addEventListener('click', () => leftDrawer.classList.add('hidden'));
-    document.getElementById('toggle-right-btn').addEventListener('click', () => rightDrawer.classList.toggle('hidden'));
-    document.getElementById('close-right-btn').addEventListener('click', () => rightDrawer.classList.add('hidden'));
+    function togglePanel(panelEl, side) {
+      const isHidden = panelEl.classList.contains('hidden');
+      if (isHidden) {
+        panelEl.classList.remove('hidden');
+      } else {
+        panelEl.classList.add('hidden');
+      }
+    }
 
-    if (window.innerWidth < 860) {
-      leftDrawer.classList.add('hidden');
-      rightDrawer.classList.add('hidden');
+    document.getElementById('toggle-models-btn').addEventListener('click', () => togglePanel(modelsPanel, 'left'));
+    document.getElementById('close-models-btn').addEventListener('click', () => modelsPanel.classList.add('hidden'));
+    document.getElementById('toggle-studio-btn').addEventListener('click', () => togglePanel(studioPanel, 'right'));
+    document.getElementById('close-studio-btn').addEventListener('click', () => studioPanel.classList.add('hidden'));
+
+    if (window.innerWidth < 768) {
+      modelsPanel.classList.add('hidden');
+      studioPanel.classList.add('hidden');
     }
 
     window.addEventListener('keydown', (e) => {
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
 
-      switch (e.key.toLowerCase()) {
-        case 'q': setGizmoMode('select'); break;
-        case 'w': setGizmoMode('translate'); break;
-        case 'e': setGizmoMode('rotate'); break;
-        case 's': setGizmoMode('scale'); break;
-        case 'k': recordKeyframeForSelectedNode(false); break;
-        case 'r': setCameraPreset('fit', true); break;
-        case '1': setCameraPreset('front', true); break;
-        case '2': setCameraPreset('right', true); break;
-        case '3': setCameraPreset('top', true); break;
-        case '4': setCameraPreset('iso', true); break;
-        case ' ':
-          e.preventDefault();
-          playPauseBtn.click();
-          break;
+      if (e.key === 'r' || e.key === 'R') {
+        setCameraPreset('fit', true);
+      } else if (e.key === '1') {
+        setCameraPreset('front', true);
+      } else if (e.key === '2') {
+        setCameraPreset('right', true);
+      } else if (e.key === '3') {
+        setCameraPreset('top', true);
+      } else if (e.key === '4') {
+        setCameraPreset('iso', true);
+      } else if (e.code === 'Space' && state.activeAction) {
+        e.preventDefault();
+        animPlayBtn.click();
       }
     });
 
@@ -2562,30 +1284,32 @@
 
     function showToast(message, type = 'info') {
       const colors = {
-        success: 'border-emerald-500/40 text-emerald-200',
-        error:   'border-rose-500/40 text-rose-200',
-        info:    'border-sky-500/40 text-slate-200',
+        success: 'border-emerald-500/40 bg-studio-900/95 text-emerald-200',
+        error:   'border-rose-500/40 bg-studio-900/95 text-rose-200',
+        info:    'border-indigo-500/40 bg-studio-900/95 text-slate-200',
       };
       const dotColors = {
         success: 'bg-emerald-400',
         error:   'bg-rose-400',
-        info:    'bg-sky-400',
+        info:    'bg-indigo-400',
       };
 
       const toast = document.createElement('div');
-      toast.className = `glass-panel pointer-events-auto flex items-start gap-2.5 rounded-2xl px-4 py-2.5 text-xs font-medium shadow-2xl transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+      toast.className = `pointer-events-auto flex items-start gap-2.5 rounded-2xl border px-4 py-3 text-xs font-medium backdrop-blur-xl shadow-2xl transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.info}`;
       toast.innerHTML = `
         <span class="mt-1 h-2 w-2 shrink-0 rounded-full ${dotColors[type] || dotColors.info}"></span>
         <span class="leading-relaxed">${escapeHtml(message)}</span>
       `;
 
       toastContainer.appendChild(toast);
-      requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
 
       setTimeout(() => {
         toast.classList.add('translate-y-2', 'opacity-0');
         setTimeout(() => toast.remove(), 300);
-      }, 3800);
+      }, 4200);
     }
 
     function escapeHtml(str) {
@@ -2603,13 +1327,10 @@
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
-      cachedTimelineWidth = timelineScrubberArea.getBoundingClientRect().width;
-      updatePlayheadPosition();
     }
 
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(container);
-    resizeObserver.observe(timelineScrubberArea);
     window.addEventListener('resize', handleResize);
 
     const clock = new THREE.Clock();
@@ -2618,37 +1339,31 @@
       requestAnimationFrame(animate);
       const delta = clock.getDelta();
 
-      if (state.isPlaying && !state.isScrubbingTimeline) {
-        const duration = getActiveDuration();
-        state.currentTime += delta * state.playbackSpeed;
-
-        if (state.currentTime >= duration) {
-          if (state.isLooping) {
-            state.currentTime = state.currentTime % (duration || 1);
-          } else {
-            state.currentTime = duration;
-            state.isPlaying = false;
-            updatePlayPauseUI();
+      if (state.mixer && state.activeAction) {
+        if (!state.isScrubbing && state.isPlaying) {
+          state.mixer.update(delta);
+        }
+        const clip = state.activeAction.getClip();
+        if (clip && clip.duration > 0) {
+          const wrappedTime = state.activeAction.time % clip.duration;
+          if (!state.isScrubbing) {
+            animScrubber.value = (wrappedTime / clip.duration).toFixed(4);
           }
+          updateTimecodeUI(wrappedTime, clip.duration);
         }
-
-        if (state.activeClipType === 'custom') {
-          evaluateCustomClipAtTime(getActiveCustomClip(), state.currentTime);
-        } else if (state.mixer && state.activeAction) {
-          state.activeAction.time = state.currentTime;
-          state.mixer.update(0);
-        }
-
-        updatePlayheadPosition();
       }
 
       if (state.cameraTransition) {
         const t = state.cameraTransition;
         t.progress = Math.min(1, t.progress + delta / t.duration);
         const ease = 1 - Math.pow(1 - t.progress, 3);
+
         camera.position.lerpVectors(t.startPos, t.endPos, ease);
         controls.target.lerpVectors(t.startTarget, t.endTarget, ease);
-        if (t.progress >= 1) state.cameraTransition = null;
+
+        if (t.progress >= 1) {
+          state.cameraTransition = null;
+        }
       }
 
       controls.update();
@@ -2656,35 +1371,23 @@
     }
 
     window.addEventListener('load', () => {
-      cachedTimelineWidth = timelineScrubberArea.getBoundingClientRect().width;
-
-      const rig = createArticulatedShowcaseRig();
-      const normalized = normalizeAndInspectModel(rig.group);
+      const showcase = createShowcaseModel();
+      const { wrapper, normalizedHeight, stats } = normalizeAndInspectModel(showcase.group);
 
       const defaultModel = {
-        id: 'default-kinetic-rig',
-        name: 'Kinetic Drone Rig',
+        id: 'default-showcase',
+        name: 'Studio Showcase Core',
         sizeLabel: 'Procedural',
-        group: normalized.wrapper,
-        rawScene: normalized.rawScene,
-        normalizedHeight: normalized.normalizedHeight,
-        hierarchyNodes: normalized.hierarchyNodes,
-        animations: rig.animations,
-        starterTracks: rig.starterTracks,
-        stats: normalized.stats,
+        group: wrapper,
+        normalizedHeight,
+        animations: showcase.animations,
+        stats,
         isDefault: true,
         blobUrls: [],
       };
 
       state.models.push(defaultModel);
       activateModel(defaultModel.id);
-
-      const rightArmNode = defaultModel.hierarchyNodes.find((h) => h.node.name === 'RightArm');
-      if (rightArmNode) {
-        selectNode(rightArmNode.node);
-        switchLeftTab('hierarchy');
-      }
-
       setCameraPreset('fit', false);
       animate();
     });
