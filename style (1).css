@@ -1,0 +1,109 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0b0d12;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.studio-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.studio-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
+}
+
+.studio-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.38);
+}
+
+input[type="range"].studio-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"].studio-slider::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 9999px;
+  background: rgba(148, 163, 184, 0.22);
+}
+
+input[type="range"].studio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #6366f1;
+  border: 2px solid #e0e7ff;
+  margin-top: -4.5px;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.55);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+input[type="range"].studio-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: #818cf8;
+}
+
+input[type="range"].studio-slider::-moz-range-track {
+  height: 5px;
+  border-radius: 9999px;
+  background: rgba(148, 163, 184, 0.22);
+}
+
+input[type="range"].studio-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #6366f1;
+  border: 2px solid #e0e7ff;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.55);
+}
+
+#three-canvas {
+  cursor: grab;
+  touch-action: none;
+}
+
+#three-canvas.can-select {
+  cursor: pointer;
+}
+
+#three-canvas.is-orbiting {
+  cursor: grabbing;
+}
+
+#three-canvas.is-posing {
+  cursor: move;
+}
+
+#anim-scrubber.has-manual-keys::-webkit-slider-runnable-track {
+  background: var(--kf-track, rgba(148, 163, 184, 0.22));
+}
+
+#anim-scrubber.has-manual-keys::-moz-range-track {
+  background: var(--kf-track, rgba(148, 163, 184, 0.22));
+}
+
+#animation-bar.posing-active {
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(99, 102, 241, 0.2);
+}
+
+#inspector-badge.posing-badge {
+  background-color: rgba(99, 102, 241, 0.22);
+  color: #c7d2fe;
+}
