@@ -12,6 +12,7 @@ const state = {
   autoRotate: true,
   autoRotateSpeed: 1.5,
   wireframe: false,
+  useVertexColors: true,
   showGrid: true,
   bgPreset: 'dark-studio',
   exposure: 1.1,
@@ -33,7 +34,7 @@ const state = {
 };
 
 const BG_PRESETS = {
-  'dark-studio': { color: 0x0f1218, label: 'Dark Studio', gridCenter: 0x3b4254, gridLine: 0x1e2330 },
+  'dark-studio': { color: 0x09090b, label: 'Dark Studio', gridCenter: 0x3f3f46, gridLine: 0x18181b },
   'charcoal':    { color: 0x232730, label: 'Charcoal',    gridCenter: 0x525b70, gridLine: 0x323846 },
   'light-gray':  { color: 0xdfe4ec, label: 'Light Gray',  gridCenter: 0x94a3b8, gridLine: 0xcbd5e1 },
   'deep-navy':   { color: 0x0a1428, label: 'Deep Navy',   gridCenter: 0x2b4570, gridLine: 0x152544 },
@@ -132,7 +133,7 @@ transformControls.addEventListener('dragging-changed', (event) => {
   }
 });
 
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x262b38, 0.45);
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0x18181b, 0.45);
 hemiLight.position.set(0, 10, 0);
 scene.add(hemiLight);
 
@@ -150,18 +151,18 @@ dirLight.shadow.camera.bottom = -d;
 dirLight.shadow.bias = -0.0005;
 scene.add(dirLight);
 
-const rimLight = new THREE.DirectionalLight(0x818cf8, 0.65);
+const rimLight = new THREE.DirectionalLight(0xe4e4e7, 0.65);
 rimLight.position.set(-5, 3, -5);
 scene.add(rimLight);
 
 let gridHelper = new THREE.GridHelper(10, 20, BG_PRESETS['dark-studio'].gridCenter, BG_PRESETS['dark-studio'].gridLine);
-gridHelper.material.opacity = 0.55;
+gridHelper.material.opacity = 0.65;
 gridHelper.material.transparent = true;
 scene.add(gridHelper);
 
 const shadowPlane = new THREE.Mesh(
   new THREE.PlaneGeometry(16, 16),
-  new THREE.ShadowMaterial({ opacity: 0.28 })
+  new THREE.ShadowMaterial({ opacity: 0.32 })
 );
 shadowPlane.rotation.x = -Math.PI / 2;
 shadowPlane.receiveShadow = true;
@@ -175,24 +176,24 @@ function createShowcaseModel() {
   root.name = 'StudioShowcaseCore';
 
   const darkTitaniumMat = new THREE.MeshStandardMaterial({
-    color: 0x1e2430,
+    color: 0x18181b,
     metalness: 0.85,
     roughness: 0.26,
   });
   const brushedSilverMat = new THREE.MeshStandardMaterial({
-    color: 0xdbe2ef,
+    color: 0xe4e4e7,
     metalness: 0.92,
     roughness: 0.18,
   });
-  const accentIndigoMat = new THREE.MeshStandardMaterial({
-    color: 0x6366f1,
-    emissive: 0x312e81,
-    emissiveIntensity: 0.55,
-    metalness: 0.35,
-    roughness: 0.2,
+  const accentChromeMat = new THREE.MeshStandardMaterial({
+    color: 0xfafafa,
+    emissive: 0x3f3f46,
+    emissiveIntensity: 0.45,
+    metalness: 0.45,
+    roughness: 0.18,
   });
   const glassCoreMat = new THREE.MeshPhysicalMaterial({
-    color: 0xa5b4fc,
+    color: 0xd4d4d8,
     metalness: 0.05,
     roughness: 0.08,
     transmission: 0.72,
@@ -206,7 +207,7 @@ function createShowcaseModel() {
   base.receiveShadow = true;
   root.add(base);
 
-  const baseRing = new THREE.Mesh(new THREE.TorusGeometry(1.16, 0.02, 24, 64), accentIndigoMat);
+  const baseRing = new THREE.Mesh(new THREE.TorusGeometry(1.16, 0.02, 24, 64), accentChromeMat);
   baseRing.rotation.x = Math.PI / 2;
   baseRing.position.y = 0.14;
   root.add(baseRing);
@@ -231,7 +232,7 @@ function createShowcaseModel() {
   coreMesh.castShadow = true;
   gimbalPivot.add(coreMesh);
 
-  const innerCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), accentIndigoMat);
+  const innerCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), accentChromeMat);
   innerCore.name = 'InnerEnergyCore';
   gimbalPivot.add(innerCore);
 
@@ -339,6 +340,9 @@ function normalizeAndInspectModel(rawScene) {
           if (mat.userData.originalWireframe === undefined) {
             mat.userData.originalWireframe = Boolean(mat.wireframe);
           }
+          if (mat.userData.originalVertexColors === undefined) {
+            mat.userData.originalVertexColors = Boolean(mat.vertexColors);
+          }
         }
       });
     }
@@ -362,13 +366,18 @@ function normalizeAndInspectModel(rawScene) {
   };
 }
 
-function applyWireframeToModel(group, enabled) {
+function applyMaterialSettingsToModel(group) {
   if (!group) return;
   group.traverse((child) => {
     if (child.isMesh && child.material) {
       const mats = Array.isArray(child.material) ? child.material : [child.material];
       mats.forEach((mat) => {
-        mat.wireframe = enabled ? true : Boolean(mat.userData.originalWireframe);
+        mat.wireframe = state.wireframe ? true : Boolean(mat.userData.originalWireframe);
+        const targetVC = state.useVertexColors ? Boolean(mat.userData.originalVertexColors) : false;
+        if (mat.vertexColors !== targetVC) {
+          mat.vertexColors = targetVC;
+          mat.needsUpdate = true;
+        }
       });
     }
   });
@@ -417,7 +426,7 @@ function activateModel(modelId) {
 
   state.activeModelId = targetModel.id;
   scene.add(targetModel.group);
-  applyWireframeToModel(targetModel.group, state.wireframe);
+  applyMaterialSettingsToModel(targetModel.group);
 
   document.getElementById('info-name').textContent = targetModel.name;
   document.getElementById('info-name').title = targetModel.name;
@@ -427,6 +436,14 @@ function activateModel(modelId) {
   document.getElementById('info-triangles').textContent = targetModel.stats.triangles.toLocaleString();
   document.getElementById('info-vertices').textContent = targetModel.stats.vertices.toLocaleString();
   document.getElementById('info-dimensions').textContent = targetModel.stats.dimensions;
+
+  const headerNameEl = document.getElementById('header-active-name');
+  const headerTrisEl = document.getElementById('header-tris-badge');
+  if (headerNameEl) headerNameEl.textContent = targetModel.name;
+  if (headerTrisEl) {
+    const tris = targetModel.stats.triangles;
+    headerTrisEl.textContent = tris >= 1000 ? `${(tris / 1000).toFixed(1)}k` : `${tris}`;
+  }
 
   setupAnimationsForModel(targetModel);
 
@@ -466,38 +483,38 @@ function renderModelsList() {
   state.models.forEach((model) => {
     const isActive = model.id === state.activeModelId;
     const item = document.createElement('div');
-    item.className = `group flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 cursor-pointer transition ${
+    item.className = `group flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 cursor-pointer transition ${
       isActive
-        ? 'bg-indigo-600/20 border border-indigo-500/40 text-white'
-        : 'border border-transparent hover:bg-white/[0.05] text-slate-300'
+        ? 'bg-zinc-900 border border-zinc-700 text-zinc-50'
+        : 'border border-transparent hover:bg-zinc-900/60 text-zinc-400'
     }`;
 
     item.innerHTML = `
       <div class="flex items-center gap-2.5 min-w-0 flex-1">
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-          isActive ? 'bg-indigo-500 text-white' : 'bg-white/5 text-slate-400 group-hover:text-slate-200'
+        <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${
+          isActive ? 'border-zinc-50 bg-zinc-50 text-zinc-950' : 'border-zinc-800 bg-zinc-900 text-zinc-400 group-hover:text-zinc-200'
         }">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
           </svg>
         </div>
         <div class="min-w-0 flex-1">
-          <div class="truncate text-xs font-medium ${isActive ? 'text-white' : 'text-slate-200'}">${escapeHtml(model.name)}</div>
-          <div class="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+          <div class="truncate text-xs font-medium ${isActive ? 'text-zinc-50' : 'text-zinc-200'}">${escapeHtml(model.name)}</div>
+          <div class="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
             <span>${escapeHtml(model.sizeLabel)}</span>
-            ${model.animations.length > 0 ? `<span class="text-indigo-300">• ${model.animations.length} anim</span>` : ''}
+            ${model.animations.length > 0 ? `<span class="text-zinc-300">• ${model.animations.length} anim</span>` : ''}
           </div>
         </div>
       </div>
       ${
         !model.isDefault
           ? `<button type="button" data-delete-id="${model.id}" title="Remove Model"
-              class="delete-model-btn rounded-lg p-1.5 text-slate-400 opacity-70 hover:opacity-100 hover:bg-rose-500/20 hover:text-rose-300 transition">
+              class="delete-model-btn rounded-md p-1 text-zinc-500 opacity-75 hover:opacity-100 hover:bg-zinc-800 hover:text-zinc-100 transition">
               <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
               </svg>
             </button>`
-          : `<span class="rounded bg-white/5 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-slate-400">Demo</span>`
+          : `<span class="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[9px] font-medium text-zinc-400">Demo</span>`
       }
     `;
 
@@ -796,19 +813,19 @@ function updateScrubberKeyframeMarkers() {
   }
 
   const duration = state.activeAction ? state.activeAction.getClip().duration : state.manualDuration;
-  const stops = ['rgba(148, 163, 184, 0.22) 0%'];
+  const stops = ['#27272a 0%'];
   const sorted = Array.from(allTimes).sort((a, b) => a - b);
 
   sorted.forEach((t) => {
     const pct = Math.max(0, Math.min(100, (t / (duration || 1)) * 100));
     const start = Math.max(0, pct - 0.8).toFixed(2);
     const end = Math.min(100, pct + 0.8).toFixed(2);
-    stops.push(`rgba(148, 163, 184, 0.22) ${start}%`);
-    stops.push(`#818cf8 ${start}%`);
-    stops.push(`#818cf8 ${end}%`);
-    stops.push(`rgba(148, 163, 184, 0.22) ${end}%`);
+    stops.push(`#27272a ${start}%`);
+    stops.push(`#fafafa ${start}%`);
+    stops.push(`#fafafa ${end}%`);
+    stops.push(`#27272a ${end}%`);
   });
-  stops.push('rgba(148, 163, 184, 0.22) 100%');
+  stops.push('#27272a 100%');
 
   animScrubber.classList.add('has-manual-keys');
   animScrubber.style.setProperty('--kf-track', `linear-gradient(90deg, ${stops.join(', ')})`);
@@ -946,8 +963,8 @@ document.querySelectorAll('.anim-speed-btn').forEach((btn) => {
     document.querySelectorAll('.anim-speed-btn').forEach((b) => {
       const active = parseFloat(b.dataset.speed) === speed;
       b.className = active
-        ? 'anim-speed-btn rounded-lg bg-indigo-600 px-2 py-1 font-mono text-[11px] font-semibold text-white transition'
-        : 'anim-speed-btn rounded-lg px-2 py-1 font-mono text-[11px] text-slate-400 hover:text-white transition';
+        ? 'anim-speed-btn rounded bg-zinc-50 px-2 py-1 font-mono text-[11px] font-semibold text-zinc-950 transition'
+        : 'anim-speed-btn rounded px-2 py-1 font-mono text-[11px] text-zinc-400 hover:text-zinc-100 transition';
     });
   });
 });
@@ -1138,15 +1155,15 @@ function setSwitchState(btnEl, isOn) {
   btnEl.setAttribute('aria-checked', String(isOn));
   const knob = btnEl.querySelector('span');
   if (isOn) {
-    btnEl.classList.remove('bg-slate-700');
-    btnEl.classList.add('bg-indigo-600');
-    knob.classList.remove('translate-x-0');
-    knob.classList.add('translate-x-4');
+    btnEl.classList.remove('bg-zinc-800');
+    btnEl.classList.add('bg-zinc-50');
+    knob.classList.remove('translate-x-0', 'bg-zinc-400');
+    knob.classList.add('translate-x-4', 'bg-zinc-950');
   } else {
-    btnEl.classList.remove('bg-indigo-600');
-    btnEl.classList.add('bg-slate-700');
-    knob.classList.remove('translate-x-4');
-    knob.classList.add('translate-x-0');
+    btnEl.classList.remove('bg-zinc-50');
+    btnEl.classList.add('bg-zinc-800');
+    knob.classList.remove('translate-x-4', 'bg-zinc-950');
+    knob.classList.add('translate-x-0', 'bg-zinc-400');
   }
 }
 
@@ -1173,7 +1190,17 @@ wireframeToggle.addEventListener('click', () => {
   setSwitchState(wireframeToggle, state.wireframe);
   const activeModel = state.models.find((m) => m.id === state.activeModelId);
   if (activeModel) {
-    applyWireframeToModel(activeModel.group, state.wireframe);
+    applyMaterialSettingsToModel(activeModel.group);
+  }
+});
+
+const vertexColorsToggle = document.getElementById('vertex-colors-toggle');
+vertexColorsToggle.addEventListener('click', () => {
+  state.useVertexColors = !state.useVertexColors;
+  setSwitchState(vertexColorsToggle, state.useVertexColors);
+  const activeModel = state.models.find((m) => m.id === state.activeModelId);
+  if (activeModel) {
+    applyMaterialSettingsToModel(activeModel.group);
   }
 });
 
@@ -1199,15 +1226,29 @@ document.querySelectorAll('.bg-preset-btn').forEach((btn) => {
     gridHelper.geometry.dispose();
     gridHelper.material.dispose();
     gridHelper = new THREE.GridHelper(10, 20, preset.gridCenter, preset.gridLine);
-    gridHelper.material.opacity = 0.55;
+    gridHelper.material.opacity = 0.65;
     gridHelper.material.transparent = true;
     gridHelper.visible = state.showGrid;
     scene.add(gridHelper);
 
     document.querySelectorAll('.bg-preset-btn').forEach((b) => {
       const active = b.dataset.bg === key;
-      b.classList.toggle('border-indigo-500', active);
-      b.classList.toggle('border-transparent', !active);
+      const dot = b.querySelector('.bg-radio-dot');
+      if (active) {
+        b.classList.remove('border-zinc-800', 'bg-zinc-900/40');
+        b.classList.add('border-zinc-400', 'bg-zinc-900');
+        if (dot) {
+          dot.classList.remove('border', 'border-zinc-700', 'bg-transparent');
+          dot.classList.add('bg-zinc-50');
+        }
+      } else {
+        b.classList.remove('border-zinc-400', 'bg-zinc-900');
+        b.classList.add('border-zinc-800', 'bg-zinc-900/40');
+        if (dot) {
+          dot.classList.remove('bg-zinc-50');
+          dot.classList.add('border', 'border-zinc-700', 'bg-transparent');
+        }
+      }
     });
   });
 });
@@ -1310,18 +1351,18 @@ function setLoading(isLoading, message = 'Loading...') {
 
 function showToast(message, type = 'info') {
   const colors = {
-    success: 'border-emerald-500/40 bg-studio-900/95 text-emerald-200',
-    error:   'border-rose-500/40 bg-studio-900/95 text-rose-200',
-    info:    'border-indigo-500/40 bg-studio-900/95 text-slate-200',
+    success: 'border-zinc-700 bg-zinc-950/95 text-zinc-100',
+    error:   'border-red-900/80 bg-zinc-950/95 text-red-200',
+    info:    'border-zinc-800 bg-zinc-950/95 text-zinc-200',
   };
   const dotColors = {
-    success: 'bg-emerald-400',
-    error:   'bg-rose-400',
-    info:    'bg-indigo-400',
+    success: 'bg-zinc-50',
+    error:   'bg-red-400',
+    info:    'bg-zinc-400',
   };
 
   const toast = document.createElement('div');
-  toast.className = `pointer-events-auto flex items-start gap-2.5 rounded-2xl border px-4 py-3 text-xs font-medium backdrop-blur-xl shadow-2xl transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+  toast.className = `pointer-events-auto flex items-start gap-2.5 rounded-lg border px-3.5 py-2.5 text-xs font-medium backdrop-blur-xl shadow-2xl transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.info}`;
   toast.innerHTML = `
     <span class="mt-1 h-2 w-2 shrink-0 rounded-full ${dotColors[type] || dotColors.info}"></span>
     <span class="leading-relaxed">${escapeHtml(message)}</span>
