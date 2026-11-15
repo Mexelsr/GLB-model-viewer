@@ -18,19 +18,18 @@ const state = {
   mixer: null,
   activeAction: null,
   isPlaying: true,
-  isLooping: true,
   playbackSpeed: 1.0,
   isScrubbing: false,
-  currentTime: 0,
   cameraTransition: null,
   selectedTarget: null,
   gizmoMode: 'rotate',
   gizmoSpace: 'local',
   isDraggingGizmo: false,
   isOrbiting: false,
-  autoKey: false,
-  timelineCollapsed: false,
+  manualDuration: 4.0,
+  manualTracks: new Map(),
   restPoses: new WeakMap(),
+  manualClipIndex: -1,
 };
 
 const BG_PRESETS = {
@@ -54,28 +53,11 @@ const toastContainer = document.getElementById('toast-container');
 
 const animationBar = document.getElementById('animation-bar');
 const animPlayBtn = document.getElementById('anim-play-btn');
-const animRestartBtn = document.getElementById('anim-restart-btn');
-const animLoopBtn = document.getElementById('anim-loop-btn');
 const iconPause = document.getElementById('icon-pause');
 const iconPlay = document.getElementById('icon-play');
 const animClipSelect = document.getElementById('anim-clip-select');
-const newClipBtn = document.getElementById('new-clip-btn');
-const animCurrentTimeEl = document.getElementById('anim-current-time');
-const animDurationInput = document.getElementById('anim-duration-input');
-const addKeyframeBtn = document.getElementById('add-keyframe-btn');
-const deleteKeyframeBtn = document.getElementById('delete-keyframe-btn');
-const clearTrackBtn = document.getElementById('clear-track-btn');
-const autoKeyBtn = document.getElementById('auto-key-btn');
-const autoKeyDot = document.getElementById('auto-key-dot');
-const toggleTimelineCollapseBtn = document.getElementById('toggle-timeline-collapse-btn');
-const timelineChevronIcon = document.getElementById('timeline-chevron-icon');
-const timelineBody = document.getElementById('timeline-body');
-const activeTrackNameEl = document.getElementById('active-track-name');
-const trackKeyframeCountEl = document.getElementById('track-keyframe-count');
-const timelineTrack = document.getElementById('timeline-track');
-const timelineTicks = document.getElementById('timeline-ticks');
-const timelineKeyframes = document.getElementById('timeline-keyframes');
-const timelinePlayhead = document.getElementById('timeline-playhead');
+const animScrubber = document.getElementById('anim-scrubber');
+const animTimecode = document.getElementById('anim-timecode');
 const inspectorBadge = document.getElementById('inspector-badge');
 
 const renderer = new THREE.WebGLRenderer({
@@ -127,7 +109,7 @@ controls.addEventListener('end', () => {
 const transformControls = new TransformControls(camera, renderer.domElement);
 transformControls.setMode(state.gizmoMode);
 transformControls.setSpace(state.gizmoSpace);
-transformControls.setSize(0.8);
+transformControls.setSize(window.innerWidth < 768 ? 1.05 : 0.8);
 const gizmoHelper = transformControls.getHelper();
 scene.add(gizmoHelper);
 
@@ -147,8 +129,6 @@ transformControls.addEventListener('dragging-changed', (event) => {
       state.activeAction.paused = true;
       updatePlayPauseUI();
     }
-  } else if (state.autoKey && state.selectedTarget) {
-    recordManualKeyframe(true);
   }
 });
 
@@ -414,32 +394,14 @@ function disposeObject(obj) {
   });
 }
 
-function getActiveModel() {
-  return state.models.find((m) => m.id === state.activeModelId) || null;
-}
-
-function getSelectedClipDescriptor(model) {
-  if (!model) return null;
-  const val = animClipSelect.value;
-  if (!val) return null;
-  if (val.startsWith('custom:')) {
-    const id = val.slice(7);
-    const custom = model.customClips.find((c) => c.id === id);
-    return custom ? { type: 'custom', custom } : null;
-  }
-  if (val.startsWith('embedded:')) {
-    const idx = Number(val.slice(9));
-    const clip = model.animations[idx];
-    return clip ? { type: 'embedded', index: idx, clip } : null;
-  }
-  return null;
-}
-
 function activateModel(modelId) {
   const targetModel = state.models.find((m) => m.id === modelId);
   if (!targetModel) return;
 
   selectObjectForPosing(null, true);
+  state.manualTracks.clear();
+  state.manualClipIndex = -1;
+  updateScrubberKeyframeMarkers();
 
   state.models.forEach((m) => {
     if (m.group.parent === scene) {
@@ -503,7 +465,6 @@ function renderModelsList() {
 
   state.models.forEach((model) => {
     const isActive = model.id === state.activeModelId;
-    const totalAnimCount = model.animations.length + model.customClips.length;
     const item = document.createElement('div');
     item.className = `group flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 cursor-pointer transition ${
       isActive
@@ -524,7 +485,7 @@ function renderModelsList() {
           <div class="truncate text-xs font-medium ${isActive ? 'text-white' : 'text-slate-200'}">${escapeHtml(model.name)}</div>
           <div class="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
             <span>${escapeHtml(model.sizeLabel)}</span>
-            ${totalAnimCount > 0 ? `<span class="text-indigo-300">• ${totalAnimCount} anim</span>` : ''}
+            ${model.animations.length > 0 ? `<span class="text-indigo-300">• ${model.animations.length} anim</span>` : ''}
           </div>
         </div>
       </div>
@@ -543,6 +504,9 @@ function renderModelsList() {
     item.addEventListener('click', (e) => {
       if (e.target.closest('.delete-model-btn')) return;
       activateModel(model.id);
+      if (window.innerWidth < 768) {
+        modelsPanel.classList.add('hidden');
+      }
     });
 
     const delBtn = item.querySelector('.delete-model-btn');
@@ -557,70 +521,10 @@ function renderModelsList() {
   });
 }
 
-function createCustomClipEntry(model, customName) {
-  const index = model.customClips.length + 1;
-  const name = customName || (index === 1 ? '★ Custom Manual Animation' : `★ Custom Clip ${index}`);
-  const entry = {
-    id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    name,
-    duration: 4.0,
-    tracks: new Map(),
-    compiledClip: null,
-  };
-  model.customClips.push(entry);
-  return entry;
-}
-
-function ensureActiveCustomClip(model) {
-  const desc = getSelectedClipDescriptor(model);
-  if (desc && desc.type === 'custom') {
-    return desc.custom;
-  }
-  if (model.customClips.length > 0) {
-    const existing = model.customClips[0];
-    populateClipSelector(model, `custom:${existing.id}`);
-    activateSelectedClip(model, 0);
-    return existing;
-  }
-  const created = createCustomClipEntry(model);
-  populateClipSelector(model, `custom:${created.id}`);
-  activateSelectedClip(model, 0);
-  renderModelsList();
-  return created;
-}
-
-function populateClipSelector(model, preferredValue) {
-  const prevVal = preferredValue || animClipSelect.value;
-  animClipSelect.innerHTML = '';
-
-  model.customClips.forEach((c) => {
-    const opt = document.createElement('option');
-    opt.value = `custom:${c.id}`;
-    opt.textContent = c.name;
-    animClipSelect.appendChild(opt);
-  });
-
-  model.animations.forEach((clip, idx) => {
-    const opt = document.createElement('option');
-    opt.value = `embedded:${idx}`;
-    opt.textContent = clip.name || `Animation ${idx + 1}`;
-    animClipSelect.appendChild(opt);
-  });
-
-  if (prevVal && Array.from(animClipSelect.options).some((o) => o.value === prevVal)) {
-    animClipSelect.value = prevVal;
-  } else if (animClipSelect.options.length > 0) {
-    animClipSelect.selectedIndex = 0;
-  }
-}
-
 function setupAnimationsForModel(model) {
-  const hasAnyClip = model.animations.length > 0 || model.customClips.length > 0;
-  if (!hasAnyClip) {
+  const clips = model.animations || [];
+  if (clips.length === 0) {
     animationBar.classList.add('hidden');
-    renderTimelineRuler(4.0);
-    renderTimelineKeyframes();
-    updateTrackStatusUI();
     return;
   }
 
@@ -630,57 +534,32 @@ function setupAnimationsForModel(model) {
   }
   state.mixer.timeScale = state.playbackSpeed;
 
-  populateClipSelector(model);
-  activateSelectedClip(model, 0);
+  animClipSelect.innerHTML = '';
+  clips.forEach((clip, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = clip.name || `Animation ${idx + 1}`;
+    animClipSelect.appendChild(opt);
+  });
+
+  playClipAtIndex(0);
 }
 
-function activateSelectedClip(model, seekTime = 0) {
-  if (!model) return;
-  if (!state.mixer) {
-    state.mixer = new THREE.AnimationMixer(model.group);
-    state.mixer.timeScale = state.playbackSpeed;
-  }
+function playClipAtIndex(index) {
+  const model = state.models.find((m) => m.id === state.activeModelId);
+  if (!model || !state.mixer || !model.animations[index]) return;
 
   state.mixer.stopAllAction();
-  state.activeAction = null;
+  const clip = model.animations[index];
+  const action = state.mixer.clipAction(clip);
+  action.reset();
+  action.play();
+  action.paused = !state.isPlaying;
 
-  const desc = getSelectedClipDescriptor(model);
-  if (!desc) return;
-
-  let duration = 4.0;
-  let clipToPlay = null;
-
-  if (desc.type === 'custom') {
-    duration = desc.custom.duration;
-    clipToPlay = desc.custom.compiledClip;
-  } else {
-    clipToPlay = desc.clip;
-    duration = clipToPlay.duration || 4.0;
-  }
-
-  animDurationInput.value = duration.toFixed(1);
-  animDurationInput.disabled = desc.type !== 'custom';
-  renderTimelineRuler(duration);
-
-  if (clipToPlay) {
-    const action = state.mixer.clipAction(clipToPlay);
-    action.reset();
-    action.setLoop(state.isLooping ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);
-    action.clampWhenFinished = !state.isLooping;
-    action.play();
-    action.time = Math.max(0, Math.min(seekTime, duration));
-    action.paused = !state.isPlaying;
-    state.activeAction = action;
-    state.mixer.update(0);
-    state.currentTime = action.time;
-  } else {
-    state.currentTime = Math.max(0, Math.min(seekTime, duration));
-  }
-
+  state.activeAction = action;
+  animScrubber.value = 0;
   updatePlayPauseUI();
-  updatePlayheadPosition(state.currentTime, duration);
-  renderTimelineKeyframes();
-  updateTrackStatusUI();
+  updateScrubberKeyframeMarkers();
 }
 
 function updatePlayPauseUI() {
@@ -690,36 +569,6 @@ function updatePlayPauseUI() {
   } else {
     iconPause.classList.add('hidden');
     iconPlay.classList.remove('hidden');
-  }
-}
-
-function updateLoopUI() {
-  animLoopBtn.setAttribute('aria-pressed', String(state.isLooping));
-  if (state.isLooping) {
-    animLoopBtn.classList.add('border-indigo-500/50', 'bg-indigo-500/15', 'text-indigo-300');
-    animLoopBtn.classList.remove('border-white/10', 'bg-white/[0.04]', 'text-slate-400');
-  } else {
-    animLoopBtn.classList.remove('border-indigo-500/50', 'bg-indigo-500/15', 'text-indigo-300');
-    animLoopBtn.classList.add('border-white/10', 'bg-white/[0.04]', 'text-slate-400');
-  }
-  if (state.activeAction) {
-    state.activeAction.setLoop(state.isLooping ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);
-    state.activeAction.clampWhenFinished = !state.isLooping;
-  }
-}
-
-function updateAutoKeyUI() {
-  autoKeyBtn.setAttribute('aria-pressed', String(state.autoKey));
-  if (state.autoKey) {
-    autoKeyBtn.classList.add('border-amber-500/50', 'bg-amber-500/15', 'text-amber-300');
-    autoKeyBtn.classList.remove('border-white/10', 'bg-white/[0.04]', 'text-slate-300');
-    autoKeyDot.classList.remove('bg-slate-500');
-    autoKeyDot.classList.add('bg-amber-400', 'animate-pulse');
-  } else {
-    autoKeyBtn.classList.remove('border-amber-500/50', 'bg-amber-500/15', 'text-amber-300');
-    autoKeyBtn.classList.add('border-white/10', 'bg-white/[0.04]', 'text-slate-300');
-    autoKeyDot.classList.remove('bg-amber-400', 'animate-pulse');
-    autoKeyDot.classList.add('bg-slate-500');
   }
 }
 
@@ -757,8 +606,6 @@ function selectObjectForPosing(obj, silent = false) {
     inspectorBadge.classList.remove('posing-badge');
     inspectorBadge.textContent = 'READY';
     controls.autoRotate = state.autoRotate;
-    updateTrackStatusUI();
-    renderTimelineKeyframes();
     return;
   }
 
@@ -768,25 +615,17 @@ function selectObjectForPosing(obj, silent = false) {
   inspectorBadge.classList.add('posing-badge');
   inspectorBadge.textContent = obj.isBone ? `BONE: ${obj.name}` : `PART: ${obj.name}`;
 
-  const activeModel = getActiveModel();
+  const activeModel = state.models.find((m) => m.id === state.activeModelId);
   if (obj.isBone && activeModel) {
     skeletonHelper = new THREE.SkeletonHelper(activeModel.group);
     scene.add(skeletonHelper);
   }
 
-  if (activeModel) {
-    if (activeModel.animations.length === 0 && activeModel.customClips.length === 0) {
-      const created = createCustomClipEntry(activeModel);
-      populateClipSelector(activeModel, `custom:${created.id}`);
-      state.isPlaying = false;
-      activateSelectedClip(activeModel, 0);
-      renderModelsList();
-    }
-    animationBar.classList.remove('hidden');
+  animationBar.classList.remove('hidden');
+  if (!state.activeAction) {
+    const curTime = parseFloat(animScrubber.value || '0') * state.manualDuration;
+    updateTimecodeUI(curTime, state.manualDuration);
   }
-
-  updateTrackStatusUI();
-  renderTimelineKeyframes();
 
   if (!silent) {
     showToast(
@@ -796,154 +635,33 @@ function selectObjectForPosing(obj, silent = false) {
   }
 }
 
-function updateTrackStatusUI() {
-  const model = getActiveModel();
-  const obj = state.selectedTarget;
-  activeTrackNameEl.textContent = obj ? obj.name : 'None selected';
-
-  if (!model) {
-    trackKeyframeCountEl.textContent = '0 keyframes';
-    return;
-  }
-
-  const desc = getSelectedClipDescriptor(model);
-  if (!desc || desc.type !== 'custom') {
-    const clipCount = desc && desc.clip ? desc.clip.tracks.length : 0;
-    trackKeyframeCountEl.textContent = `${clipCount} embedded tracks`;
-    return;
-  }
-
-  if (obj && desc.custom.tracks.has(obj.uuid)) {
-    const count = desc.custom.tracks.get(obj.uuid).keyframes.length;
-    trackKeyframeCountEl.textContent = `${count} ${count === 1 ? 'keyframe' : 'keyframes'}`;
-  } else {
-    let total = 0;
-    desc.custom.tracks.forEach((t) => {
-      total += t.keyframes.length;
-    });
-    trackKeyframeCountEl.textContent = `${total} ${total === 1 ? 'keyframe' : 'keyframes'}`;
-  }
-}
-
-function getActiveDuration(model) {
-  const desc = getSelectedClipDescriptor(model);
-  if (!desc) return 4.0;
-  if (desc.type === 'custom') return desc.custom.duration;
-  return desc.clip.duration || 4.0;
-}
-
-function seekTimelineToSeconds(seconds) {
-  const model = getActiveModel();
-  if (!model) return;
-  const duration = getActiveDuration(model);
-  const clamped = Math.max(0, Math.min(seconds, duration));
-  state.currentTime = clamped;
-
-  if (state.activeAction && state.mixer) {
-    state.activeAction.time = clamped;
-    state.mixer.update(0);
-  }
-  updatePlayheadPosition(clamped, duration);
-}
-
-function updatePlayheadPosition(current, total) {
-  const safeTotal = total > 0 ? total : 4.0;
-  const pct = Math.max(0, Math.min(100, (current / safeTotal) * 100));
-  timelinePlayhead.style.left = `${pct}%`;
-  animCurrentTimeEl.textContent = `${current.toFixed(2)}s`;
-}
-
-function renderTimelineRuler(duration) {
-  timelineTicks.innerHTML = '';
-  const safeDur = Math.max(0.5, duration);
-  const step = safeDur <= 2 ? 0.25 : safeDur <= 6 ? 0.5 : safeDur <= 15 ? 1 : 2;
-  const subDivs = 4;
-  const totalSteps = Math.floor(safeDur / step);
-
-  for (let i = 0; i <= totalSteps; i++) {
-    const t = Number((i * step).toFixed(3));
-    if (t > safeDur) break;
-    const pct = (t / safeDur) * 100;
-
-    const major = document.createElement('div');
-    major.className = 'timeline-tick-major';
-    major.style.left = `${pct}%`;
-
-    if (t < safeDur - step * 0.25) {
-      const label = document.createElement('span');
-      label.className = 'timeline-tick-label';
-      label.textContent = Number.isInteger(t) ? `${t}s` : `${t.toFixed(1)}s`;
-      major.appendChild(label);
-    }
-    timelineTicks.appendChild(major);
-
-    for (let s = 1; s < subDivs; s++) {
-      const subT = t + (step / subDivs) * s;
-      if (subT >= safeDur) break;
-      const sub = document.createElement('div');
-      sub.className = 'timeline-tick-minor';
-      sub.style.left = `${(subT / safeDur) * 100}%`;
-      timelineTicks.appendChild(sub);
+function getCurrentTimelineSeconds() {
+  if (state.activeAction) {
+    const clip = state.activeAction.getClip();
+    if (clip && clip.duration > 0) {
+      return Number((state.activeAction.time % clip.duration).toFixed(2));
     }
   }
+  return Number((parseFloat(animScrubber.value || '0') * state.manualDuration).toFixed(2));
 }
 
-function renderTimelineKeyframes() {
-  timelineKeyframes.innerHTML = '';
-  const model = getActiveModel();
-  if (!model) return;
-  const desc = getSelectedClipDescriptor(model);
-  if (!desc || desc.type !== 'custom') return;
-
-  const duration = desc.custom.duration || 4.0;
-  const selectedUuid = state.selectedTarget ? state.selectedTarget.uuid : null;
-
-  desc.custom.tracks.forEach(({ object, keyframes }, uuid) => {
-    const isPrimary = !selectedUuid || uuid === selectedUuid;
-    keyframes.forEach((kf) => {
-      const pct = Math.max(0, Math.min(100, (kf.time / duration) * 100));
-      const diamond = document.createElement('button');
-      diamond.type = 'button';
-      diamond.className = isPrimary ? 'timeline-diamond' : 'timeline-diamond is-secondary';
-      diamond.style.left = `${pct}%`;
-      diamond.title = `${object.name} @ ${kf.time.toFixed(2)}s`;
-
-      diamond.addEventListener('pointerdown', (e) => {
-        e.stopPropagation();
-      });
-      diamond.addEventListener('click', (e) => {
-        e.stopPropagation();
-        state.isPlaying = false;
-        if (state.activeAction) state.activeAction.paused = true;
-        updatePlayPauseUI();
-        if (state.selectedTarget !== object) {
-          selectObjectForPosing(object, true);
-        }
-        seekTimelineToSeconds(kf.time);
-      });
-
-      timelineKeyframes.appendChild(diamond);
-    });
-  });
-}
-
-function recordManualKeyframe(silent = false) {
+function recordManualKeyframe() {
   const obj = state.selectedTarget;
-  const model = getActiveModel();
+  const model = state.models.find((m) => m.id === state.activeModelId);
   if (!obj || !model) {
-    if (!silent) {
-      showToast('Click any mesh or bone on the 3D model first to pose and keyframe.', 'info');
-    }
+    showToast('Click any mesh or bone on the 3D model first to pose and keyframe.', 'info');
     return;
   }
 
-  const custom = ensureActiveCustomClip(model);
-  const time = Number(Math.max(0, Math.min(state.currentTime, custom.duration)).toFixed(2));
+  const time = getCurrentTimelineSeconds();
+  if (time > state.manualDuration) {
+    state.manualDuration = Math.ceil(time);
+  }
 
-  let entry = custom.tracks.get(obj.uuid);
+  let entry = state.manualTracks.get(obj.uuid);
   if (!entry) {
     entry = { object: obj, keyframes: [] };
-    custom.tracks.set(obj.uuid, entry);
+    state.manualTracks.set(obj.uuid, entry);
   }
 
   const snapshot = {
@@ -961,56 +679,36 @@ function recordManualKeyframe(silent = false) {
     entry.keyframes.sort((a, b) => a.time - b.time);
   }
 
-  rebuildCustomAnimationClip(model, custom, time);
-  if (!silent) {
-    showToast(`Keyframe saved for "${obj.name}" at ${time.toFixed(2)}s`, 'success');
-  }
+  rebuildManualAnimationClip(model, time);
+  showToast(`Keyframe saved for "${obj.name}" at ${time.toFixed(2)}s (Ctrl+E to export GLB)`, 'success');
 }
 
 function deleteManualKeyframe() {
   const obj = state.selectedTarget;
-  const model = getActiveModel();
+  const model = state.models.find((m) => m.id === state.activeModelId);
   if (!obj || !model) return;
-  const desc = getSelectedClipDescriptor(model);
-  if (!desc || desc.type !== 'custom') return;
 
-  const entry = desc.custom.tracks.get(obj.uuid);
+  const entry = state.manualTracks.get(obj.uuid);
   if (!entry || entry.keyframes.length === 0) return;
 
-  const time = state.currentTime;
+  const time = getCurrentTimelineSeconds();
   const before = entry.keyframes.length;
   entry.keyframes = entry.keyframes.filter((kf) => Math.abs(kf.time - time) >= 0.08);
 
   if (entry.keyframes.length !== before) {
     if (entry.keyframes.length === 0) {
-      desc.custom.tracks.delete(obj.uuid);
+      state.manualTracks.delete(obj.uuid);
     }
-    rebuildCustomAnimationClip(model, desc.custom, time);
+    rebuildManualAnimationClip(model, time);
     showToast(`Deleted keyframe on "${obj.name}" at ${time.toFixed(2)}s`, 'info');
   }
 }
 
-function clearSelectedTrack() {
-  const obj = state.selectedTarget;
-  const model = getActiveModel();
-  if (!obj || !model) {
-    showToast('Select a mesh or bone first to clear its track.', 'info');
-    return;
-  }
-  const desc = getSelectedClipDescriptor(model);
-  if (!desc || desc.type !== 'custom') return;
-
-  if (desc.custom.tracks.delete(obj.uuid)) {
-    rebuildCustomAnimationClip(model, desc.custom, state.currentTime);
-    showToast(`Cleared all keyframes for "${obj.name}"`, 'info');
-  }
-}
-
-function rebuildCustomAnimationClip(model, custom, seekTime = 0) {
+function rebuildManualAnimationClip(model, seekTime = 0) {
   const tracks = [];
-  const duration = custom.duration;
+  let maxTime = state.manualDuration;
 
-  custom.tracks.forEach(({ object, keyframes }) => {
+  state.manualTracks.forEach(({ object, keyframes }) => {
     if (keyframes.length === 0) return;
     const times = [];
     const positions = [];
@@ -1022,11 +720,12 @@ function rebuildCustomAnimationClip(model, custom, seekTime = 0) {
       positions.push(...kf.pos);
       quaternions.push(...kf.quat);
       scales.push(...kf.scale);
+      if (kf.time > maxTime) maxTime = kf.time;
     });
 
     if (times.length === 1) {
-      const holdT = times[0] < duration ? duration : times[0] + 0.1;
-      times.push(holdT);
+      const endT = Math.max(maxTime, times[0] + 0.5);
+      times.push(endT);
       positions.push(...keyframes[0].pos);
       quaternions.push(...keyframes[0].quat);
       scales.push(...keyframes[0].scale);
@@ -1038,12 +737,81 @@ function rebuildCustomAnimationClip(model, custom, seekTime = 0) {
     tracks.push(new THREE.VectorKeyframeTrack(`${nodeName}.scale`, times, scales));
   });
 
-  custom.compiledClip = tracks.length > 0
-    ? new THREE.AnimationClip(custom.name.replace(/^★\s*/, ''), duration, tracks)
-    : null;
+  if (!state.mixer) {
+    state.mixer = new THREE.AnimationMixer(model.group);
+    state.mixer.timeScale = state.playbackSpeed;
+  }
+
+  if (tracks.length === 0) {
+    if (state.manualClipIndex !== -1) {
+      model.animations.splice(state.manualClipIndex, 1);
+      state.manualClipIndex = -1;
+      setupAnimationsForModel(model);
+      renderModelsList();
+    }
+    updateScrubberKeyframeMarkers();
+    return;
+  }
+
+  const manualClip = new THREE.AnimationClip('Manual Animation', maxTime, tracks);
+  if (state.manualClipIndex === -1) {
+    model.animations.push(manualClip);
+    state.manualClipIndex = model.animations.length - 1;
+  } else {
+    model.animations[state.manualClipIndex] = manualClip;
+  }
+
+  animClipSelect.innerHTML = '';
+  model.animations.forEach((clip, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = clip.name || `Animation ${idx + 1}`;
+    animClipSelect.appendChild(opt);
+  });
+  animClipSelect.value = String(state.manualClipIndex);
 
   state.isPlaying = false;
-  activateSelectedClip(model, seekTime);
+  playClipAtIndex(state.manualClipIndex);
+  if (state.activeAction) {
+    state.activeAction.time = Math.min(seekTime, maxTime);
+    state.mixer.update(0);
+    animScrubber.value = (state.activeAction.time / maxTime).toFixed(4);
+    updateTimecodeUI(state.activeAction.time, maxTime);
+  }
+
+  updateScrubberKeyframeMarkers();
+  renderModelsList();
+}
+
+function updateScrubberKeyframeMarkers() {
+  const allTimes = new Set();
+  state.manualTracks.forEach(({ keyframes }) => {
+    keyframes.forEach((kf) => allTimes.add(kf.time));
+  });
+
+  if (allTimes.size === 0) {
+    animScrubber.classList.remove('has-manual-keys');
+    animScrubber.style.removeProperty('--kf-track');
+    return;
+  }
+
+  const duration = state.activeAction ? state.activeAction.getClip().duration : state.manualDuration;
+  const stops = ['rgba(148, 163, 184, 0.22) 0%'];
+  const sorted = Array.from(allTimes).sort((a, b) => a - b);
+
+  sorted.forEach((t) => {
+    const pct = Math.max(0, Math.min(100, (t / (duration || 1)) * 100));
+    const start = Math.max(0, pct - 0.8).toFixed(2);
+    const end = Math.min(100, pct + 0.8).toFixed(2);
+    stops.push(`rgba(148, 163, 184, 0.22) ${start}%`);
+    stops.push(`#818cf8 ${start}%`);
+    stops.push(`#818cf8 ${end}%`);
+    stops.push(`rgba(148, 163, 184, 0.22) ${end}%`);
+  });
+  stops.push('rgba(148, 163, 184, 0.22) 100%');
+
+  animScrubber.classList.add('has-manual-keys');
+  animScrubber.style.setProperty('--kf-track', `linear-gradient(90deg, ${stops.join(', ')})`);
 }
 
 function resetSelectedPose() {
@@ -1059,16 +827,11 @@ function resetSelectedPose() {
 }
 
 function exportAnimatedGLB() {
-  const model = getActiveModel();
+  const model = state.models.find((m) => m.id === state.activeModelId);
   if (!model) return;
 
   const prevSelected = state.selectedTarget;
   if (prevSelected) transformControls.detach();
-
-  const allClips = [
-    ...model.animations,
-    ...model.customClips.map((c) => c.compiledClip).filter(Boolean),
-  ];
 
   setLoading(true, 'Exporting animated .GLB...');
   const exporter = new GLTFExporter();
@@ -1094,131 +857,9 @@ function exportAnimatedGLB() {
       if (prevSelected) transformControls.attach(prevSelected);
       showToast('Failed to export GLB file.', 'error');
     },
-    { binary: true, animations: allClips }
+    { binary: true, animations: model.animations }
   );
 }
-
-function scrubFromPointerEvent(e) {
-  const model = getActiveModel();
-  if (!model) return;
-  const rect = timelineTrack.getBoundingClientRect();
-  if (rect.width <= 0) return;
-  const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  const duration = getActiveDuration(model);
-  seekTimelineToSeconds(ratio * duration);
-}
-
-timelineTrack.addEventListener('pointerdown', (e) => {
-  if (e.button !== 0) return;
-  state.isScrubbing = true;
-  if (state.isPlaying && state.activeAction) {
-    state.isPlaying = false;
-    state.activeAction.paused = true;
-    updatePlayPauseUI();
-  }
-  timelineTrack.setPointerCapture(e.pointerId);
-  scrubFromPointerEvent(e);
-});
-
-timelineTrack.addEventListener('pointermove', (e) => {
-  if (!state.isScrubbing) return;
-  scrubFromPointerEvent(e);
-});
-
-timelineTrack.addEventListener('pointerup', (e) => {
-  if (!state.isScrubbing) return;
-  state.isScrubbing = false;
-  if (timelineTrack.hasPointerCapture(e.pointerId)) {
-    timelineTrack.releasePointerCapture(e.pointerId);
-  }
-});
-
-newClipBtn.addEventListener('click', () => {
-  const model = getActiveModel();
-  if (!model) return;
-  const created = createCustomClipEntry(model);
-  populateClipSelector(model, `custom:${created.id}`);
-  state.isPlaying = false;
-  activateSelectedClip(model, 0);
-  renderModelsList();
-  showToast(`Created "${created.name}"`, 'success');
-});
-
-animRestartBtn.addEventListener('click', () => {
-  seekTimelineToSeconds(0);
-});
-
-animPlayBtn.addEventListener('click', () => {
-  const model = getActiveModel();
-  if (!model) return;
-  const duration = getActiveDuration(model);
-  if (!state.isPlaying && state.currentTime >= duration - 0.01) {
-    seekTimelineToSeconds(0);
-  }
-  state.isPlaying = !state.isPlaying;
-  if (state.activeAction) {
-    state.activeAction.paused = !state.isPlaying;
-    if (state.isPlaying && !state.activeAction.isRunning()) {
-      state.activeAction.reset();
-      state.activeAction.play();
-    }
-  }
-  updatePlayPauseUI();
-});
-
-animLoopBtn.addEventListener('click', () => {
-  state.isLooping = !state.isLooping;
-  updateLoopUI();
-});
-
-animClipSelect.addEventListener('change', () => {
-  const model = getActiveModel();
-  if (!model) return;
-  activateSelectedClip(model, 0);
-});
-
-animDurationInput.addEventListener('change', () => {
-  const model = getActiveModel();
-  if (!model) return;
-  const desc = getSelectedClipDescriptor(model);
-  if (!desc || desc.type !== 'custom') return;
-  const val = Math.max(0.5, Math.min(120, parseFloat(animDurationInput.value) || 4.0));
-  animDurationInput.value = val.toFixed(1);
-  desc.custom.duration = val;
-  rebuildCustomAnimationClip(model, desc.custom, Math.min(state.currentTime, val));
-});
-
-addKeyframeBtn.addEventListener('click', () => recordManualKeyframe(false));
-deleteKeyframeBtn.addEventListener('click', () => deleteManualKeyframe());
-clearTrackBtn.addEventListener('click', () => clearSelectedTrack());
-
-autoKeyBtn.addEventListener('click', () => {
-  state.autoKey = !state.autoKey;
-  updateAutoKeyUI();
-  showToast(`Auto-Key ${state.autoKey ? 'enabled' : 'disabled'}`, 'info');
-});
-
-toggleTimelineCollapseBtn.addEventListener('click', () => {
-  state.timelineCollapsed = !state.timelineCollapsed;
-  timelineBody.classList.toggle('hidden', state.timelineCollapsed);
-  timelineChevronIcon.classList.toggle('rotate-180', state.timelineCollapsed);
-});
-
-document.querySelectorAll('.anim-speed-btn').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const speed = parseFloat(btn.dataset.speed);
-    state.playbackSpeed = speed;
-    if (state.mixer) {
-      state.mixer.timeScale = speed;
-    }
-    document.querySelectorAll('.anim-speed-btn').forEach((b) => {
-      const active = parseFloat(b.dataset.speed) === speed;
-      b.className = active
-        ? 'anim-speed-btn rounded-lg bg-indigo-600 px-2 py-1 font-mono text-[11px] font-semibold text-white transition'
-        : 'anim-speed-btn rounded-lg px-2 py-1 font-mono text-[11px] text-slate-400 hover:text-white transition';
-    });
-  });
-});
 
 canvas.addEventListener('pointerdown', (e) => {
   if (e.button !== 0 || state.isDraggingGizmo) return;
@@ -1227,8 +868,8 @@ canvas.addEventListener('pointerdown', (e) => {
 });
 
 canvas.addEventListener('pointermove', (e) => {
-  if (state.isDraggingGizmo || state.isOrbiting) return;
-  const activeModel = getActiveModel();
+  if (e.pointerType === 'touch' || state.isDraggingGizmo || state.isOrbiting) return;
+  const activeModel = state.models.find((m) => m.id === state.activeModelId);
   if (!activeModel) return;
 
   const rect = canvas.getBoundingClientRect();
@@ -1243,9 +884,10 @@ canvas.addEventListener('pointerup', (e) => {
   if (e.button !== 0 || state.isDraggingGizmo) return;
   const moveDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
   const elapsed = performance.now() - pointerDownTime;
-  if (moveDist > 5 || elapsed > 350) return;
+  const maxTapDist = e.pointerType === 'touch' ? 12 : 5;
+  if (moveDist > maxTapDist || elapsed > 380) return;
 
-  const activeModel = getActiveModel();
+  const activeModel = state.models.find((m) => m.id === state.activeModelId);
   if (!activeModel) return;
 
   const rect = canvas.getBoundingClientRect();
@@ -1265,6 +907,54 @@ canvas.addEventListener('pointerup', (e) => {
     selectObjectForPosing(null);
   }
 });
+
+animPlayBtn.addEventListener('click', () => {
+  if (!state.activeAction) return;
+  state.isPlaying = !state.isPlaying;
+  state.activeAction.paused = !state.isPlaying;
+  updatePlayPauseUI();
+});
+
+animClipSelect.addEventListener('change', (e) => {
+  playClipAtIndex(Number(e.target.value));
+});
+
+animScrubber.addEventListener('input', (e) => {
+  state.isScrubbing = true;
+  const ratio = parseFloat(e.target.value);
+  if (state.activeAction && state.mixer) {
+    const clip = state.activeAction.getClip();
+    state.activeAction.time = ratio * clip.duration;
+    state.mixer.update(0);
+    updateTimecodeUI(state.activeAction.time, clip.duration);
+  } else {
+    updateTimecodeUI(ratio * state.manualDuration, state.manualDuration);
+  }
+});
+
+animScrubber.addEventListener('change', () => {
+  state.isScrubbing = false;
+});
+
+document.querySelectorAll('.anim-speed-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const speed = parseFloat(btn.dataset.speed);
+    state.playbackSpeed = speed;
+    if (state.mixer) {
+      state.mixer.timeScale = speed;
+    }
+    document.querySelectorAll('.anim-speed-btn').forEach((b) => {
+      const active = parseFloat(b.dataset.speed) === speed;
+      b.className = active
+        ? 'anim-speed-btn rounded-lg bg-indigo-600 px-2 py-1 font-mono text-[11px] font-semibold text-white transition'
+        : 'anim-speed-btn rounded-lg px-2 py-1 font-mono text-[11px] text-slate-400 hover:text-white transition';
+    });
+  });
+});
+
+function updateTimecodeUI(current, total) {
+  animTimecode.textContent = `${current.toFixed(1)}s / ${total.toFixed(1)}s`;
+}
 
 async function handleUploadedFiles(fileList) {
   const files = Array.from(fileList || []);
@@ -1320,7 +1010,6 @@ function loadSingleModelFile(file, resourceMap, sharedBlobUrls) {
             group: wrapper,
             normalizedHeight,
             animations: gltf.animations || [],
-            customClips: [],
             stats,
             isDefault: false,
             blobUrls: sharedBlobUrls,
@@ -1399,7 +1088,7 @@ window.addEventListener('drop', (e) => {
 });
 
 function setCameraPreset(preset, smooth = true) {
-  const activeModel = getActiveModel();
+  const activeModel = state.models.find((m) => m.id === state.activeModelId);
   const centerY = activeModel ? (activeModel.normalizedHeight * 0.48) : 1.0;
   const target = new THREE.Vector3(0, centerY, 0);
   const dist = 3.9;
@@ -1482,7 +1171,7 @@ const wireframeToggle = document.getElementById('wireframe-toggle');
 wireframeToggle.addEventListener('click', () => {
   state.wireframe = !state.wireframe;
   setSwitchState(wireframeToggle, state.wireframe);
-  const activeModel = getActiveModel();
+  const activeModel = state.models.find((m) => m.id === state.activeModelId);
   if (activeModel) {
     applyWireframeToModel(activeModel.group, state.wireframe);
   }
@@ -1532,13 +1221,21 @@ exposureSlider.addEventListener('input', (e) => {
   exposureVal.textContent = `${val.toFixed(2)} EV`;
 });
 
-function togglePanel(panelEl) {
-  panelEl.classList.toggle('hidden');
+function togglePanel(panelEl, otherPanelEl) {
+  const isHidden = panelEl.classList.contains('hidden');
+  if (isHidden) {
+    if (window.innerWidth < 768 && otherPanelEl) {
+      otherPanelEl.classList.add('hidden');
+    }
+    panelEl.classList.remove('hidden');
+  } else {
+    panelEl.classList.add('hidden');
+  }
 }
 
-document.getElementById('toggle-models-btn').addEventListener('click', () => togglePanel(modelsPanel));
+document.getElementById('toggle-models-btn').addEventListener('click', () => togglePanel(modelsPanel, studioPanel));
 document.getElementById('close-models-btn').addEventListener('click', () => modelsPanel.classList.add('hidden'));
-document.getElementById('toggle-studio-btn').addEventListener('click', () => togglePanel(studioPanel));
+document.getElementById('toggle-studio-btn').addEventListener('click', () => togglePanel(studioPanel, modelsPanel));
 document.getElementById('close-studio-btn').addEventListener('click', () => studioPanel.classList.add('hidden'));
 
 if (window.innerWidth < 768) {
@@ -1580,12 +1277,10 @@ window.addEventListener('keydown', (e) => {
     transformControls.setSpace(state.gizmoSpace);
     showToast(`Gizmo Space: ${state.gizmoSpace.toUpperCase()}`, 'info');
   } else if (e.key === 'k' || e.key === 'K') {
-    recordManualKeyframe(false);
+    recordManualKeyframe();
   } else if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedTarget) {
     e.preventDefault();
     deleteManualKeyframe();
-  } else if (e.key === 'Home') {
-    seekTimelineToSeconds(0);
   } else if (e.key === 'r' || e.key === 'R') {
     setCameraPreset('fit', true);
   } else if (e.key === '1') {
@@ -1596,7 +1291,7 @@ window.addEventListener('keydown', (e) => {
     setCameraPreset('top', true);
   } else if (e.key === '4') {
     setCameraPreset('iso', true);
-  } else if (e.code === 'Space' && !animationBar.classList.contains('hidden')) {
+  } else if (e.code === 'Space' && state.activeAction) {
     e.preventDefault();
     animPlayBtn.click();
   }
@@ -1658,6 +1353,7 @@ function handleResize() {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
+  transformControls.setSize(width < 768 ? 1.05 : 0.8);
 }
 
 const resizeObserver = new ResizeObserver(handleResize);
@@ -1670,35 +1366,17 @@ function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
 
-  const model = getActiveModel();
-  if (model) {
-    const duration = getActiveDuration(model);
-    if (state.mixer && state.activeAction) {
-      if (!state.isScrubbing && state.isPlaying && !state.isDraggingGizmo) {
-        state.mixer.update(delta);
-        if (!state.isLooping && state.activeAction.time >= duration) {
-          state.isPlaying = false;
-          state.activeAction.paused = true;
-          updatePlayPauseUI();
-        }
+  if (state.mixer && state.activeAction) {
+    if (!state.isScrubbing && state.isPlaying && !state.isDraggingGizmo) {
+      state.mixer.update(delta);
+    }
+    const clip = state.activeAction.getClip();
+    if (clip && clip.duration > 0) {
+      const wrappedTime = state.activeAction.time % clip.duration;
+      if (!state.isScrubbing) {
+        animScrubber.value = (wrappedTime / clip.duration).toFixed(4);
       }
-      const rawTime = state.activeAction.time;
-      const displayTime = state.isLooping && duration > 0 ? (rawTime % duration) : Math.min(rawTime, duration);
-      state.currentTime = displayTime;
-      updatePlayheadPosition(displayTime, duration);
-    } else if (!state.isScrubbing && state.isPlaying) {
-      let next = state.currentTime + delta * state.playbackSpeed;
-      if (next >= duration) {
-        if (state.isLooping) {
-          next = next % duration;
-        } else {
-          next = duration;
-          state.isPlaying = false;
-          updatePlayPauseUI();
-        }
-      }
-      state.currentTime = next;
-      updatePlayheadPosition(next, duration);
+      updateTimecodeUI(wrappedTime, clip.duration);
     }
   }
 
@@ -1730,7 +1408,6 @@ window.addEventListener('load', () => {
     group: wrapper,
     normalizedHeight,
     animations: showcase.animations,
-    customClips: [],
     stats,
     isDefault: true,
     blobUrls: [],
