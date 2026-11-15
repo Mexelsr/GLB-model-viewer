@@ -69,7 +69,7 @@ Because Prism 3D uses native ES Modules (`<script type="importmap">`), no bundle
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/glb-model-viewer.git
+git clone https://github.com/Mexelsr/GLB-model-viewer.git
 cd glb-model-viewer
 
 # 2. Start any static server (pick one)
