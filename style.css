@@ -5,9 +5,14 @@ html, body {
   height: 100%;
   height: 100dvh;
   overflow: hidden;
-  background-color: #0b0d12;
+  background-color: #09090b;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
 }
 
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
@@ -26,14 +31,15 @@ html, body {
 }
 
 .studio-scroll::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
+  background: #27272a;
   border-radius: 9999px;
 }
 
 .studio-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.38);
+  background: #3f3f46;
 }
 
+/* Shadcn Monochrome Slider */
 input[type="range"].studio-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -44,40 +50,40 @@ input[type="range"].studio-slider {
 input[type="range"].studio-slider::-webkit-slider-runnable-track {
   height: 5px;
   border-radius: 9999px;
-  background: rgba(148, 163, 184, 0.22);
+  background: #27272a;
 }
 
 input[type="range"].studio-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   border-radius: 9999px;
-  background: #6366f1;
-  border: 2px solid #e0e7ff;
-  margin-top: -4.5px;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.55);
+  background: #fafafa;
+  border: 2px solid #09090b;
+  margin-top: -5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
   transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
 input[type="range"].studio-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-  background: #818cf8;
+  transform: scale(1.12);
+  background: #ffffff;
 }
 
 input[type="range"].studio-slider::-moz-range-track {
   height: 5px;
   border-radius: 9999px;
-  background: rgba(148, 163, 184, 0.22);
+  background: #27272a;
 }
 
 input[type="range"].studio-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   border-radius: 9999px;
-  background: #6366f1;
-  border: 2px solid #e0e7ff;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.55);
+  background: #fafafa;
+  border: 2px solid #09090b;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
 }
 
 #three-canvas {
@@ -98,19 +104,20 @@ input[type="range"].studio-slider::-moz-range-thumb {
 }
 
 #anim-scrubber.has-manual-keys::-webkit-slider-runnable-track {
-  background: var(--kf-track, rgba(148, 163, 184, 0.22));
+  background: var(--kf-track, #27272a);
 }
 
 #anim-scrubber.has-manual-keys::-moz-range-track {
-  background: var(--kf-track, rgba(148, 163, 184, 0.22));
+  background: var(--kf-track, #27272a);
 }
 
 #animation-bar.posing-active {
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(99, 102, 241, 0.2);
+  border-color: #71717a;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(250, 250, 250, 0.15);
 }
 
 #inspector-badge.posing-badge {
-  background-color: rgba(99, 102, 241, 0.22);
-  color: #c7d2fe;
+  background-color: #fafafa;
+  border-color: #fafafa;
+  color: #09090b;
 }
