@@ -90,6 +90,3 @@ Then open `http://localhost:8080` (or the URL printed in your terminal) in any m
 
 ---
 
-## License
-
-MIT License — feel free to use, modify, and deploy for your own 3D workflows.
