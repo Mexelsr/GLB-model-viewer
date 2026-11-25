@@ -15,6 +15,21 @@ button, input, select, textarea {
   font-family: inherit;
 }
 
+/* Adapt side drawer height based on whether the bottom animation dock is open */
+.side-drawer {
+  max-height: calc(100dvh - 5rem);
+}
+
+body.has-anim-bar .side-drawer {
+  max-height: calc(100dvh - 10.5rem);
+}
+
+@media (min-width: 640px) {
+  body.has-anim-bar .side-drawer {
+    max-height: calc(100dvh - 8.5rem);
+  }
+}
+
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   #animation-bar {
     margin-bottom: env(safe-area-inset-bottom);
