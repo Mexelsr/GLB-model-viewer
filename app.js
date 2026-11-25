@@ -31,6 +31,7 @@ const state = {
   manualTracks: new Map(),
   restPoses: new WeakMap(),
   manualClipIndex: -1,
+  pendingTextureMaterial: null,
 };
 
 const BG_PRESETS = {
@@ -44,9 +45,12 @@ const container = document.getElementById('viewport-container');
 const canvas = document.getElementById('three-canvas');
 const dropOverlay = document.getElementById('drop-overlay');
 const fileInput = document.getElementById('file-input');
+const textureInput = document.getElementById('texture-input');
 const modelsPanel = document.getElementById('models-panel');
 const studioPanel = document.getElementById('studio-panel');
 const modelsListEl = document.getElementById('models-list');
+const materialsListEl = document.getElementById('materials-list');
+const textureStatusBadge = document.getElementById('texture-status-badge');
 const modelCountBadge = document.getElementById('model-count-badge');
 const loadingPill = document.getElementById('loading-pill');
 const loadingText = document.getElementById('loading-text');
@@ -181,16 +185,19 @@ function createShowcaseModel() {
   root.name = 'StudioShowcaseCore';
 
   const darkTitaniumMat = new THREE.MeshStandardMaterial({
+    name: 'Dark_Titanium',
     color: 0x18181b,
     metalness: 0.85,
     roughness: 0.26,
   });
   const brushedSilverMat = new THREE.MeshStandardMaterial({
+    name: 'Brushed_Silver',
     color: 0xe4e4e7,
     metalness: 0.92,
     roughness: 0.18,
   });
   const accentChromeMat = new THREE.MeshStandardMaterial({
+    name: 'Accent_Chrome',
     color: 0xfafafa,
     emissive: 0x3f3f46,
     emissiveIntensity: 0.45,
@@ -198,6 +205,7 @@ function createShowcaseModel() {
     roughness: 0.18,
   });
   const glassCoreMat = new THREE.MeshPhysicalMaterial({
+    name: 'Crystal_Glass',
     color: 0xd4d4d8,
     metalness: 0.05,
     roughness: 0.08,
@@ -273,43 +281,99 @@ function formatBytes(bytes) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
-function detectAnimeShaderMasks(root) {
-  let hasNonColorMask = false;
+async function recoverEmbeddedTextures(gltf, root) {
+  const uniqueMaterials = [];
+  const seen = new Set();
 
   root.traverse((child) => {
-    if (hasNonColorMask || !child.isMesh || !child.geometry) return;
+    if (!child.isMesh || !child.material) return;
+    const mats = Array.isArray(child.material) ? child.material : [child.material];
+    mats.forEach((mat) => {
+      if (mat && !seen.has(mat)) {
+        seen.add(mat);
+        uniqueMaterials.push(mat);
+      }
+    });
+  });
+
+  // 1. Promote emissiveMap to baseColor map if diffuse map is missing (common in unlit/toon exports)
+  uniqueMaterials.forEach((mat) => {
+    if (!mat.map && mat.emissiveMap) {
+      mat.map = mat.emissiveMap;
+      mat.map.colorSpace = THREE.SRGBColorSpace;
+      mat.emissiveMap = null;
+      if (mat.emissive) mat.emissive.setHex(0x000000);
+      mat.needsUpdate = true;
+    }
+  });
+
+  // 2. Check gltf.parser for unreferenced diffuse images packed inside the GLB
+  const parser = gltf && gltf.parser;
+  const json = parser && parser.json;
+  if (!json || !Array.isArray(json.textures) || json.textures.length === 0) return;
+
+  const missingMapMats = uniqueMaterials.filter((m) => !m.map);
+  if (missingMapMats.length === 0) return;
+
+  const diffuseCandidates = [];
+  for (let texIdx = 0; texIdx < json.textures.length; texIdx++) {
+    const texDef = json.textures[texIdx];
+    const imgDef = json.images && texDef.source !== undefined ? json.images[texDef.source] : null;
+    const rawName = (texDef.name || (imgDef && imgDef.name) || '').toLowerCase();
+
+    // Skip normal, metallic/roughness, mask, or ramp maps
+    if (/(normal|_n\b|_nrm|rough|metal|_m\b|_r\b|mask|_id\b|ramp|lightmap|ao\b)/i.test(rawName)) {
+      continue;
+    }
+    try {
+      const texture = await parser.getDependency('texture', texIdx);
+      if (texture) {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        diffuseCandidates.push({ name: rawName, texture });
+      }
+    } catch {
+      // Ignore unreadable texture entries
+    }
+  }
+
+  if (diffuseCandidates.length === 0) return;
+
+  missingMapMats.forEach((mat) => {
+    const matName = (mat.name || '').toLowerCase();
+    const tokens = matName.split(/[^a-z0-9]+/).filter((t) => t.length >= 3 && !['mat', 'mi', 'material', 'inst'].includes(t));
+
+    let matched = diffuseCandidates.find((c) => tokens.some((tok) => c.name.includes(tok)));
+    if (!matched && diffuseCandidates.length === 1) {
+      matched = diffuseCandidates[0];
+    }
+
+    if (matched) {
+      mat.map = matched.texture;
+      mat.color.setHex(0xffffff);
+      mat.needsUpdate = true;
+    }
+  });
+}
+
+function detectAnimeShaderMasks(root) {
+  let hasTexturedMask = false;
+
+  root.traverse((child) => {
+    if (hasTexturedMask || !child.isMesh || !child.geometry) return;
     const colorAttr = child.geometry.attributes.color;
     if (!colorAttr || colorAttr.count === 0) return;
 
     const mats = Array.isArray(child.material) ? child.material : [child.material];
     const hasDiffuseMap = mats.some((m) => m && m.map);
 
-    // If a textured mesh carries COLOR_0, game rips almost always use it for shader masks
+    // Only auto-disable COLOR_0 when a diffuse texture actually exists underneath.
+    // If no diffuse texture is present, disabling COLOR_0 turns a white base material into flat clay-white.
     if (hasDiffuseMap) {
-      hasNonColorMask = true;
-      return;
-    }
-
-    // Sample vertex colors to detect single-channel green/cyan shader mask packing
-    const sampleCount = Math.min(colorAttr.count, 160);
-    const step = Math.max(1, Math.floor(colorAttr.count / sampleCount));
-    let maskChannelHits = 0;
-
-    for (let i = 0; i < colorAttr.count; i += step) {
-      const r = colorAttr.getX(i);
-      const g = colorAttr.getY(i);
-      const b = colorAttr.getZ(i);
-      if ((g > 0.65 && r < 0.25) || (b > 0.65 && r < 0.25)) {
-        maskChannelHits++;
-      }
-    }
-
-    if (maskChannelHits / sampleCount > 0.2) {
-      hasNonColorMask = true;
+      hasTexturedMask = true;
     }
   });
 
-  return hasNonColorMask;
+  return hasTexturedMask;
 }
 
 function normalizeAndInspectModel(rawScene) {
@@ -378,14 +442,20 @@ function normalizeAndInspectModel(rawScene) {
       }
 
       const mats = Array.isArray(child.material) ? child.material : [child.material];
-      mats.forEach((mat) => {
+      mats.forEach((mat, idx) => {
         if (mat) {
+          if (!mat.name) {
+            mat.name = `${child.name}_Mat${idx > 0 ? `_${idx}` : ''}`;
+          }
           uniqueMaterials.add(mat);
           if (mat.userData.originalWireframe === undefined) {
             mat.userData.originalWireframe = Boolean(mat.wireframe);
           }
           if (mat.userData.originalVertexColors === undefined) {
             mat.userData.originalVertexColors = Boolean(mat.vertexColors);
+          }
+          if (mat.userData.originalColorHex === undefined && mat.color) {
+            mat.userData.originalColorHex = mat.color.getHex();
           }
         }
       });
@@ -397,15 +467,19 @@ function normalizeAndInspectModel(rawScene) {
   const normSize = new THREE.Vector3();
   normBox.getSize(normSize);
 
+  const materialsArray = Array.from(uniqueMaterials);
   const hasShaderMasks = detectAnimeShaderMasks(wrapper);
+  const hasAnyTexture = materialsArray.some((m) => Boolean(m.map));
 
   return {
     wrapper,
     normalizedHeight: normSize.y || 1.5,
     hasShaderMasks,
+    hasAnyTexture,
+    materials: materialsArray,
     stats: {
       meshes: meshCount,
-      materials: uniqueMaterials.size,
+      materials: materialsArray.length,
       triangles: triangleCount,
       vertices: vertexCount,
       dimensions: `${rawSize.x.toFixed(2)} × ${rawSize.y.toFixed(2)} × ${rawSize.z.toFixed(2)}`,
@@ -425,10 +499,143 @@ function applyMaterialSettingsToModel(group) {
           mat.vertexColors = targetVC;
           mat.needsUpdate = true;
         }
+        // Prevent pure white blowout when a material has neither a texture nor active vertex colors
+        if (mat.color && mat.userData.originalColorHex !== undefined) {
+          if (!mat.map && !targetVC && mat.userData.originalColorHex === 0xffffff) {
+            mat.color.setHex(0xd4d4d8);
+          } else {
+            mat.color.setHex(mat.userData.originalColorHex);
+          }
+        }
       });
     }
   });
 }
+
+function renderMaterialsList(model) {
+  if (!materialsListEl || !model) return;
+  const mats = model.materials || [];
+  const texturedCount = mats.filter((m) => Boolean(m.map)).length;
+  if (textureStatusBadge) {
+    textureStatusBadge.textContent = `${texturedCount}/${mats.length} TEX`;
+  }
+
+  materialsListEl.innerHTML = '';
+  mats.forEach((mat) => {
+    const hasMap = Boolean(mat.map);
+    const swatchHex = mat.color ? `#${mat.color.getHexString()}` : '#d4d4d8';
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.title = 'Click to assign diffuse texture (.png / .jpg)';
+    row.className = 'w-full flex items-center justify-between gap-2 rounded-md border border-zinc-800/90 bg-zinc-900/40 hover:bg-zinc-900 hover:border-zinc-700 px-2.5 py-1.5 text-left transition';
+    row.innerHTML = `
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="h-3 w-3 shrink-0 rounded-sm border border-zinc-700" style="background-color: ${swatchHex}"></span>
+        <span class="truncate text-[11px] font-medium text-zinc-200">${escapeHtml(mat.name || 'Material')}</span>
+      </div>
+      <span class="shrink-0 rounded px-1.5 py-0.5 font-mono text-[9px] ${
+        hasMap
+          ? 'border border-zinc-700 bg-zinc-800 text-zinc-200'
+          : 'border border-zinc-800 bg-zinc-950 text-zinc-400'
+      }">${hasMap ? 'MAPPED' : '+ TEX'}</span>
+    `;
+
+    row.addEventListener('click', () => {
+      state.pendingTextureMaterial = mat;
+      textureInput.click();
+    });
+
+    materialsListEl.appendChild(row);
+  });
+}
+
+function applyImageFileToMaterial(file, targetMat, model) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    if (model && model.blobUrls) model.blobUrls.push(url);
+
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      url,
+      (texture) => {
+        texture.flipY = false;
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.needsUpdate = true;
+
+        targetMat.map = texture;
+        targetMat.userData.originalColorHex = 0xffffff;
+        if (targetMat.color) targetMat.color.setHex(0xffffff);
+        targetMat.needsUpdate = true;
+        resolve(true);
+      },
+      undefined,
+      () => resolve(false)
+    );
+  });
+}
+
+async function applyTextureFilesToActiveModel(imageFiles) {
+  const model = state.models.find((m) => m.id === state.activeModelId);
+  if (!model || !model.materials || model.materials.length === 0) return;
+
+  let appliedCount = 0;
+
+  for (const file of imageFiles) {
+    const baseName = file.name.replace(/\.[^/.]+$/, '').toLowerCase();
+    // Skip normal/roughness/mask maps when batch-dropping a folder of textures
+    if (/(_n$|_nrm|normal|_m$|_r$|rough|metal|mask|_id$|ramp|ao$)/i.test(baseName) && imageFiles.length > 1) {
+      continue;
+    }
+
+    const tokens = baseName
+      .split(/[^a-z0-9]+/)
+      .filter((t) => t.length >= 3 && !['tex', 'texture', 'diff', 'diffuse', 'albedo', 'basecolor', 'color', 'png', 'jpg'].includes(t));
+
+    let matchedMats = model.materials.filter((mat) => {
+      const mName = (mat.name || '').toLowerCase();
+      return tokens.some((tok) => mName.includes(tok));
+    });
+
+    if (matchedMats.length === 0 && model.materials.length === 1) {
+      matchedMats = [model.materials[0]];
+    }
+
+    for (const mat of matchedMats) {
+      const ok = await applyImageFileToMaterial(file, mat, model);
+      if (ok) appliedCount++;
+    }
+  }
+
+  if (appliedCount > 0) {
+    model.hasAnyTexture = true;
+    if (detectAnimeShaderMasks(model.group)) {
+      state.useVertexColors = false;
+      setSwitchState(vertexColorsToggle, false);
+    }
+    applyMaterialSettingsToModel(model.group);
+    renderMaterialsList(model);
+    showToast(`Applied textures to ${appliedCount} material slot(s)`, 'success');
+  } else {
+    showToast('Click a Material Slot in the Inspector to assign this texture directly.', 'info');
+  }
+}
+
+textureInput.addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  const mat = state.pendingTextureMaterial;
+  const model = state.models.find((m) => m.id === state.activeModelId);
+  state.pendingTextureMaterial = null;
+  textureInput.value = '';
+
+  if (!file || !mat || !model) return;
+  const ok = await applyImageFileToMaterial(file, mat, model);
+  if (ok) {
+    model.hasAnyTexture = true;
+    applyMaterialSettingsToModel(model.group);
+    renderMaterialsList(model);
+    showToast(`Applied "${file.name}" to ${mat.name}`, 'success');
+  }
+});
 
 function disposeObject(obj) {
   if (!obj) return;
@@ -474,10 +681,11 @@ function activateModel(modelId) {
   state.activeModelId = targetModel.id;
   scene.add(targetModel.group);
 
-  // Automatically disable COLOR_0 when anime/game shader masks are detected
-  state.useVertexColors = !targetModel.hasShaderMasks;
+  // Only disable COLOR_0 automatically if diffuse textures exist to show underneath
+  state.useVertexColors = !(targetModel.hasShaderMasks && targetModel.hasAnyTexture);
   setSwitchState(vertexColorsToggle, state.useVertexColors);
   applyMaterialSettingsToModel(targetModel.group);
+  renderMaterialsList(targetModel);
 
   document.getElementById('info-name').textContent = targetModel.name;
   document.getElementById('info-name').title = targetModel.name;
@@ -1032,6 +1240,19 @@ async function handleUploadedFiles(fileList) {
   const files = Array.from(fileList || []);
   if (files.length === 0) return;
 
+  const modelFiles = files.filter((f) => /\.(glb|gltf)$/i.test(f.name));
+  const imageFiles = files.filter((f) => /^image\//i.test(f.type) || /\.(png|jpe?g|webp|tga)$/i.test(f.name));
+
+  // If the user dropped texture images without a model file, apply them to the active model
+  if (modelFiles.length === 0) {
+    if (imageFiles.length > 0) {
+      await applyTextureFilesToActiveModel(imageFiles);
+      return;
+    }
+    showToast('Unsupported file format. Upload .glb, .gltf, or .png/.jpg textures.', 'error');
+    return;
+  }
+
   const resourceMap = new Map();
   const blobUrls = [];
   files.forEach((f) => {
@@ -1039,13 +1260,6 @@ async function handleUploadedFiles(fileList) {
     blobUrls.push(url);
     resourceMap.set(f.name, url);
   });
-
-  const modelFiles = files.filter((f) => /\.(glb|gltf)$/i.test(f.name));
-  if (modelFiles.length === 0) {
-    blobUrls.forEach((u) => URL.revokeObjectURL(u));
-    showToast('Unsupported file format. Please upload .glb or .gltf files.', 'error');
-    return;
-  }
 
   for (const file of modelFiles) {
     await loadSingleModelFile(file, resourceMap, blobUrls);
@@ -1072,9 +1286,10 @@ function loadSingleModelFile(file, resourceMap, sharedBlobUrls) {
 
     loader.load(
       mainUrl,
-      (gltf) => {
+      async (gltf) => {
         try {
-          const { wrapper, normalizedHeight, hasShaderMasks, stats } = normalizeAndInspectModel(gltf.scene);
+          await recoverEmbeddedTextures(gltf, gltf.scene);
+          const { wrapper, normalizedHeight, hasShaderMasks, hasAnyTexture, materials, stats } = normalizeAndInspectModel(gltf.scene);
           const newModel = {
             id: `model-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
             name: file.name,
@@ -1082,6 +1297,8 @@ function loadSingleModelFile(file, resourceMap, sharedBlobUrls) {
             group: wrapper,
             normalizedHeight,
             hasShaderMasks,
+            hasAnyTexture,
+            materials,
             animations: gltf.animations || [],
             stats,
             isDefault: false,
@@ -1091,12 +1308,15 @@ function loadSingleModelFile(file, resourceMap, sharedBlobUrls) {
           state.models.push(newModel);
           activateModel(newModel.id);
           setLoading(false);
-          showToast(
-            hasShaderMasks
-              ? `Loaded "${file.name}" (COLOR_0 shader masks auto-disabled)`
-              : `Loaded "${file.name}"`,
-            'success'
-          );
+
+          if (!hasAnyTexture) {
+            showToast(
+              `Loaded "${file.name}" (no embedded textures found — drop .PNG textures onto viewport to apply)`,
+              'info'
+            );
+          } else {
+            showToast(`Loaded "${file.name}"`, 'success');
+          }
         } catch (err) {
           console.error(err);
           setLoading(false);
@@ -1262,6 +1482,7 @@ vertexColorsToggle.addEventListener('click', () => {
   const activeModel = state.models.find((m) => m.id === state.activeModelId);
   if (activeModel) {
     applyMaterialSettingsToModel(activeModel.group);
+    renderMaterialsList(activeModel);
   }
 });
 
@@ -1501,7 +1722,7 @@ function animate() {
 
 window.addEventListener('load', () => {
   const showcase = createShowcaseModel();
-  const { wrapper, normalizedHeight, hasShaderMasks, stats } = normalizeAndInspectModel(showcase.group);
+  const { wrapper, normalizedHeight, hasShaderMasks, hasAnyTexture, materials, stats } = normalizeAndInspectModel(showcase.group);
 
   const defaultModel = {
     id: 'default-showcase',
@@ -1510,6 +1731,8 @@ window.addEventListener('load', () => {
     group: wrapper,
     normalizedHeight,
     hasShaderMasks,
+    hasAnyTexture,
+    materials,
     animations: showcase.animations,
     stats,
     isDefault: true,
