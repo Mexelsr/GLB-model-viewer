@@ -15,7 +15,6 @@ button, input, select, textarea {
   font-family: inherit;
 }
 
-/* Adapt side drawer height based on whether the bottom animation dock is open */
 .side-drawer {
   max-height: calc(100dvh - 5rem);
 }
@@ -54,7 +53,6 @@ body.has-anim-bar .side-drawer {
   background: #3f3f46;
 }
 
-/* Shadcn Monochrome Slider */
 input[type="range"].studio-slider {
   -webkit-appearance: none;
   appearance: none;
