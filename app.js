@@ -171,6 +171,11 @@ scene.add(shadowPlane);
 const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://unpkg.com/three@0.170.0/examples/jsm/libs/draco/gltf/');
 
+function setAnimationBarVisible(visible) {
+  animationBar.classList.toggle('hidden', !visible);
+  document.body.classList.toggle('has-anim-bar', visible);
+}
+
 function createShowcaseModel() {
   const root = new THREE.Group();
   root.name = 'StudioShowcaseCore';
@@ -268,6 +273,45 @@ function formatBytes(bytes) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
+function detectAnimeShaderMasks(root) {
+  let hasNonColorMask = false;
+
+  root.traverse((child) => {
+    if (hasNonColorMask || !child.isMesh || !child.geometry) return;
+    const colorAttr = child.geometry.attributes.color;
+    if (!colorAttr || colorAttr.count === 0) return;
+
+    const mats = Array.isArray(child.material) ? child.material : [child.material];
+    const hasDiffuseMap = mats.some((m) => m && m.map);
+
+    // If a textured mesh carries COLOR_0, game rips almost always use it for shader masks
+    if (hasDiffuseMap) {
+      hasNonColorMask = true;
+      return;
+    }
+
+    // Sample vertex colors to detect single-channel green/cyan shader mask packing
+    const sampleCount = Math.min(colorAttr.count, 160);
+    const step = Math.max(1, Math.floor(colorAttr.count / sampleCount));
+    let maskChannelHits = 0;
+
+    for (let i = 0; i < colorAttr.count; i += step) {
+      const r = colorAttr.getX(i);
+      const g = colorAttr.getY(i);
+      const b = colorAttr.getZ(i);
+      if ((g > 0.65 && r < 0.25) || (b > 0.65 && r < 0.25)) {
+        maskChannelHits++;
+      }
+    }
+
+    if (maskChannelHits / sampleCount > 0.2) {
+      hasNonColorMask = true;
+    }
+  });
+
+  return hasNonColorMask;
+}
+
 function normalizeAndInspectModel(rawScene) {
   rawScene.updateMatrixWorld(true);
   const rawBox = new THREE.Box3().setFromObject(rawScene);
@@ -353,9 +397,12 @@ function normalizeAndInspectModel(rawScene) {
   const normSize = new THREE.Vector3();
   normBox.getSize(normSize);
 
+  const hasShaderMasks = detectAnimeShaderMasks(wrapper);
+
   return {
     wrapper,
     normalizedHeight: normSize.y || 1.5,
+    hasShaderMasks,
     stats: {
       meshes: meshCount,
       materials: uniqueMaterials.size,
@@ -426,6 +473,10 @@ function activateModel(modelId) {
 
   state.activeModelId = targetModel.id;
   scene.add(targetModel.group);
+
+  // Automatically disable COLOR_0 when anime/game shader masks are detected
+  state.useVertexColors = !targetModel.hasShaderMasks;
+  setSwitchState(vertexColorsToggle, state.useVertexColors);
   applyMaterialSettingsToModel(targetModel.group);
 
   document.getElementById('info-name').textContent = targetModel.name;
@@ -442,7 +493,7 @@ function activateModel(modelId) {
   if (headerNameEl) headerNameEl.textContent = targetModel.name;
   if (headerTrisEl) {
     const tris = targetModel.stats.triangles;
-    headerTrisEl.textContent = tris >= 1000 ? `${(tris / 1000).toFixed(1)}k` : `${tris}`;
+    headerTrisEl.textContent = tris >= 1000 ? `${(tris / 1000).toFixed(1)}k tris` : `${tris} tris`;
   }
 
   setupAnimationsForModel(targetModel);
@@ -541,11 +592,11 @@ function renderModelsList() {
 function setupAnimationsForModel(model) {
   const clips = model.animations || [];
   if (clips.length === 0) {
-    animationBar.classList.add('hidden');
+    setAnimationBarVisible(false);
     return;
   }
 
-  animationBar.classList.remove('hidden');
+  setAnimationBarVisible(true);
   if (!state.mixer) {
     state.mixer = new THREE.AnimationMixer(model.group);
   }
@@ -623,6 +674,10 @@ function selectObjectForPosing(obj, silent = false) {
     inspectorBadge.classList.remove('posing-badge');
     inspectorBadge.textContent = 'READY';
     controls.autoRotate = state.autoRotate;
+    const activeModel = state.models.find((m) => m.id === state.activeModelId);
+    if (activeModel && (!activeModel.animations || activeModel.animations.length === 0)) {
+      setAnimationBarVisible(false);
+    }
     return;
   }
 
@@ -638,7 +693,7 @@ function selectObjectForPosing(obj, silent = false) {
     scene.add(skeletonHelper);
   }
 
-  animationBar.classList.remove('hidden');
+  setAnimationBarVisible(true);
   if (!state.activeAction) {
     const curTime = parseFloat(animScrubber.value || '0') * state.manualDuration;
     updateTimecodeUI(curTime, state.manualDuration);
@@ -1019,13 +1074,14 @@ function loadSingleModelFile(file, resourceMap, sharedBlobUrls) {
       mainUrl,
       (gltf) => {
         try {
-          const { wrapper, normalizedHeight, stats } = normalizeAndInspectModel(gltf.scene);
+          const { wrapper, normalizedHeight, hasShaderMasks, stats } = normalizeAndInspectModel(gltf.scene);
           const newModel = {
             id: `model-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
             name: file.name,
             sizeLabel: formatBytes(file.size),
             group: wrapper,
             normalizedHeight,
+            hasShaderMasks,
             animations: gltf.animations || [],
             stats,
             isDefault: false,
@@ -1035,7 +1091,12 @@ function loadSingleModelFile(file, resourceMap, sharedBlobUrls) {
           state.models.push(newModel);
           activateModel(newModel.id);
           setLoading(false);
-          showToast(`Loaded "${file.name}"`, 'success');
+          showToast(
+            hasShaderMasks
+              ? `Loaded "${file.name}" (COLOR_0 shader masks auto-disabled)`
+              : `Loaded "${file.name}"`,
+            'success'
+          );
         } catch (err) {
           console.error(err);
           setLoading(false);
@@ -1440,7 +1501,7 @@ function animate() {
 
 window.addEventListener('load', () => {
   const showcase = createShowcaseModel();
-  const { wrapper, normalizedHeight, stats } = normalizeAndInspectModel(showcase.group);
+  const { wrapper, normalizedHeight, hasShaderMasks, stats } = normalizeAndInspectModel(showcase.group);
 
   const defaultModel = {
     id: 'default-showcase',
@@ -1448,6 +1509,7 @@ window.addEventListener('load', () => {
     sizeLabel: 'Procedural',
     group: wrapper,
     normalizedHeight,
+    hasShaderMasks,
     animations: showcase.animations,
     stats,
     isDefault: true,
