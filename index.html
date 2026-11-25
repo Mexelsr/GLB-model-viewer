@@ -65,9 +65,8 @@
     </div>
   </div>
 
-  <!-- Top Navigation Bar (Shadcn Dark Zinc Header) -->
+  <!-- Top Navigation Bar -->
   <header class="fixed top-0 left-0 right-0 z-30 h-13 sm:h-14 border-b border-zinc-800/90 bg-zinc-950/90 px-3 sm:px-5 backdrop-blur-xl flex items-center justify-between gap-2">
-    <!-- Left Cluster: Brand + Clean Navigation Links -->
     <div class="flex items-center gap-1 sm:gap-5 min-w-0">
       <div class="flex items-center gap-2.5 shrink-0">
         <div class="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 text-zinc-50">
@@ -101,10 +100,9 @@
       </nav>
     </div>
 
-    <!-- Right Cluster: Search-style Asset Readout + Studio Toggle + Crisp White Primary CTA -->
     <div class="flex items-center gap-2 shrink-0">
       <div id="header-model-pill"
-        class="hidden md:flex items-center justify-between gap-4 w-56 rounded-md border border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-xs text-zinc-400">
+        class="hidden md:flex items-center justify-between gap-3 w-60 rounded-md border border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-xs text-zinc-400">
         <span id="header-active-name" class="truncate text-zinc-300">Studio Showcase Core</span>
         <kbd id="header-tris-badge" class="shrink-0 rounded border border-zinc-800 bg-zinc-950 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400">0 tris</kbd>
       </div>
@@ -135,7 +133,7 @@
 
   <!-- Left Drawer: Scene Models -->
   <aside id="models-panel"
-    class="fixed top-16 left-3 z-20 w-72 max-w-[calc(100vw-1.5rem)] max-h-[calc(100dvh-10.5rem)] sm:max-h-[calc(100dvh-8.5rem)] flex flex-col rounded-xl border border-zinc-800 bg-zinc-950/92 backdrop-blur-xl shadow-2xl transition-all duration-200">
+    class="side-drawer fixed top-16 left-3 z-20 w-72 max-w-[calc(100vw-1.5rem)] flex flex-col rounded-xl border border-zinc-800 bg-zinc-950/92 backdrop-blur-xl shadow-2xl transition-all duration-200">
     <div class="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
       <div>
         <div class="text-xs font-semibold text-zinc-100">Scene Models</div>
@@ -162,9 +160,9 @@
     </div>
   </aside>
 
-  <!-- Right Drawer: Studio & Inspector (Shadcn Card Sections) -->
+  <!-- Right Drawer: Studio & Inspector -->
   <aside id="studio-panel"
-    class="fixed top-16 right-3 z-20 w-80 max-w-[calc(100vw-1.5rem)] max-h-[calc(100dvh-10.5rem)] sm:max-h-[calc(100dvh-8.5rem)] flex flex-col rounded-xl border border-zinc-800 bg-zinc-950/92 backdrop-blur-xl shadow-2xl transition-all duration-200">
+    class="side-drawer fixed top-16 right-3 z-20 w-80 max-w-[calc(100vw-1.5rem)] flex flex-col rounded-xl border border-zinc-800 bg-zinc-950/92 backdrop-blur-xl shadow-2xl transition-all duration-200">
     <div class="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
       <div>
         <div class="text-xs font-semibold text-zinc-100">Studio &amp; Inspector</div>
@@ -226,7 +224,7 @@
         <div class="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2.5">
           <div>
             <label for="vertex-colors-toggle" class="block text-xs font-medium text-zinc-200 cursor-pointer">Vertex Colors (COLOR_0)</label>
-            <span class="block text-[11px] text-zinc-400">Toggle off for anime shader masks</span>
+            <span class="block text-[11px] text-zinc-400">Auto-off for anime shader masks</span>
           </div>
           <button id="vertex-colors-toggle" type="button" role="switch" aria-checked="true"
             class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-zinc-50 transition-colors duration-200 focus:outline-none">
@@ -246,7 +244,7 @@
         </div>
       </div>
 
-      <!-- Environment & Lighting (Shadcn Selectable Option Cards) -->
+      <!-- Environment & Lighting -->
       <div class="space-y-3 border-t border-zinc-800 pt-4">
         <div class="flex items-center justify-between">
           <div>
