@@ -1,3 +1,72 @@
+:root,
+html[data-theme="light-gray"] {
+  --ui-bg: #ffffff;
+  --ui-subtle: #f8f9fa;
+  --ui-hover: #eaecf0;
+  --ui-border: #a2a9b1;
+  --ui-divider: #eaecf0;
+  --ui-text: #202122;
+  --ui-heading: #000000;
+  --ui-muted: #54595d;
+  --ui-accent: #3366cc;
+  --ui-accent-hover: #2a4b8d;
+  --ui-accent-soft: #eaf3ff;
+  --ui-btn-text: #ffffff;
+  --ui-radio-bg: #ffffff;
+  --ui-track: #c8ccd1;
+}
+
+html[data-theme="dark-studio"] {
+  --ui-bg: #09090b;
+  --ui-subtle: #111113;
+  --ui-hover: #1c1c20;
+  --ui-border: #3f3f46;
+  --ui-divider: #27272a;
+  --ui-text: #e4e4e7;
+  --ui-heading: #fafafa;
+  --ui-muted: #a1a1aa;
+  --ui-accent: #60a5fa;
+  --ui-accent-hover: #93c5fd;
+  --ui-accent-soft: rgba(96, 165, 250, 0.16);
+  --ui-btn-text: #09090b;
+  --ui-radio-bg: #111113;
+  --ui-track: #3f3f46;
+}
+
+html[data-theme="charcoal"] {
+  --ui-bg: #1b1e26;
+  --ui-subtle: #232730;
+  --ui-hover: #2d323e;
+  --ui-border: #475063;
+  --ui-divider: #313745;
+  --ui-text: #e2e8f0;
+  --ui-heading: #f8fafc;
+  --ui-muted: #94a3b8;
+  --ui-accent: #7aa2f7;
+  --ui-accent-hover: #a5b4fc;
+  --ui-accent-soft: rgba(122, 162, 247, 0.16);
+  --ui-btn-text: #0f172a;
+  --ui-radio-bg: #232730;
+  --ui-track: #475063;
+}
+
+html[data-theme="deep-navy"] {
+  --ui-bg: #070e1c;
+  --ui-subtle: #0c172e;
+  --ui-hover: #132240;
+  --ui-border: #243b66;
+  --ui-divider: #16274a;
+  --ui-text: #dbeafe;
+  --ui-heading: #f8fafc;
+  --ui-muted: #8ba3c7;
+  --ui-accent: #60a5fa;
+  --ui-accent-hover: #93c5fd;
+  --ui-accent-soft: rgba(96, 165, 250, 0.18);
+  --ui-btn-text: #070e1c;
+  --ui-radio-bg: #0c172e;
+  --ui-track: #1e335c;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -5,8 +74,8 @@ html, body {
   height: 100%;
   height: 100dvh;
   overflow: hidden;
-  background-color: #ffffff;
-  color: #202122;
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -28,48 +97,48 @@ button, input, select, textarea {
 }
 
 .studio-scroll::-webkit-scrollbar-track {
-  background: #f8f9fa;
+  background: var(--ui-subtle);
 }
 
 .studio-scroll::-webkit-scrollbar-thumb {
-  background: #c8ccd1;
+  background: var(--ui-track);
   border-radius: 2px;
 }
 
 .studio-scroll::-webkit-scrollbar-thumb:hover {
-  background: #a2a9b1;
+  background: var(--ui-border);
 }
 
-/* Wikipedia Vector 2022 Custom Radio Button */
+/* Custom Radio Button */
 .wiki-radio {
   display: inline-block;
   width: 16px;
   height: 16px;
   border-radius: 9999px;
-  border: 1px solid #72777d;
-  background-color: #ffffff;
+  border: 1px solid var(--ui-muted);
+  background-color: var(--ui-radio-bg);
   flex-shrink: 0;
   transition: all 0.12s ease;
 }
 
 .bg-preset-btn:hover .wiki-radio {
-  border-color: #3366cc;
+  border-color: var(--ui-accent);
 }
 
 .wiki-radio.is-checked {
-  border: 5px solid #3366cc;
-  background-color: #ffffff;
+  border: 5px solid var(--ui-accent);
+  background-color: var(--ui-radio-bg);
 }
 
-/* Wikipedia Codex Checkbox */
+/* Custom Checkbox */
 .wiki-checkbox {
   appearance: none;
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
-  border: 1px solid #72777d;
+  border: 1px solid var(--ui-muted);
   border-radius: 2px;
-  background-color: #ffffff;
+  background-color: var(--ui-radio-bg);
   cursor: pointer;
   display: inline-grid;
   place-content: center;
@@ -78,24 +147,24 @@ button, input, select, textarea {
 }
 
 .wiki-checkbox:hover {
-  border-color: #3366cc;
+  border-color: var(--ui-accent);
 }
 
 .wiki-checkbox:checked {
-  background-color: #3366cc;
-  border-color: #3366cc;
+  background-color: var(--ui-accent);
+  border-color: var(--ui-accent);
 }
 
 .wiki-checkbox:checked::before {
   content: "";
   width: 9px;
   height: 5px;
-  border-left: 2px solid #ffffff;
-  border-bottom: 2px solid #ffffff;
+  border-left: 2px solid var(--ui-btn-text);
+  border-bottom: 2px solid var(--ui-btn-text);
   transform: rotate(-45deg) translate(1px, -1px);
 }
 
-/* Wikipedia Progressive Blue Slider */
+/* Theme-Aware Slider */
 input[type="range"].wiki-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -106,7 +175,7 @@ input[type="range"].wiki-slider {
 input[type="range"].wiki-slider::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
-  background: #c8ccd1;
+  background: var(--ui-track);
 }
 
 input[type="range"].wiki-slider::-webkit-slider-thumb {
@@ -115,8 +184,8 @@ input[type="range"].wiki-slider::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: #3366cc;
-  border: 2px solid #ffffff;
+  background: var(--ui-accent);
+  border: 2px solid var(--ui-bg);
   margin-top: -5px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   transition: transform 0.12s ease, background-color 0.12s ease;
@@ -124,21 +193,21 @@ input[type="range"].wiki-slider::-webkit-slider-thumb {
 
 input[type="range"].wiki-slider::-webkit-slider-thumb:hover {
   transform: scale(1.12);
-  background: #2a4b8d;
+  background: var(--ui-accent-hover);
 }
 
 input[type="range"].wiki-slider::-moz-range-track {
   height: 4px;
   border-radius: 2px;
-  background: #c8ccd1;
+  background: var(--ui-track);
 }
 
 input[type="range"].wiki-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: #3366cc;
-  border: 2px solid #ffffff;
+  background: var(--ui-accent);
+  border: 2px solid var(--ui-bg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
@@ -160,20 +229,20 @@ input[type="range"].wiki-slider::-moz-range-thumb {
 }
 
 #anim-scrubber.has-manual-keys::-webkit-slider-runnable-track {
-  background: var(--kf-track, #c8ccd1);
+  background: var(--kf-track, var(--ui-track));
 }
 
 #anim-scrubber.has-manual-keys::-moz-range-track {
-  background: var(--kf-track, #c8ccd1);
+  background: var(--kf-track, var(--ui-track));
 }
 
 #animation-bar.posing-active {
-  border-color: #3366cc;
-  box-shadow: 0 8px 24px rgba(51, 102, 204, 0.18);
+  border-color: var(--ui-accent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 #inspector-badge.posing-badge {
-  background-color: #eaf3ff;
-  border-color: #3366cc;
-  color: #2a4b8d;
+  background-color: var(--ui-accent-soft);
+  border-color: var(--ui-accent);
+  color: var(--ui-accent);
 }
