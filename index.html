@@ -1,31 +1,35 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Prism 3D — GLB / GLTF Studio Viewer</title>
+  <title>Prism 3D — The Interactive GLB / GLTF Encyclopedia</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            serif: ['Newsreader', 'Georgia', 'Times New Roman', 'serif'],
             mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
-            studio: {
-              950: '#09090b',
-              900: '#111113',
-              850: '#18181b',
-              800: '#27272a',
-              700: '#3f3f46',
+            wiki: {
+              bg: '#ffffff',
+              subtle: '#f8f9fa',
+              border: '#a2a9b1',
+              divider: '#eaecf0',
+              text: '#202122',
+              muted: '#54595d',
+              link: '#3366cc',
+              linkHover: '#2a4b8d',
+              chip: '#eaecf0',
             }
           }
         }
@@ -44,361 +48,398 @@
     }
   </script>
 </head>
-<body class="font-sans text-zinc-100 antialiased selection:bg-zinc-50 selection:text-zinc-950">
-
-  <div id="viewport-container" class="relative w-full h-full overflow-hidden">
-    <canvas id="three-canvas" class="block w-full h-full outline-none"></canvas>
-  </div>
+<body class="bg-white font-sans text-[#202122] antialiased selection:bg-[#3366cc] selection:text-white flex flex-col h-full">
 
   <!-- Drag & Drop Overlay -->
-  <div id="drop-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-zinc-950/85 backdrop-blur-md transition-opacity duration-200 pointer-events-none">
-    <div class="mx-4 max-w-md w-full rounded-xl border border-dashed border-zinc-600 bg-zinc-950/95 p-8 text-center shadow-2xl">
-      <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100">
-        <svg class="h-6 w-6 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <div id="drop-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-white/85 backdrop-blur-sm transition-opacity duration-200 pointer-events-none">
+    <div class="mx-4 max-w-md w-full rounded-[2px] border-2 border-dashed border-[#3366cc] bg-white p-8 text-center shadow-xl">
+      <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#eaf3ff] text-[#3366cc]">
+        <svg class="h-5 w-5 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
       </div>
-      <h2 class="text-base font-semibold tracking-tight text-zinc-50">Drop 3D model or textures</h2>
-      <p class="mt-1.5 text-xs text-zinc-400">
-        Supports <span class="font-mono text-zinc-200">.glb</span>, <span class="font-mono text-zinc-200">.gltf</span>, or <span class="font-mono text-zinc-200">.png / .jpg</span> textures for the active model
+      <h2 class="font-serif text-xl font-normal text-black">Drop 3D model or textures</h2>
+      <p class="mt-1.5 text-xs text-[#54595d]">
+        Supports <span class="font-mono text-[#202122]">.glb</span>, <span class="font-mono text-[#202122]">.gltf</span>, or <span class="font-mono text-[#202122]">.png / .jpg</span> textures for the active model
       </p>
     </div>
   </div>
 
-  <!-- Top Navigation Bar -->
-  <header class="fixed top-0 left-0 right-0 z-30 h-13 sm:h-14 border-b border-zinc-800/90 bg-zinc-950/90 px-3 sm:px-4 backdrop-blur-xl flex items-center justify-between gap-2">
-    <div class="flex items-center gap-1 sm:gap-4 min-w-0">
-      <div class="flex items-center gap-2 shrink-0">
-        <div class="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 text-zinc-50">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="7" y1="19" x2="13" y2="5" />
-            <line x1="12" y1="19" x2="18" y2="5" />
-          </svg>
-        </div>
-        <span class="text-sm font-semibold tracking-tight text-zinc-50 whitespace-nowrap">Prism 3D</span>
-      </div>
-
-      <nav class="flex items-center gap-1" aria-label="Viewport navigation">
-        <button id="toggle-models-btn" type="button" title="Toggle Scene Models"
-          class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-900 hover:text-zinc-50 transition shrink-0">
-          <span>Models</span>
-          <span id="model-count-badge" class="rounded-full border border-zinc-800 bg-zinc-900 px-1.5 py-0.2 text-[10px] font-mono text-zinc-300">1</span>
-        </button>
-
-        <div class="hidden xl:flex items-center gap-0.5">
-          <button type="button" data-view="fit" title="Reset & Fit Camera (R)"
-            class="camera-preset-btn rounded-md px-2 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-900 hover:text-zinc-50 transition">Fit View</button>
-          <button type="button" data-view="front" title="Front View (1)"
-            class="camera-preset-btn rounded-md px-2 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-900 hover:text-zinc-50 transition">Front</button>
-          <button type="button" data-view="right" title="Right View (2)"
-            class="camera-preset-btn rounded-md px-2 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-900 hover:text-zinc-50 transition">Right</button>
-          <button type="button" data-view="top" title="Top View (3)"
-            class="camera-preset-btn rounded-md px-2 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-900 hover:text-zinc-50 transition">Top</button>
-          <button type="button" data-view="iso" title="Isometric View (4)"
-            class="camera-preset-btn rounded-md px-2 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-900 hover:text-zinc-50 transition">Iso</button>
-        </div>
-      </nav>
-    </div>
-
-    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-      <div id="header-model-pill"
-        class="hidden md:flex items-center justify-between gap-2.5 w-48 lg:w-56 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1.5 text-xs text-zinc-400">
-        <span id="header-active-name" class="truncate text-zinc-300">Studio Showcase Core</span>
-        <kbd id="header-tris-badge" class="shrink-0 rounded border border-zinc-800 bg-zinc-950 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400">0 tris</kbd>
-      </div>
-
-      <button id="toggle-studio-btn" type="button" title="Toggle Studio & Inspector"
-        class="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50 transition shrink-0">
-        <svg class="h-3.5 w-3.5 text-zinc-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
-          <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
-          <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>
-          <line x1="17" y1="16" x2="23" y2="16"/>
+  <!-- Vector 2022 Top Header Bar -->
+  <header class="shrink-0 z-30 h-14 border-b border-[#eaecf0] bg-white px-3 sm:px-6 flex items-center justify-between gap-3">
+    <!-- Left: Hamburger + Serif Wordmark -->
+    <div class="flex items-center gap-3 shrink-0">
+      <button id="toggle-models-btn" type="button" title="Toggle Contents & Scene Models"
+        class="flex h-8 w-8 items-center justify-center rounded-[2px] text-[#202122] hover:bg-[#eaecf0] transition">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
         </svg>
-        <span class="hidden sm:inline">Inspector</span>
       </button>
 
+      <a href="#top" id="brand-reset-link" class="flex items-center gap-2.5 no-underline group">
+        <div class="flex h-8 w-8 items-center justify-center rounded-full border border-[#a2a9b1] bg-[#f8f9fa] text-[#202122] group-hover:border-[#3366cc] transition">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M3.6 9h16.8M3.6 15h16.8"/>
+            <path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
+          </svg>
+        </div>
+        <div class="leading-none">
+          <div class="font-serif text-[17px] sm:text-[19px] tracking-[0.04em] text-black uppercase">PRISM 3D</div>
+          <div class="hidden sm:block font-serif text-[10px] text-[#54595d] mt-0.5">The Free 3D Asset Inspector</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Center-Left: Wikipedia Search Input + Attached Button -->
+    <form id="header-search-form" class="hidden md:flex flex-1 max-w-md items-stretch mx-2">
+      <div class="relative flex-1 flex items-center">
+        <svg class="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-[#72777d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input id="header-search-input" type="text" placeholder="Search models, materials, or views..."
+          class="w-full h-8 rounded-l-[2px] border border-[#a2a9b1] bg-white pl-8 pr-2.5 text-[13px] text-[#202122] placeholder-[#72777d] focus:border-[#3366cc] focus:outline-none focus:ring-1 focus:ring-[#3366cc]" />
+      </div>
+      <button type="submit"
+        class="h-8 rounded-r-[2px] border border-l-0 border-[#a2a9b1] bg-[#f8f9fa] hover:bg-[#ffffff] active:bg-[#eaecf0] px-3 text-[13px] font-semibold text-[#202122] transition">
+        Search
+      </button>
+    </form>
+
+    <!-- Right: Wikipedia Progressive Blue Navigation Links -->
+    <div class="flex items-center gap-3 sm:gap-4 shrink-0 text-[13px]">
       <input id="file-input" type="file" accept=".glb,.gltf,.bin,image/*" multiple class="hidden" />
       <input id="texture-input" type="file" accept="image/*" class="hidden" />
 
       <button id="upload-btn" type="button"
-        class="inline-flex items-center gap-1.5 rounded-md bg-zinc-50 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-zinc-950 hover:bg-zinc-200 active:bg-zinc-300 shadow-sm transition whitespace-nowrap">
-        <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        <span>Upload<span class="hidden min-[380px]:inline"> GLB</span></span>
+        class="font-medium text-[#3366cc] hover:text-[#2a4b8d] hover:underline transition whitespace-nowrap">
+        Upload GLB
+      </button>
+      <button id="header-export-btn" type="button" title="Export Animated .GLB (Ctrl+E)"
+        class="hidden sm:inline font-medium text-[#3366cc] hover:text-[#2a4b8d] hover:underline transition whitespace-nowrap">
+        Export GLB
+      </button>
+      <button id="header-fit-btn" type="button" title="Reset & Fit Camera (R)"
+        class="hidden sm:inline font-medium text-[#3366cc] hover:text-[#2a4b8d] hover:underline transition whitespace-nowrap">
+        Fit view
+      </button>
+      <button id="toggle-studio-btn" type="button" title="Toggle Appearance & Inspector"
+        class="inline-flex items-center gap-1 rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] hover:bg-[#eaecf0] px-2 py-1 text-xs font-medium text-[#202122] transition">
+        <span>Appearance</span>
       </button>
     </div>
   </header>
 
-  <!-- Left Drawer: Scene Models -->
-  <aside id="models-panel"
-    class="side-drawer fixed top-16 left-3 z-20 w-72 max-w-[calc(100vw-1.5rem)] flex flex-col rounded-xl border border-zinc-800 bg-zinc-950/92 backdrop-blur-xl shadow-2xl transition-all duration-200">
-    <div class="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
-      <div>
-        <div class="text-xs font-semibold text-zinc-100">Scene Models</div>
-        <div class="text-[11px] text-zinc-400">Loaded assets in active session</div>
-      </div>
-      <button id="close-models-btn" type="button" title="Collapse Panel" class="rounded-md p-1 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 transition">
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-      </button>
-    </div>
+  <!-- Three-Column Vector 2022 Workspace -->
+  <div class="relative flex-1 flex min-h-0 overflow-hidden bg-white">
 
-    <div id="models-list" class="studio-scroll flex-1 overflow-y-auto p-2.5 space-y-1">
-    </div>
-
-    <div class="border-t border-zinc-800 p-3">
-      <button id="panel-upload-btn" type="button"
-        class="w-full flex items-center justify-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-900 hover:border-zinc-700 py-2 text-xs font-medium text-zinc-200 transition">
-        <svg class="h-3.5 w-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        <span>Add .GLB / .GLTF File</span>
-      </button>
-    </div>
-  </aside>
-
-  <!-- Right Drawer: Studio & Inspector -->
-  <aside id="studio-panel"
-    class="side-drawer fixed top-16 right-3 z-20 w-80 max-w-[calc(100vw-1.5rem)] flex flex-col rounded-xl border border-zinc-800 bg-zinc-950/92 backdrop-blur-xl shadow-2xl transition-all duration-200">
-    <div class="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
-      <div>
-        <div class="text-xs font-semibold text-zinc-100">Studio &amp; Inspector</div>
-        <div class="text-[11px] text-zinc-400">Configure viewport &amp; mesh data</div>
-      </div>
-      <button id="close-studio-btn" type="button" title="Collapse Panel" class="rounded-md p-1 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 transition">
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"/>
-        </svg>
-      </button>
-    </div>
-
-    <div class="studio-scroll flex-1 overflow-y-auto p-4 space-y-5">
-      <!-- Camera Views (Tablet / Mobile) -->
-      <div class="xl:hidden space-y-2">
-        <div class="text-xs font-medium text-zinc-300">Camera Views</div>
-        <div class="grid grid-cols-5 gap-1 rounded-md border border-zinc-800 bg-zinc-900/70 p-1">
-          <button type="button" data-view="fit" class="camera-preset-btn rounded py-1 text-[11px] font-medium text-zinc-100 hover:bg-zinc-800">Fit</button>
-          <button type="button" data-view="front" class="camera-preset-btn rounded py-1 text-[11px] font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">Front</button>
-          <button type="button" data-view="right" class="camera-preset-btn rounded py-1 text-[11px] font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">Right</button>
-          <button type="button" data-view="top" class="camera-preset-btn rounded py-1 text-[11px] font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">Top</button>
-          <button type="button" data-view="iso" class="camera-preset-btn rounded py-1 text-[11px] font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">Iso</button>
+    <!-- Left Sidebar: Wikipedia "Contents" Drawer -->
+    <aside id="models-panel"
+      class="fixed md:static inset-y-14 left-0 z-20 w-64 shrink-0 border-r border-[#eaecf0] bg-white flex flex-col overflow-hidden shadow-lg md:shadow-none">
+      <div class="flex items-center justify-between border-b border-[#eaecf0] px-4 py-3">
+        <div class="flex items-center gap-2">
+          <span class="text-[13px] font-bold text-[#202122]">Contents</span>
+          <span id="model-count-badge" class="rounded-[2px] bg-[#eaecf0] px-1.5 py-0.5 font-mono text-[10px] text-[#54595d]">1</span>
         </div>
+        <button id="close-models-btn" type="button"
+          class="rounded-[2px] bg-[#eaecf0] hover:bg-[#dadde3] px-1.5 py-0.5 text-[11px] text-[#202122] transition">
+          hide
+        </button>
       </div>
 
-      <!-- Viewport Settings -->
-      <div class="space-y-3">
+      <div class="studio-scroll flex-1 overflow-y-auto px-4 py-3 space-y-4 text-[13px]">
+        <!-- (Top) -->
         <div>
-          <div class="text-xs font-semibold text-zinc-100">Viewport Settings</div>
-          <div class="text-[11px] text-zinc-400">Turntable, shading, and helper overlays</div>
+          <button type="button" data-view="fit" class="camera-preset-btn block text-left font-bold text-[#202122] hover:underline">
+            (Top)
+          </button>
         </div>
 
-        <div class="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 space-y-3">
+        <!-- Section 1: Scene Models -->
+        <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <label for="auto-rotate-toggle" class="text-xs font-medium text-zinc-200 cursor-pointer">Auto-Rotate</label>
-            <button id="auto-rotate-toggle" type="button" role="switch" aria-checked="true"
-              class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-zinc-50 transition-colors duration-200 focus:outline-none">
-              <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-zinc-950 shadow transition duration-200 translate-x-4"></span>
+            <span class="font-medium text-[#3366cc]">Scene Models</span>
+            <button id="panel-upload-btn" type="button" class="text-[11px] text-[#3366cc] hover:underline">
+              + Add file
             </button>
           </div>
-          <div id="rotate-speed-row" class="flex items-center justify-between gap-3 pt-0.5">
-            <span class="text-[11px] text-zinc-400">Speed</span>
-            <input id="rotate-speed-slider" type="range" min="0.5" max="6" step="0.5" value="1.5" class="studio-slider flex-1" />
-            <span id="rotate-speed-val" class="w-8 text-right font-mono text-[11px] text-zinc-300">1.5x</span>
+          <div id="models-list" class="pl-2.5 border-l border-[#eaecf0] space-y-1">
           </div>
         </div>
 
-        <div class="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2.5">
-          <div>
-            <label for="wireframe-toggle" class="block text-xs font-medium text-zinc-200 cursor-pointer">Wireframe Mode</label>
-            <span class="block text-[11px] text-zinc-400">Inspect triangle topology</span>
+        <!-- Section 2: Camera Presets (Wikipedia Contents tree style) -->
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-1 text-[#3366cc]">
+            <span class="text-[10px] text-[#54595d]">▾</span>
+            <span>Camera Views</span>
           </div>
-          <button id="wireframe-toggle" type="button" role="switch" aria-checked="false"
-            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-zinc-800 transition-colors duration-200 focus:outline-none">
-            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-zinc-400 shadow transition duration-200 translate-x-0"></span>
+          <ul class="pl-4 space-y-1.5 text-[12.5px]">
+            <li><button type="button" data-view="fit" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Fit to viewport (R)</button></li>
+            <li><button type="button" data-view="front" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Front elevation (1)</button></li>
+            <li><button type="button" data-view="right" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Right profile (2)</button></li>
+            <li><button type="button" data-view="top" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Top plan view (3)</button></li>
+            <li><button type="button" data-view="iso" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Isometric 3/4 view (4)</button></li>
+          </ul>
+        </div>
+
+        <!-- Section 3: Posing & Keyframes -->
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-1 text-[#3366cc]">
+            <span class="text-[10px] text-[#54595d]">▾</span>
+            <span>Posing &amp; Keyframes</span>
+          </div>
+          <ul class="pl-4 space-y-1.5 text-[12.5px]">
+            <li><button id="sidebar-keyframe-btn" type="button" class="text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Record keyframe (K)</button></li>
+            <li><button id="sidebar-reset-pose-btn" type="button" class="text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Reset selected pose (Alt+R)</button></li>
+            <li><button id="sidebar-export-btn" type="button" class="text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Export animated GLB (Ctrl+E)</button></li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Main Article / 3D Viewport Column -->
+    <main class="flex-1 flex flex-col min-w-0 min-h-0 bg-white">
+      <!-- Wikipedia Article Title & Tab Bar -->
+      <div class="shrink-0 px-4 sm:px-6 pt-3 pb-2 bg-white border-b border-[#eaecf0]">
+        <!-- Title Row -->
+        <div class="flex items-baseline justify-between gap-3 border-b border-[#a2a9b1] pb-1">
+          <div class="flex items-center gap-2 min-w-0">
+            <button id="restore-models-btn" type="button" title="Show Contents Sidebar"
+              class="hidden rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] hover:bg-[#eaecf0] px-1.5 py-0.5 text-[11px] font-sans text-[#202122] shrink-0">
+              Contents
+            </button>
+            <h1 id="header-active-name" class="truncate font-serif text-xl sm:text-[26px] font-normal leading-tight text-black">
+              Studio Showcase Core
+            </h1>
+          </div>
+
+          <button id="header-stats-pill" type="button" title="Toggle Inspector Panel"
+            class="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-[#3366cc] hover:text-[#2a4b8d] hover:underline">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            <span id="header-tris-badge">0 triangles</span>
+            <span class="text-[10px]">▾</span>
           </button>
         </div>
 
-        <div class="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2.5">
-          <div>
-            <label for="vertex-colors-toggle" class="block text-xs font-medium text-zinc-200 cursor-pointer">Vertex Colors (COLOR_0)</label>
-            <span class="block text-[11px] text-zinc-400">Toggle mesh vertex color channel</span>
+        <!-- Article / Talk / Read / Edit Tab Strip -->
+        <div class="flex items-center justify-between gap-2 border-b border-[#eaecf0] text-[12.5px]">
+          <div class="flex items-center gap-4">
+            <button type="button" data-view="fit"
+              class="camera-preset-btn py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122]">
+              Viewport
+            </button>
+            <button id="tab-wireframe-btn" type="button"
+              class="py-1.5 border-b-2 border-transparent text-[#3366cc] hover:text-[#2a4b8d] transition">
+              Wireframe
+            </button>
+            <button id="tab-vertex-colors-btn" type="button"
+              class="py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition">
+              Vertex Colors
+            </button>
           </div>
-          <button id="vertex-colors-toggle" type="button" role="switch" aria-checked="true"
-            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-zinc-50 transition-colors duration-200 focus:outline-none">
-            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-zinc-950 shadow transition duration-200 translate-x-4"></span>
-          </button>
+
+          <div class="flex items-center gap-3 sm:gap-4">
+            <button id="tab-autorotate-btn" type="button"
+              class="py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition">
+              Auto-Rotate
+            </button>
+            <button id="tab-grid-btn" type="button"
+              class="hidden sm:inline-block py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition">
+              Grid
+            </button>
+            <span id="inspector-badge"
+              class="rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[#202122]">
+              READY
+            </span>
+          </div>
         </div>
 
-        <div class="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2.5">
-          <div>
-            <label for="grid-toggle" class="block text-xs font-medium text-zinc-200 cursor-pointer">Ground Grid &amp; Shadow</label>
-            <span class="block text-[11px] text-zinc-400">Spatial reference floor plane</span>
-          </div>
-          <button id="grid-toggle" type="button" role="switch" aria-checked="true"
-            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-zinc-50 transition-colors duration-200 focus:outline-none">
-            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-zinc-950 shadow transition duration-200 translate-x-4"></span>
-          </button>
+        <!-- Tagline & Hatnote -->
+        <div class="pt-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5 text-[11.5px] text-[#54595d]">
+          <span>From Prism 3D, the interactive GLB / GLTF studio</span>
+          <span class="italic font-serif text-[12px] text-[#202122]">
+            Click any mesh or bone to pose; press <kbd class="font-mono not-italic text-[10px] bg-[#f8f9fa] border border-[#a2a9b1] px-1 rounded-[2px]">K</kbd> to keyframe.
+          </span>
         </div>
       </div>
 
-      <!-- Material Slots & Texture Mapping -->
-      <div class="space-y-2.5 border-t border-zinc-800 pt-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-xs font-semibold text-zinc-100">Material Slots</div>
-            <div class="text-[11px] text-zinc-400">Click slot to assign diffuse texture</div>
-          </div>
-          <span id="texture-status-badge" class="rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 font-mono text-[10px] text-zinc-300">0/0 TEX</span>
-        </div>
+      <!-- 3D Canvas Stage -->
+      <div id="viewport-container" class="relative flex-1 w-full min-h-0 overflow-hidden bg-[#f8f9fa]">
+        <canvas id="three-canvas" class="block w-full h-full outline-none"></canvas>
 
-        <div id="materials-list" class="space-y-1.5 max-h-40 overflow-y-auto studio-scroll pr-0.5">
-        </div>
-      </div>
+        <!-- Bottom Floating Animation & Timeline Dock -->
+        <div id="animation-bar"
+          class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 hidden w-[calc(100%-1.5rem)] max-w-2xl rounded-[2px] border border-[#a2a9b1] bg-white/95 px-3 py-2 backdrop-blur-md shadow-md transition-all duration-200">
+          <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
+            <button id="anim-play-btn" type="button" title="Play / Pause (Space)"
+              class="order-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-[2px] bg-[#3366cc] hover:bg-[#2a4b8d] text-white transition">
+              <svg id="icon-pause" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
+              </svg>
+              <svg id="icon-play" class="h-3.5 w-3.5 hidden ml-0.5" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            </button>
 
-      <!-- Environment & Lighting -->
-      <div class="space-y-3 border-t border-zinc-800 pt-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-xs font-semibold text-zinc-100">Studio Environment</div>
-            <div class="text-[11px] text-zinc-400">Select backdrop &amp; exposure</div>
-          </div>
-          <span id="bg-label" class="rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[10px] font-medium text-zinc-300">Dark Studio</span>
-        </div>
+            <select id="anim-clip-select" aria-label="Animation Clip"
+              class="order-2 flex-1 sm:flex-initial min-w-0 sm:max-w-[175px] truncate rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] px-2 py-1 text-xs font-medium text-[#202122] focus:border-[#3366cc] focus:outline-none">
+            </select>
 
-        <div class="grid grid-cols-2 gap-2">
-          <button type="button" data-bg="dark-studio" title="Dark Studio"
-            class="bg-preset-btn flex items-start justify-between gap-2 rounded-lg border border-zinc-400 bg-zinc-900 p-2.5 text-left transition">
-            <div>
-              <div class="text-xs font-medium text-zinc-100">Studio</div>
-              <div class="text-[10px] text-zinc-400">Obsidian #09090b</div>
+            <div class="order-4 sm:order-3 flex basis-full sm:basis-auto flex-1 items-center gap-2.5 min-w-0 sm:min-w-[160px]">
+              <input id="anim-scrubber" type="range" min="0" max="1" step="0.001" value="0" class="wiki-slider flex-1" />
+              <span id="anim-timecode" class="shrink-0 font-mono text-[11px] text-[#54595d]">0.0s / 0.0s</span>
             </div>
-            <span class="bg-radio-dot mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full bg-zinc-50"></span>
-          </button>
 
-          <button type="button" data-bg="charcoal" title="Charcoal"
-            class="bg-preset-btn flex items-start justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 p-2.5 text-left hover:border-zinc-700 transition">
-            <div>
-              <div class="text-xs font-medium text-zinc-300">Charcoal</div>
-              <div class="text-[10px] text-zinc-500">Matte #232730</div>
+            <div class="order-3 sm:order-4 flex items-center rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] p-0.5 shrink-0">
+              <button type="button" data-speed="0.5" class="anim-speed-btn rounded-[2px] px-2 py-0.5 font-mono text-[11px] text-[#54595d] hover:text-[#202122] transition">0.5x</button>
+              <button type="button" data-speed="1" class="anim-speed-btn rounded-[2px] bg-[#3366cc] px-2 py-0.5 font-mono text-[11px] font-semibold text-white transition">1x</button>
+              <button type="button" data-speed="2" class="anim-speed-btn rounded-[2px] px-2 py-0.5 font-mono text-[11px] text-[#54595d] hover:text-[#202122] transition">2x</button>
             </div>
-            <span class="bg-radio-dot mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full border border-zinc-700 bg-transparent"></span>
-          </button>
-
-          <button type="button" data-bg="light-gray" title="Light Gray"
-            class="bg-preset-btn flex items-start justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 p-2.5 text-left hover:border-zinc-700 transition">
-            <div>
-              <div class="text-xs font-medium text-zinc-300">Light</div>
-              <div class="text-[10px] text-zinc-500">Daylight #dfe4ec</div>
-            </div>
-            <span class="bg-radio-dot mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full border border-zinc-700 bg-transparent"></span>
-          </button>
-
-          <button type="button" data-bg="deep-navy" title="Deep Navy"
-            class="bg-preset-btn flex items-start justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 p-2.5 text-left hover:border-zinc-700 transition">
-            <div>
-              <div class="text-xs font-medium text-zinc-300">Navy</div>
-              <div class="text-[10px] text-zinc-500">Slate #0a1428</div>
-            </div>
-            <span class="bg-radio-dot mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full border border-zinc-700 bg-transparent"></span>
-          </button>
-        </div>
-
-        <div class="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-zinc-200">Tone Exposure</span>
-            <span id="exposure-val" class="font-mono text-[11px] text-zinc-300">1.10 EV</span>
-          </div>
-          <input id="exposure-slider" type="range" min="0.2" max="2.5" step="0.05" value="1.1" class="studio-slider w-full" />
-        </div>
-      </div>
-
-      <!-- Model Inspector -->
-      <div class="space-y-2.5 border-t border-zinc-800 pt-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-xs font-semibold text-zinc-100">Model Inspector</div>
-            <div class="text-[11px] text-zinc-400">Geometry &amp; bounding telemetry</div>
-          </div>
-          <span id="inspector-badge" class="rounded-full border border-zinc-700 bg-zinc-900 px-2 py-0.5 font-mono text-[10px] font-medium text-zinc-200">READY</span>
-        </div>
-
-        <div class="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 space-y-2 text-xs">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-zinc-400">File Name</span>
-            <span id="info-name" class="truncate max-w-[165px] font-medium text-zinc-100" title="Studio Showcase Core">Studio Showcase Core</span>
-          </div>
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-zinc-400">File Size</span>
-            <span id="info-size" class="font-mono text-zinc-300">Procedural</span>
-          </div>
-          <div class="h-px bg-zinc-800 my-1"></div>
-          <div class="grid grid-cols-2 gap-2 pt-0.5">
-            <div class="rounded-md border border-zinc-800/80 bg-zinc-950/80 px-2.5 py-1.5">
-              <div class="text-[10px] font-medium text-zinc-400">Meshes</div>
-              <div id="info-meshes" class="font-mono text-sm font-semibold text-zinc-50">0</div>
-            </div>
-            <div class="rounded-md border border-zinc-800/80 bg-zinc-950/80 px-2.5 py-1.5">
-              <div class="text-[10px] font-medium text-zinc-400">Materials</div>
-              <div id="info-materials" class="font-mono text-sm font-semibold text-zinc-50">0</div>
-            </div>
-            <div class="rounded-md border border-zinc-800/80 bg-zinc-950/80 px-2.5 py-1.5">
-              <div class="text-[10px] font-medium text-zinc-400">Triangles</div>
-              <div id="info-triangles" class="font-mono text-sm font-semibold text-zinc-50">0</div>
-            </div>
-            <div class="rounded-md border border-zinc-800/80 bg-zinc-950/80 px-2.5 py-1.5">
-              <div class="text-[10px] font-medium text-zinc-400">Vertices</div>
-              <div id="info-vertices" class="font-mono text-sm font-semibold text-zinc-200">0</div>
-            </div>
-          </div>
-          <div class="pt-1 flex items-center justify-between gap-2">
-            <span class="text-zinc-400">Dimensions</span>
-            <span id="info-dimensions" class="font-mono text-[11px] text-zinc-300">0.00 × 0.00 × 0.00</span>
           </div>
         </div>
       </div>
-    </div>
-  </aside>
+    </main>
 
-  <!-- Bottom Floating Animation & Timeline Dock -->
-  <div id="animation-bar"
-    class="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 hidden w-[calc(100%-1.5rem)] max-w-2xl rounded-xl border border-zinc-800 bg-zinc-950/92 px-3 py-2.5 backdrop-blur-xl shadow-2xl transition-all duration-200">
-    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
-      <button id="anim-play-btn" type="button" title="Play / Pause (Space)"
-        class="order-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-zinc-50 hover:bg-zinc-200 text-zinc-950 shadow-sm transition">
-        <svg id="icon-pause" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-          <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
-        </svg>
-        <svg id="icon-play" class="h-3.5 w-3.5 hidden ml-0.5" viewBox="0 0 24 24" fill="currentColor">
-          <polygon points="5 3 19 12 5 21 5 3"/>
-        </svg>
-      </button>
-
-      <select id="anim-clip-select" aria-label="Animation Clip"
-        class="order-2 flex-1 sm:flex-initial min-w-0 sm:max-w-[175px] truncate rounded-md border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-zinc-100 focus:border-zinc-500 focus:outline-none">
-      </select>
-
-      <div class="order-4 sm:order-3 flex basis-full sm:basis-auto flex-1 items-center gap-2.5 min-w-0 sm:min-w-[160px]">
-        <input id="anim-scrubber" type="range" min="0" max="1" step="0.001" value="0" class="studio-slider flex-1" />
-        <span id="anim-timecode" class="shrink-0 font-mono text-[11px] text-zinc-400">0.0s / 0.0s</span>
+    <!-- Right Sidebar: Wikipedia "Appearance" & Inspector Drawer -->
+    <aside id="studio-panel"
+      class="fixed md:static inset-y-14 right-0 z-20 w-72 shrink-0 border-l border-[#eaecf0] bg-white flex flex-col overflow-hidden shadow-lg md:shadow-none">
+      <div class="flex items-center justify-between border-b border-[#eaecf0] px-4 py-3">
+        <span class="text-[13px] font-bold text-[#202122]">Appearance</span>
+        <button id="close-studio-btn" type="button"
+          class="rounded-[2px] bg-[#eaecf0] hover:bg-[#dadde3] px-1.5 py-0.5 text-[11px] text-[#202122] transition">
+          hide
+        </button>
       </div>
 
-      <div class="order-3 sm:order-4 flex items-center rounded-md border border-zinc-800 bg-zinc-900 p-0.5 shrink-0">
-        <button type="button" data-speed="0.5" class="anim-speed-btn rounded px-2 py-1 font-mono text-[11px] text-zinc-400 hover:text-zinc-100 transition">0.5x</button>
-        <button type="button" data-speed="1" class="anim-speed-btn rounded bg-zinc-50 px-2 py-1 font-mono text-[11px] font-semibold text-zinc-950 transition">1x</button>
-        <button type="button" data-speed="2" class="anim-speed-btn rounded px-2 py-1 font-mono text-[11px] text-zinc-400 hover:text-zinc-100 transition">2x</button>
+      <div class="studio-scroll flex-1 overflow-y-auto px-4 py-3 space-y-4 text-[13px]">
+
+        <!-- Color / Backdrop Radio Group (Matches Wikipedia Appearance -> Color) -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between border-b border-[#eaecf0] pb-1">
+            <span class="text-xs font-medium text-[#54595d]">Backdrop</span>
+            <span id="bg-label" class="text-[11px] text-[#54595d]">Light</span>
+          </div>
+          <div class="space-y-1.5">
+            <button type="button" data-bg="light-gray" class="bg-preset-btn flex w-full items-center gap-2.5 py-0.5 text-left">
+              <span class="wiki-radio is-checked" aria-hidden="true"></span>
+              <span class="text-[13px] text-[#202122]">Light (Wikipedia)</span>
+            </button>
+            <button type="button" data-bg="dark-studio" class="bg-preset-btn flex w-full items-center gap-2.5 py-0.5 text-left">
+              <span class="wiki-radio" aria-hidden="true"></span>
+              <span class="text-[13px] text-[#202122]">Dark Studio</span>
+            </button>
+            <button type="button" data-bg="charcoal" class="bg-preset-btn flex w-full items-center gap-2.5 py-0.5 text-left">
+              <span class="wiki-radio" aria-hidden="true"></span>
+              <span class="text-[13px] text-[#202122]">Charcoal</span>
+            </button>
+            <button type="button" data-bg="deep-navy" class="bg-preset-btn flex w-full items-center gap-2.5 py-0.5 text-left">
+              <span class="wiki-radio" aria-hidden="true"></span>
+              <span class="text-[13px] text-[#202122]">Deep Navy</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Viewport Settings (Wikipedia Radio / Checkbox Style) -->
+        <div class="space-y-2.5">
+          <div class="border-b border-[#eaecf0] pb-1 text-xs font-medium text-[#54595d]">Viewport</div>
+
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input id="auto-rotate-checkbox" type="checkbox" checked class="wiki-checkbox" />
+            <span class="text-[13px] text-[#202122]">Auto-rotate turntable</span>
+          </label>
+
+          <div class="pl-6 space-y-1">
+            <div class="flex items-center justify-between text-[11px] text-[#54595d]">
+              <span>Rotation speed</span>
+              <span id="rotate-speed-val" class="font-mono text-[#202122]">1.5x</span>
+            </div>
+            <input id="rotate-speed-slider" type="range" min="0.5" max="6" step="0.5" value="1.5" class="wiki-slider w-full" />
+          </div>
+
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input id="wireframe-checkbox" type="checkbox" class="wiki-checkbox" />
+            <span class="text-[13px] text-[#202122]">Wireframe topology</span>
+          </label>
+
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input id="vertex-colors-checkbox" type="checkbox" checked class="wiki-checkbox" />
+            <span class="text-[13px] text-[#202122]">Vertex colors (COLOR_0)</span>
+          </label>
+
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input id="grid-checkbox" type="checkbox" checked class="wiki-checkbox" />
+            <span class="text-[13px] text-[#202122]">Ground grid &amp; shadow</span>
+          </label>
+
+          <div class="pt-1 space-y-1">
+            <div class="flex items-center justify-between text-[11px] text-[#54595d]">
+              <span>Tone exposure</span>
+              <span id="exposure-val" class="font-mono text-[#202122]">1.10 EV</span>
+            </div>
+            <input id="exposure-slider" type="range" min="0.2" max="2.5" step="0.05" value="1.1" class="wiki-slider w-full" />
+          </div>
+        </div>
+
+        <!-- Material Slots & Texture Mapping -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between border-b border-[#eaecf0] pb-1">
+            <span class="text-xs font-medium text-[#54595d]">Material Slots</span>
+            <span id="texture-status-badge" class="font-mono text-[10px] text-[#54595d]">0/0 TEX</span>
+          </div>
+          <p class="text-[11px] text-[#54595d] leading-snug">
+            Click a slot to assign a diffuse texture (<span class="font-mono">.png</span>/<span class="font-mono">.jpg</span>).
+          </p>
+          <div id="materials-list" class="space-y-1 max-h-36 overflow-y-auto studio-scroll pr-0.5">
+          </div>
+        </div>
+
+        <!-- Infobox-style Model Telemetry Table -->
+        <div class="space-y-1.5">
+          <div class="border-b border-[#eaecf0] pb-1 text-xs font-medium text-[#54595d]">Asset Infobox</div>
+          <div class="rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] text-xs overflow-hidden">
+            <div class="border-b border-[#a2a9b1] bg-[#eaecf0] px-2.5 py-1.5 text-center font-semibold text-[#202122] truncate" id="info-name">
+              Studio Showcase Core
+            </div>
+            <div class="divide-y divide-[#eaecf0]">
+              <div class="flex items-center justify-between px-2.5 py-1.5">
+                <span class="font-semibold text-[#202122]">File size</span>
+                <span id="info-size" class="font-mono text-[#54595d]">Procedural</span>
+              </div>
+              <div class="flex items-center justify-between px-2.5 py-1.5">
+                <span class="font-semibold text-[#202122]">Meshes</span>
+                <span id="info-meshes" class="font-mono text-[#202122]">0</span>
+              </div>
+              <div class="flex items-center justify-between px-2.5 py-1.5">
+                <span class="font-semibold text-[#202122]">Materials</span>
+                <span id="info-materials" class="font-mono text-[#202122]">0</span>
+              </div>
+              <div class="flex items-center justify-between px-2.5 py-1.5">
+                <span class="font-semibold text-[#202122]">Triangles</span>
+                <span id="info-triangles" class="font-mono text-[#202122]">0</span>
+              </div>
+              <div class="flex items-center justify-between px-2.5 py-1.5">
+                <span class="font-semibold text-[#202122]">Vertices</span>
+                <span id="info-vertices" class="font-mono text-[#202122]">0</span>
+              </div>
+              <div class="flex items-center justify-between px-2.5 py-1.5">
+                <span class="font-semibold text-[#202122]">Dimensions</span>
+                <span id="info-dimensions" class="font-mono text-[11px] text-[#54595d]">0.00 × 0.00 × 0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-    </div>
+    </aside>
   </div>
 
   <!-- Status Pill -->
-  <div id="loading-pill" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950/95 px-3.5 py-1.5 text-xs font-medium text-zinc-200 backdrop-blur-xl shadow-xl">
-    <svg class="h-3.5 w-3.5 animate-spin text-zinc-100" viewBox="0 0 24 24" fill="none">
+  <div id="loading-pill" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden items-center gap-2 rounded-[2px] border border-[#a2a9b1] bg-white px-3.5 py-1.5 text-xs font-medium text-[#202122] shadow-md">
+    <svg class="h-3.5 w-3.5 animate-spin text-[#3366cc]" viewBox="0 0 24 24" fill="none">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
     </svg>
@@ -406,7 +447,7 @@
   </div>
 
   <!-- Toast Container -->
-  <div id="toast-container" class="fixed top-16 sm:top-auto sm:bottom-4 right-3 sm:right-4 z-50 flex flex-col gap-2 max-w-sm w-[calc(100%-1.5rem)] sm:w-full pointer-events-none"></div>
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-[calc(100%-2rem)] sm:w-full pointer-events-none"></div>
 
   <script type="module" src="app.js"></script>
 </body>
