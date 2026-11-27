@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light-gray">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Prism 3D — The Interactive GLB / GLTF Encyclopedia</title>
+  <title>3D Asset Inspector</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,19 +18,6 @@
             sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
             serif: ['Newsreader', 'Georgia', 'Times New Roman', 'serif'],
             mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            wiki: {
-              bg: '#ffffff',
-              subtle: '#f8f9fa',
-              border: '#a2a9b1',
-              divider: '#eaecf0',
-              text: '#202122',
-              muted: '#54595d',
-              link: '#3366cc',
-              linkHover: '#2a4b8d',
-              chip: '#eaecf0',
-            }
           }
         }
       }
@@ -48,103 +35,89 @@
     }
   </script>
 </head>
-<body class="bg-white font-sans text-[#202122] antialiased selection:bg-[#3366cc] selection:text-white flex flex-col h-full">
+<body class="bg-[var(--ui-bg)] font-sans text-[var(--ui-text)] antialiased selection:bg-[var(--ui-accent)] selection:text-[var(--ui-btn-text)] flex flex-col h-full transition-colors duration-200">
 
   <!-- Drag & Drop Overlay -->
-  <div id="drop-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-white/85 backdrop-blur-sm transition-opacity duration-200 pointer-events-none">
-    <div class="mx-4 max-w-md w-full rounded-[2px] border-2 border-dashed border-[#3366cc] bg-white p-8 text-center shadow-xl">
-      <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#eaf3ff] text-[#3366cc]">
+  <div id="drop-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-[var(--ui-bg)]/85 backdrop-blur-sm transition-opacity duration-200 pointer-events-none">
+    <div class="mx-4 max-w-md w-full rounded-[2px] border-2 border-dashed border-[var(--ui-accent)] bg-[var(--ui-bg)] p-8 text-center shadow-xl">
+      <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--ui-accent-soft)] text-[var(--ui-accent)]">
         <svg class="h-5 w-5 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
       </div>
-      <h2 class="font-serif text-xl font-normal text-black">Drop 3D model or textures</h2>
-      <p class="mt-1.5 text-xs text-[#54595d]">
-        Supports <span class="font-mono text-[#202122]">.glb</span>, <span class="font-mono text-[#202122]">.gltf</span>, or <span class="font-mono text-[#202122]">.png / .jpg</span> textures for the active model
+      <h2 class="font-serif text-xl font-normal text-[var(--ui-heading)]">Drop 3D model or textures</h2>
+      <p class="mt-1.5 text-xs text-[var(--ui-muted)]">
+        Supports <span class="font-mono text-[var(--ui-text)]">.glb</span>, <span class="font-mono text-[var(--ui-text)]">.gltf</span>, or <span class="font-mono text-[var(--ui-text)]">.png / .jpg</span> textures for the active model
       </p>
     </div>
   </div>
 
   <!-- Vector 2022 Top Header Bar -->
-  <header class="shrink-0 z-30 h-14 border-b border-[#eaecf0] bg-white px-3 sm:px-6 flex items-center justify-between gap-3">
-    <!-- Left: Hamburger + Serif Wordmark -->
-    <div class="flex items-center gap-3 shrink-0">
+  <header class="shrink-0 z-30 h-14 border-b border-[var(--ui-divider)] bg-[var(--ui-bg)] px-3 sm:px-6 flex items-center justify-between gap-3 transition-colors duration-200">
+    <!-- Left: Hamburger Toggle + Attached Search Bar -->
+    <div class="flex items-center gap-3 flex-1 min-w-0">
       <button id="toggle-models-btn" type="button" title="Toggle Contents & Scene Models"
-        class="flex h-8 w-8 items-center justify-center rounded-[2px] text-[#202122] hover:bg-[#eaecf0] transition">
+        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[2px] text-[var(--ui-text)] hover:bg-[var(--ui-hover)] transition">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
         </svg>
       </button>
 
-      <a href="#top" id="brand-reset-link" class="flex items-center gap-2.5 no-underline group">
-        <div class="flex h-8 w-8 items-center justify-center rounded-full border border-[#a2a9b1] bg-[#f8f9fa] text-[#202122] group-hover:border-[#3366cc] transition">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"/>
-            <path d="M3.6 9h16.8M3.6 15h16.8"/>
-            <path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
+      <!-- Wikipedia Search Input + Attached Button -->
+      <form id="header-search-form" class="hidden sm:flex flex-1 max-w-md items-stretch">
+        <div class="relative flex-1 flex items-center">
+          <svg class="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-[var(--ui-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
+          <input id="header-search-input" type="text" placeholder="Search models, materials, or views..."
+            class="w-full h-8 rounded-l-[2px] border border-[var(--ui-border)] bg-[var(--ui-bg)] pl-8 pr-2.5 text-[13px] text-[var(--ui-text)] placeholder-[var(--ui-muted)] focus:border-[var(--ui-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--ui-accent)]" />
         </div>
-        <div class="leading-none">
-          <div class="font-serif text-[17px] sm:text-[19px] tracking-[0.04em] text-black uppercase">PRISM 3D</div>
-          <div class="hidden sm:block font-serif text-[10px] text-[#54595d] mt-0.5">The Free 3D Asset Inspector</div>
-        </div>
-      </a>
+        <button type="submit"
+          class="h-8 rounded-r-[2px] border border-l-0 border-[var(--ui-border)] bg-[var(--ui-subtle)] hover:bg-[var(--ui-hover)] px-3 text-[13px] font-semibold text-[var(--ui-text)] transition">
+          Search
+        </button>
+      </form>
     </div>
 
-    <!-- Center-Left: Wikipedia Search Input + Attached Button -->
-    <form id="header-search-form" class="hidden md:flex flex-1 max-w-md items-stretch mx-2">
-      <div class="relative flex-1 flex items-center">
-        <svg class="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-[#72777d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input id="header-search-input" type="text" placeholder="Search models, materials, or views..."
-          class="w-full h-8 rounded-l-[2px] border border-[#a2a9b1] bg-white pl-8 pr-2.5 text-[13px] text-[#202122] placeholder-[#72777d] focus:border-[#3366cc] focus:outline-none focus:ring-1 focus:ring-[#3366cc]" />
-      </div>
-      <button type="submit"
-        class="h-8 rounded-r-[2px] border border-l-0 border-[#a2a9b1] bg-[#f8f9fa] hover:bg-[#ffffff] active:bg-[#eaecf0] px-3 text-[13px] font-semibold text-[#202122] transition">
-        Search
-      </button>
-    </form>
-
-    <!-- Right: Wikipedia Progressive Blue Navigation Links -->
+    <!-- Right: Wikipedia Progressive Navigation Links -->
     <div class="flex items-center gap-3 sm:gap-4 shrink-0 text-[13px]">
       <input id="file-input" type="file" accept=".glb,.gltf,.bin,image/*" multiple class="hidden" />
       <input id="texture-input" type="file" accept="image/*" class="hidden" />
 
       <button id="upload-btn" type="button"
-        class="font-medium text-[#3366cc] hover:text-[#2a4b8d] hover:underline transition whitespace-nowrap">
+        class="font-medium text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline transition whitespace-nowrap">
         Upload GLB
       </button>
       <button id="header-export-btn" type="button" title="Export Animated .GLB (Ctrl+E)"
-        class="hidden sm:inline font-medium text-[#3366cc] hover:text-[#2a4b8d] hover:underline transition whitespace-nowrap">
+        class="hidden sm:inline font-medium text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline transition whitespace-nowrap">
         Export GLB
       </button>
       <button id="header-fit-btn" type="button" title="Reset & Fit Camera (R)"
-        class="hidden sm:inline font-medium text-[#3366cc] hover:text-[#2a4b8d] hover:underline transition whitespace-nowrap">
+        class="hidden sm:inline font-medium text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline transition whitespace-nowrap">
         Fit view
       </button>
       <button id="toggle-studio-btn" type="button" title="Toggle Appearance & Inspector"
-        class="inline-flex items-center gap-1 rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] hover:bg-[#eaecf0] px-2 py-1 text-xs font-medium text-[#202122] transition">
+        class="inline-flex items-center gap-1 rounded-[2px] border border-[var(--ui-border)] bg-[var(--ui-subtle)] hover:bg-[var(--ui-hover)] px-2 py-1 text-xs font-medium text-[var(--ui-text)] transition">
         <span>Appearance</span>
       </button>
     </div>
   </header>
 
   <!-- Three-Column Vector 2022 Workspace -->
-  <div class="relative flex-1 flex min-h-0 overflow-hidden bg-white">
+  <div class="relative flex-1 flex min-h-0 overflow-hidden bg-[var(--ui-bg)] transition-colors duration-200">
 
     <!-- Left Sidebar: Wikipedia "Contents" Drawer -->
     <aside id="models-panel"
-      class="fixed md:static inset-y-14 left-0 z-20 w-64 shrink-0 border-r border-[#eaecf0] bg-white flex flex-col overflow-hidden shadow-lg md:shadow-none">
-      <div class="flex items-center justify-between border-b border-[#eaecf0] px-4 py-3">
+      class="fixed md:static inset-y-14 left-0 z-20 w-64 shrink-0 border-r border-[var(--ui-divider)] bg-[var(--ui-bg)] flex flex-col overflow-hidden shadow-lg md:shadow-none transition-colors duration-200">
+      <div class="flex items-center justify-between border-b border-[var(--ui-divider)] px-4 py-3">
         <div class="flex items-center gap-2">
-          <span class="text-[13px] font-bold text-[#202122]">Contents</span>
-          <span id="model-count-badge" class="rounded-[2px] bg-[#eaecf0] px-1.5 py-0.5 font-mono text-[10px] text-[#54595d]">1</span>
+          <span class="text-[13px] font-bold text-[var(--ui-text)]">Contents</span>
+          <span id="model-count-badge" class="rounded-[2px] bg-[var(--ui-hover)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--ui-muted)]">1</span>
         </div>
         <button id="close-models-btn" type="button"
-          class="rounded-[2px] bg-[#eaecf0] hover:bg-[#dadde3] px-1.5 py-0.5 text-[11px] text-[#202122] transition">
+          class="rounded-[2px] bg-[var(--ui-hover)] hover:opacity-80 px-1.5 py-0.5 text-[11px] text-[var(--ui-text)] transition">
           hide
         </button>
       </div>
@@ -152,7 +125,7 @@
       <div class="studio-scroll flex-1 overflow-y-auto px-4 py-3 space-y-4 text-[13px]">
         <!-- (Top) -->
         <div>
-          <button type="button" data-view="fit" class="camera-preset-btn block text-left font-bold text-[#202122] hover:underline">
+          <button type="button" data-view="fit" class="camera-preset-btn block text-left font-bold text-[var(--ui-text)] hover:underline">
             (Top)
           </button>
         </div>
@@ -160,63 +133,63 @@
         <!-- Section 1: Scene Models -->
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <span class="font-medium text-[#3366cc]">Scene Models</span>
-            <button id="panel-upload-btn" type="button" class="text-[11px] text-[#3366cc] hover:underline">
+            <span class="font-medium text-[var(--ui-accent)]">Scene Models</span>
+            <button id="panel-upload-btn" type="button" class="text-[11px] text-[var(--ui-accent)] hover:underline">
               + Add file
             </button>
           </div>
-          <div id="models-list" class="pl-2.5 border-l border-[#eaecf0] space-y-1">
+          <div id="models-list" class="pl-2.5 border-l border-[var(--ui-divider)] space-y-1">
           </div>
         </div>
 
-        <!-- Section 2: Camera Presets (Wikipedia Contents tree style) -->
+        <!-- Section 2: Camera Presets -->
         <div class="space-y-1.5">
-          <div class="flex items-center gap-1 text-[#3366cc]">
-            <span class="text-[10px] text-[#54595d]">▾</span>
+          <div class="flex items-center gap-1 text-[var(--ui-accent)]">
+            <span class="text-[10px] text-[var(--ui-muted)]">▾</span>
             <span>Camera Views</span>
           </div>
           <ul class="pl-4 space-y-1.5 text-[12.5px]">
-            <li><button type="button" data-view="fit" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Fit to viewport (R)</button></li>
-            <li><button type="button" data-view="front" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Front elevation (1)</button></li>
-            <li><button type="button" data-view="right" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Right profile (2)</button></li>
-            <li><button type="button" data-view="top" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Top plan view (3)</button></li>
-            <li><button type="button" data-view="iso" class="camera-preset-btn text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Isometric 3/4 view (4)</button></li>
+            <li><button type="button" data-view="fit" class="camera-preset-btn text-left text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline">Fit to viewport (R)</button></li>
+            <li><button type="button" data-view="front" class="camera-preset-btn text-left text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline">Front elevation (1)</button></li>
+            <li><button type="button" data-view="right" class="camera-preset-btn text-left text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline">Right profile (2)</button></li>
+            <li><button type="button" data-view="top" class="camera-preset-btn text-left text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline">Top plan view (3)</button></li>
+            <li><button type="button" data-view="iso" class="camera-preset-btn text-left text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline">Isometric 3/4 view (4)</button></li>
           </ul>
         </div>
 
         <!-- Section 3: Posing & Keyframes -->
         <div class="space-y-1.5">
-          <div class="flex items-center gap-1 text-[#3366cc]">
-            <span class="text-[10px] text-[#54595d]">▾</span>
+          <div class="flex items-center gap-1 text-[var(--ui-accent)]">
+            <span class="text-[10px] text-[var(--ui-muted)]">▾</span>
             <span>Posing &amp; Keyframes</span>
           </div>
           <ul class="pl-4 space-y-1.5 text-[12.5px]">
-            <li><button id="sidebar-keyframe-btn" type="button" class="text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Record keyframe (K)</button></li>
-            <li><button id="sidebar-reset-pose-btn" type="button" class="text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Reset selected pose (Alt+R)</button></li>
-            <li><button id="sidebar-export-btn" type="button" class="text-left text-[#3366cc] hover:text-[#2a4b8d] hover:underline">Export animated GLB (Ctrl+E)</button></li>
+            <li><button id="sidebar-keyframe-btn" type="button" class="text-left text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline">Record keyframe (K)</button></li>
+            <li><button id="sidebar-reset-pose-btn" type="button" class="text-left text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline">Reset selected pose (Alt+R)</button></li>
+            <li><button id="sidebar-export-btn" type="button" class="text-left text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline">Export animated GLB (Ctrl+E)</button></li>
           </ul>
         </div>
       </div>
     </aside>
 
     <!-- Center Main Article / 3D Viewport Column -->
-    <main class="flex-1 flex flex-col min-w-0 min-h-0 bg-white">
+    <main class="flex-1 flex flex-col min-w-0 min-h-0 bg-[var(--ui-bg)] transition-colors duration-200">
       <!-- Wikipedia Article Title & Tab Bar -->
-      <div class="shrink-0 px-4 sm:px-6 pt-3 pb-2 bg-white border-b border-[#eaecf0]">
+      <div class="shrink-0 px-4 sm:px-6 pt-3 pb-2 bg-[var(--ui-bg)] border-b border-[var(--ui-divider)] transition-colors duration-200">
         <!-- Title Row -->
-        <div class="flex items-baseline justify-between gap-3 border-b border-[#a2a9b1] pb-1">
+        <div class="flex items-baseline justify-between gap-3 border-b border-[var(--ui-border)] pb-1">
           <div class="flex items-center gap-2 min-w-0">
             <button id="restore-models-btn" type="button" title="Show Contents Sidebar"
-              class="hidden rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] hover:bg-[#eaecf0] px-1.5 py-0.5 text-[11px] font-sans text-[#202122] shrink-0">
+              class="hidden rounded-[2px] border border-[var(--ui-border)] bg-[var(--ui-subtle)] hover:bg-[var(--ui-hover)] px-1.5 py-0.5 text-[11px] font-sans text-[var(--ui-text)] shrink-0">
               Contents
             </button>
-            <h1 id="header-active-name" class="truncate font-serif text-xl sm:text-[26px] font-normal leading-tight text-black">
+            <h1 id="header-active-name" class="truncate font-serif text-xl sm:text-[26px] font-normal leading-tight text-[var(--ui-heading)]">
               Studio Showcase Core
             </h1>
           </div>
 
           <button id="header-stats-pill" type="button" title="Toggle Inspector Panel"
-            class="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-[#3366cc] hover:text-[#2a4b8d] hover:underline">
+            class="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] hover:underline">
             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             </svg>
@@ -225,58 +198,58 @@
           </button>
         </div>
 
-        <!-- Article / Talk / Read / Edit Tab Strip -->
-        <div class="flex items-center justify-between gap-2 border-b border-[#eaecf0] text-[12.5px]">
+        <!-- Article / Tab Strip -->
+        <div class="flex items-center justify-between gap-2 border-b border-[var(--ui-divider)] text-[12.5px]">
           <div class="flex items-center gap-4">
             <button type="button" data-view="fit"
-              class="camera-preset-btn py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122]">
+              class="camera-preset-btn py-1.5 border-b-2 border-[var(--ui-accent)] font-medium text-[var(--ui-text)]">
               Viewport
             </button>
             <button id="tab-wireframe-btn" type="button"
-              class="py-1.5 border-b-2 border-transparent text-[#3366cc] hover:text-[#2a4b8d] transition">
+              class="py-1.5 border-b-2 border-transparent text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] transition">
               Wireframe
             </button>
             <button id="tab-vertex-colors-btn" type="button"
-              class="py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition">
+              class="py-1.5 border-b-2 border-[var(--ui-accent)] font-medium text-[var(--ui-text)] transition">
               Vertex Colors
             </button>
           </div>
 
           <div class="flex items-center gap-3 sm:gap-4">
             <button id="tab-autorotate-btn" type="button"
-              class="py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition">
+              class="py-1.5 border-b-2 border-[var(--ui-accent)] font-medium text-[var(--ui-text)] transition">
               Auto-Rotate
             </button>
             <button id="tab-grid-btn" type="button"
-              class="hidden sm:inline-block py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition">
+              class="hidden sm:inline-block py-1.5 border-b-2 border-[var(--ui-accent)] font-medium text-[var(--ui-text)] transition">
               Grid
             </button>
             <span id="inspector-badge"
-              class="rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[#202122]">
+              class="rounded-[2px] border border-[var(--ui-border)] bg-[var(--ui-subtle)] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--ui-text)]">
               READY
             </span>
           </div>
         </div>
 
         <!-- Tagline & Hatnote -->
-        <div class="pt-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5 text-[11.5px] text-[#54595d]">
-          <span>From Prism 3D, the interactive GLB / GLTF studio</span>
-          <span class="italic font-serif text-[12px] text-[#202122]">
-            Click any mesh or bone to pose; press <kbd class="font-mono not-italic text-[10px] bg-[#f8f9fa] border border-[#a2a9b1] px-1 rounded-[2px]">K</kbd> to keyframe.
+        <div class="pt-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5 text-[11.5px] text-[var(--ui-muted)]">
+          <span>Interactive GLB / GLTF studio inspector</span>
+          <span class="italic font-serif text-[12px] text-[var(--ui-text)]">
+            Click any mesh or bone to pose; press <kbd class="font-mono not-italic text-[10px] bg-[var(--ui-subtle)] border border-[var(--ui-border)] px-1 rounded-[2px]">K</kbd> to keyframe.
           </span>
         </div>
       </div>
 
       <!-- 3D Canvas Stage -->
-      <div id="viewport-container" class="relative flex-1 w-full min-h-0 overflow-hidden bg-[#f8f9fa]">
+      <div id="viewport-container" class="relative flex-1 w-full min-h-0 overflow-hidden bg-[var(--ui-subtle)] transition-colors duration-200">
         <canvas id="three-canvas" class="block w-full h-full outline-none"></canvas>
 
         <!-- Bottom Floating Animation & Timeline Dock -->
         <div id="animation-bar"
-          class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 hidden w-[calc(100%-1.5rem)] max-w-2xl rounded-[2px] border border-[#a2a9b1] bg-white/95 px-3 py-2 backdrop-blur-md shadow-md transition-all duration-200">
+          class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 hidden w-[calc(100%-1.5rem)] max-w-2xl rounded-[2px] border border-[var(--ui-border)] bg-[var(--ui-bg)]/95 px-3 py-2 backdrop-blur-md shadow-md transition-all duration-200">
           <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
             <button id="anim-play-btn" type="button" title="Play / Pause (Space)"
-              class="order-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-[2px] bg-[#3366cc] hover:bg-[#2a4b8d] text-white transition">
+              class="order-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-[2px] bg-[var(--ui-accent)] hover:bg-[var(--ui-accent-hover)] text-[var(--ui-btn-text)] transition">
               <svg id="icon-pause" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
                 <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
               </svg>
@@ -286,18 +259,18 @@
             </button>
 
             <select id="anim-clip-select" aria-label="Animation Clip"
-              class="order-2 flex-1 sm:flex-initial min-w-0 sm:max-w-[175px] truncate rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] px-2 py-1 text-xs font-medium text-[#202122] focus:border-[#3366cc] focus:outline-none">
+              class="order-2 flex-1 sm:flex-initial min-w-0 sm:max-w-[175px] truncate rounded-[2px] border border-[var(--ui-border)] bg-[var(--ui-subtle)] px-2 py-1 text-xs font-medium text-[var(--ui-text)] focus:border-[var(--ui-accent)] focus:outline-none">
             </select>
 
             <div class="order-4 sm:order-3 flex basis-full sm:basis-auto flex-1 items-center gap-2.5 min-w-0 sm:min-w-[160px]">
               <input id="anim-scrubber" type="range" min="0" max="1" step="0.001" value="0" class="wiki-slider flex-1" />
-              <span id="anim-timecode" class="shrink-0 font-mono text-[11px] text-[#54595d]">0.0s / 0.0s</span>
+              <span id="anim-timecode" class="shrink-0 font-mono text-[11px] text-[var(--ui-muted)]">0.0s / 0.0s</span>
             </div>
 
-            <div class="order-3 sm:order-4 flex items-center rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] p-0.5 shrink-0">
-              <button type="button" data-speed="0.5" class="anim-speed-btn rounded-[2px] px-2 py-0.5 font-mono text-[11px] text-[#54595d] hover:text-[#202122] transition">0.5x</button>
-              <button type="button" data-speed="1" class="anim-speed-btn rounded-[2px] bg-[#3366cc] px-2 py-0.5 font-mono text-[11px] font-semibold text-white transition">1x</button>
-              <button type="button" data-speed="2" class="anim-speed-btn rounded-[2px] px-2 py-0.5 font-mono text-[11px] text-[#54595d] hover:text-[#202122] transition">2x</button>
+            <div class="order-3 sm:order-4 flex items-center rounded-[2px] border border-[var(--ui-border)] bg-[var(--ui-subtle)] p-0.5 shrink-0">
+              <button type="button" data-speed="0.5" class="anim-speed-btn rounded-[2px] px-2 py-0.5 font-mono text-[11px] text-[var(--ui-muted)] hover:text-[var(--ui-text)] transition">0.5x</button>
+              <button type="button" data-speed="1" class="anim-speed-btn rounded-[2px] bg-[var(--ui-accent)] px-2 py-0.5 font-mono text-[11px] font-semibold text-[var(--ui-btn-text)] transition">1x</button>
+              <button type="button" data-speed="2" class="anim-speed-btn rounded-[2px] px-2 py-0.5 font-mono text-[11px] text-[var(--ui-muted)] hover:text-[var(--ui-text)] transition">2x</button>
             </div>
           </div>
         </div>
@@ -306,79 +279,79 @@
 
     <!-- Right Sidebar: Wikipedia "Appearance" & Inspector Drawer -->
     <aside id="studio-panel"
-      class="fixed md:static inset-y-14 right-0 z-20 w-72 shrink-0 border-l border-[#eaecf0] bg-white flex flex-col overflow-hidden shadow-lg md:shadow-none">
-      <div class="flex items-center justify-between border-b border-[#eaecf0] px-4 py-3">
-        <span class="text-[13px] font-bold text-[#202122]">Appearance</span>
+      class="fixed md:static inset-y-14 right-0 z-20 w-72 shrink-0 border-l border-[var(--ui-divider)] bg-[var(--ui-bg)] flex flex-col overflow-hidden shadow-lg md:shadow-none transition-colors duration-200">
+      <div class="flex items-center justify-between border-b border-[var(--ui-divider)] px-4 py-3">
+        <span class="text-[13px] font-bold text-[var(--ui-text)]">Appearance</span>
         <button id="close-studio-btn" type="button"
-          class="rounded-[2px] bg-[#eaecf0] hover:bg-[#dadde3] px-1.5 py-0.5 text-[11px] text-[#202122] transition">
+          class="rounded-[2px] bg-[var(--ui-hover)] hover:opacity-80 px-1.5 py-0.5 text-[11px] text-[var(--ui-text)] transition">
           hide
         </button>
       </div>
 
       <div class="studio-scroll flex-1 overflow-y-auto px-4 py-3 space-y-4 text-[13px]">
 
-        <!-- Color / Backdrop Radio Group (Matches Wikipedia Appearance -> Color) -->
+        <!-- Studio Theme & Backdrop Radio Group -->
         <div class="space-y-2">
-          <div class="flex items-center justify-between border-b border-[#eaecf0] pb-1">
-            <span class="text-xs font-medium text-[#54595d]">Backdrop</span>
-            <span id="bg-label" class="text-[11px] text-[#54595d]">Light</span>
+          <div class="flex items-center justify-between border-b border-[var(--ui-divider)] pb-1">
+            <span class="text-xs font-medium text-[var(--ui-muted)]">Studio Theme</span>
+            <span id="bg-label" class="text-[11px] text-[var(--ui-muted)]">Light</span>
           </div>
           <div class="space-y-1.5">
             <button type="button" data-bg="light-gray" class="bg-preset-btn flex w-full items-center gap-2.5 py-0.5 text-left">
               <span class="wiki-radio is-checked" aria-hidden="true"></span>
-              <span class="text-[13px] text-[#202122]">Light (Wikipedia)</span>
+              <span class="text-[13px] text-[var(--ui-text)]">Light (Wikipedia)</span>
             </button>
             <button type="button" data-bg="dark-studio" class="bg-preset-btn flex w-full items-center gap-2.5 py-0.5 text-left">
               <span class="wiki-radio" aria-hidden="true"></span>
-              <span class="text-[13px] text-[#202122]">Dark Studio</span>
+              <span class="text-[13px] text-[var(--ui-text)]">Dark Studio</span>
             </button>
             <button type="button" data-bg="charcoal" class="bg-preset-btn flex w-full items-center gap-2.5 py-0.5 text-left">
               <span class="wiki-radio" aria-hidden="true"></span>
-              <span class="text-[13px] text-[#202122]">Charcoal</span>
+              <span class="text-[13px] text-[var(--ui-text)]">Charcoal</span>
             </button>
             <button type="button" data-bg="deep-navy" class="bg-preset-btn flex w-full items-center gap-2.5 py-0.5 text-left">
               <span class="wiki-radio" aria-hidden="true"></span>
-              <span class="text-[13px] text-[#202122]">Deep Navy</span>
+              <span class="text-[13px] text-[var(--ui-text)]">Deep Navy</span>
             </button>
           </div>
         </div>
 
-        <!-- Viewport Settings (Wikipedia Radio / Checkbox Style) -->
+        <!-- Viewport Settings -->
         <div class="space-y-2.5">
-          <div class="border-b border-[#eaecf0] pb-1 text-xs font-medium text-[#54595d]">Viewport</div>
+          <div class="border-b border-[var(--ui-divider)] pb-1 text-xs font-medium text-[var(--ui-muted)]">Viewport</div>
 
           <label class="flex items-center gap-2.5 cursor-pointer">
             <input id="auto-rotate-checkbox" type="checkbox" checked class="wiki-checkbox" />
-            <span class="text-[13px] text-[#202122]">Auto-rotate turntable</span>
+            <span class="text-[13px] text-[var(--ui-text)]">Auto-rotate turntable</span>
           </label>
 
           <div class="pl-6 space-y-1">
-            <div class="flex items-center justify-between text-[11px] text-[#54595d]">
+            <div class="flex items-center justify-between text-[11px] text-[var(--ui-muted)]">
               <span>Rotation speed</span>
-              <span id="rotate-speed-val" class="font-mono text-[#202122]">1.5x</span>
+              <span id="rotate-speed-val" class="font-mono text-[var(--ui-text)]">1.5x</span>
             </div>
             <input id="rotate-speed-slider" type="range" min="0.5" max="6" step="0.5" value="1.5" class="wiki-slider w-full" />
           </div>
 
           <label class="flex items-center gap-2.5 cursor-pointer">
             <input id="wireframe-checkbox" type="checkbox" class="wiki-checkbox" />
-            <span class="text-[13px] text-[#202122]">Wireframe topology</span>
+            <span class="text-[13px] text-[var(--ui-text)]">Wireframe topology</span>
           </label>
 
           <label class="flex items-center gap-2.5 cursor-pointer">
             <input id="vertex-colors-checkbox" type="checkbox" checked class="wiki-checkbox" />
-            <span class="text-[13px] text-[#202122]">Vertex colors (COLOR_0)</span>
+            <span class="text-[13px] text-[var(--ui-text)]">Vertex colors (COLOR_0)</span>
           </label>
 
           <label class="flex items-center gap-2.5 cursor-pointer">
             <input id="grid-checkbox" type="checkbox" checked class="wiki-checkbox" />
-            <span class="text-[13px] text-[#202122]">Ground grid &amp; shadow</span>
+            <span class="text-[13px] text-[var(--ui-text)]">Ground grid &amp; shadow</span>
           </label>
 
           <div class="pt-1 space-y-1">
-            <div class="flex items-center justify-between text-[11px] text-[#54595d]">
+            <div class="flex items-center justify-between text-[11px] text-[var(--ui-muted)]">
               <span>Tone exposure</span>
-              <span id="exposure-val" class="font-mono text-[#202122]">1.10 EV</span>
+              <span id="exposure-val" class="font-mono text-[var(--ui-text)]">1.10 EV</span>
             </div>
             <input id="exposure-slider" type="range" min="0.2" max="2.5" step="0.05" value="1.1" class="wiki-slider w-full" />
           </div>
@@ -386,11 +359,11 @@
 
         <!-- Material Slots & Texture Mapping -->
         <div class="space-y-2">
-          <div class="flex items-center justify-between border-b border-[#eaecf0] pb-1">
-            <span class="text-xs font-medium text-[#54595d]">Material Slots</span>
-            <span id="texture-status-badge" class="font-mono text-[10px] text-[#54595d]">0/0 TEX</span>
+          <div class="flex items-center justify-between border-b border-[var(--ui-divider)] pb-1">
+            <span class="text-xs font-medium text-[var(--ui-muted)]">Material Slots</span>
+            <span id="texture-status-badge" class="font-mono text-[10px] text-[var(--ui-muted)]">0/0 TEX</span>
           </div>
-          <p class="text-[11px] text-[#54595d] leading-snug">
+          <p class="text-[11px] text-[var(--ui-muted)] leading-snug">
             Click a slot to assign a diffuse texture (<span class="font-mono">.png</span>/<span class="font-mono">.jpg</span>).
           </p>
           <div id="materials-list" class="space-y-1 max-h-36 overflow-y-auto studio-scroll pr-0.5">
@@ -399,35 +372,35 @@
 
         <!-- Infobox-style Model Telemetry Table -->
         <div class="space-y-1.5">
-          <div class="border-b border-[#eaecf0] pb-1 text-xs font-medium text-[#54595d]">Asset Infobox</div>
-          <div class="rounded-[2px] border border-[#a2a9b1] bg-[#f8f9fa] text-xs overflow-hidden">
-            <div class="border-b border-[#a2a9b1] bg-[#eaecf0] px-2.5 py-1.5 text-center font-semibold text-[#202122] truncate" id="info-name">
+          <div class="border-b border-[var(--ui-divider)] pb-1 text-xs font-medium text-[var(--ui-muted)]">Asset Infobox</div>
+          <div class="rounded-[2px] border border-[var(--ui-border)] bg-[var(--ui-subtle)] text-xs overflow-hidden">
+            <div class="border-b border-[var(--ui-border)] bg-[var(--ui-hover)] px-2.5 py-1.5 text-center font-semibold text-[var(--ui-text)] truncate" id="info-name">
               Studio Showcase Core
             </div>
-            <div class="divide-y divide-[#eaecf0]">
+            <div class="divide-y divide-[var(--ui-divider)]">
               <div class="flex items-center justify-between px-2.5 py-1.5">
-                <span class="font-semibold text-[#202122]">File size</span>
-                <span id="info-size" class="font-mono text-[#54595d]">Procedural</span>
+                <span class="font-semibold text-[var(--ui-text)]">File size</span>
+                <span id="info-size" class="font-mono text-[var(--ui-muted)]">Procedural</span>
               </div>
               <div class="flex items-center justify-between px-2.5 py-1.5">
-                <span class="font-semibold text-[#202122]">Meshes</span>
-                <span id="info-meshes" class="font-mono text-[#202122]">0</span>
+                <span class="font-semibold text-[var(--ui-text)]">Meshes</span>
+                <span id="info-meshes" class="font-mono text-[var(--ui-text)]">0</span>
               </div>
               <div class="flex items-center justify-between px-2.5 py-1.5">
-                <span class="font-semibold text-[#202122]">Materials</span>
-                <span id="info-materials" class="font-mono text-[#202122]">0</span>
+                <span class="font-semibold text-[var(--ui-text)]">Materials</span>
+                <span id="info-materials" class="font-mono text-[var(--ui-text)]">0</span>
               </div>
               <div class="flex items-center justify-between px-2.5 py-1.5">
-                <span class="font-semibold text-[#202122]">Triangles</span>
-                <span id="info-triangles" class="font-mono text-[#202122]">0</span>
+                <span class="font-semibold text-[var(--ui-text)]">Triangles</span>
+                <span id="info-triangles" class="font-mono text-[var(--ui-text)]">0</span>
               </div>
               <div class="flex items-center justify-between px-2.5 py-1.5">
-                <span class="font-semibold text-[#202122]">Vertices</span>
-                <span id="info-vertices" class="font-mono text-[#202122]">0</span>
+                <span class="font-semibold text-[var(--ui-text)]">Vertices</span>
+                <span id="info-vertices" class="font-mono text-[var(--ui-text)]">0</span>
               </div>
               <div class="flex items-center justify-between px-2.5 py-1.5">
-                <span class="font-semibold text-[#202122]">Dimensions</span>
-                <span id="info-dimensions" class="font-mono text-[11px] text-[#54595d]">0.00 × 0.00 × 0.00</span>
+                <span class="font-semibold text-[var(--ui-text)]">Dimensions</span>
+                <span id="info-dimensions" class="font-mono text-[11px] text-[var(--ui-muted)]">0.00 × 0.00 × 0.00</span>
               </div>
             </div>
           </div>
@@ -438,8 +411,8 @@
   </div>
 
   <!-- Status Pill -->
-  <div id="loading-pill" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden items-center gap-2 rounded-[2px] border border-[#a2a9b1] bg-white px-3.5 py-1.5 text-xs font-medium text-[#202122] shadow-md">
-    <svg class="h-3.5 w-3.5 animate-spin text-[#3366cc]" viewBox="0 0 24 24" fill="none">
+  <div id="loading-pill" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden items-center gap-2 rounded-[2px] border border-[var(--ui-border)] bg-[var(--ui-bg)] px-3.5 py-1.5 text-xs font-medium text-[var(--ui-text)] shadow-md">
+    <svg class="h-3.5 w-3.5 animate-spin text-[var(--ui-accent)]" viewBox="0 0 24 24" fill="none">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
     </svg>
