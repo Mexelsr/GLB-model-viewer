@@ -513,8 +513,8 @@ function syncToolbarAndCheckboxes() {
   if (wireCb) wireCb.checked = state.wireframe;
   if (wireTab) {
     wireTab.className = state.wireframe
-      ? 'py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition'
-      : 'py-1.5 border-b-2 border-transparent text-[#3366cc] hover:text-[#2a4b8d] transition';
+      ? 'py-1.5 border-b-2 border-[var(--ui-accent)] font-medium text-[var(--ui-text)] transition'
+      : 'py-1.5 border-b-2 border-transparent text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] transition';
   }
 
   const vcCb = document.getElementById('vertex-colors-checkbox');
@@ -522,8 +522,8 @@ function syncToolbarAndCheckboxes() {
   if (vcCb) vcCb.checked = state.useVertexColors;
   if (vcTab) {
     vcTab.className = state.useVertexColors
-      ? 'py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition'
-      : 'py-1.5 border-b-2 border-transparent text-[#3366cc] hover:text-[#2a4b8d] transition';
+      ? 'py-1.5 border-b-2 border-[var(--ui-accent)] font-medium text-[var(--ui-text)] transition'
+      : 'py-1.5 border-b-2 border-transparent text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] transition';
   }
 
   const rotCb = document.getElementById('auto-rotate-checkbox');
@@ -531,8 +531,8 @@ function syncToolbarAndCheckboxes() {
   if (rotCb) rotCb.checked = state.autoRotate;
   if (rotTab) {
     rotTab.className = state.autoRotate
-      ? 'py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition'
-      : 'py-1.5 border-b-2 border-transparent text-[#3366cc] hover:text-[#2a4b8d] transition';
+      ? 'py-1.5 border-b-2 border-[var(--ui-accent)] font-medium text-[var(--ui-text)] transition'
+      : 'py-1.5 border-b-2 border-transparent text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] transition';
   }
 
   const gridCb = document.getElementById('grid-checkbox');
@@ -540,8 +540,8 @@ function syncToolbarAndCheckboxes() {
   if (gridCb) gridCb.checked = state.showGrid;
   if (gridTab) {
     gridTab.className = state.showGrid
-      ? 'hidden sm:inline-block py-1.5 border-b-2 border-[#3366cc] font-medium text-[#202122] transition'
-      : 'hidden sm:inline-block py-1.5 border-b-2 border-transparent text-[#3366cc] hover:text-[#2a4b8d] transition';
+      ? 'hidden sm:inline-block py-1.5 border-b-2 border-[var(--ui-accent)] font-medium text-[var(--ui-text)] transition'
+      : 'hidden sm:inline-block py-1.5 border-b-2 border-transparent text-[var(--ui-accent)] hover:text-[var(--ui-accent-hover)] transition';
   }
 }
 
@@ -558,7 +558,7 @@ function renderMaterialsList(model) {
 
   materialsListEl.innerHTML = '';
   if (mats.length === 0) {
-    materialsListEl.innerHTML = `<div class="text-[11px] text-[#54595d] py-1">No matching material slots.</div>`;
+    materialsListEl.innerHTML = `<div class="text-[11px] text-[var(--ui-muted)] py-1">No matching material slots.</div>`;
     return;
   }
 
@@ -568,14 +568,14 @@ function renderMaterialsList(model) {
     const row = document.createElement('button');
     row.type = 'button';
     row.title = 'Click to assign diffuse texture (.png / .jpg)';
-    row.className = 'w-full flex items-center justify-between gap-2 rounded-[2px] border border-[#eaecf0] bg-[#f8f9fa] hover:bg-[#eaecf0] hover:border-[#a2a9b1] px-2 py-1 text-left transition';
+    row.className = 'w-full flex items-center justify-between gap-2 rounded-[2px] border border-[var(--ui-divider)] bg-[var(--ui-subtle)] hover:bg-[var(--ui-hover)] hover:border-[var(--ui-border)] px-2 py-1 text-left transition';
     row.innerHTML = `
       <div class="flex items-center gap-2 min-w-0">
-        <span class="h-3 w-3 shrink-0 rounded-[2px] border border-[#a2a9b1]" style="background-color: ${swatchHex}"></span>
-        <span class="truncate text-[11.5px] text-[#202122]">${escapeHtml(mat.name || 'Material')}</span>
+        <span class="h-3 w-3 shrink-0 rounded-[2px] border border-[var(--ui-border)]" style="background-color: ${swatchHex}"></span>
+        <span class="truncate text-[11.5px] text-[var(--ui-text)]">${escapeHtml(mat.name || 'Material')}</span>
       </div>
       <span class="shrink-0 font-mono text-[10px] ${
-        hasMap ? 'font-semibold text-[#202122]' : 'text-[#3366cc] hover:underline'
+        hasMap ? 'font-semibold text-[var(--ui-text)]' : 'text-[var(--ui-accent)] hover:underline'
       }">${hasMap ? 'MAPPED' : '+ TEX'}</span>
     `;
 
@@ -782,7 +782,7 @@ function renderModelsList() {
     : state.models;
 
   if (visibleModels.length === 0) {
-    modelsListEl.innerHTML = `<div class="py-1 text-xs text-[#54595d]">No matching models.</div>`;
+    modelsListEl.innerHTML = `<div class="py-1 text-xs text-[var(--ui-muted)]">No matching models.</div>`;
     return;
   }
 
@@ -790,25 +790,25 @@ function renderModelsList() {
     const isActive = model.id === state.activeModelId;
     const item = document.createElement('div');
     item.className = `group flex items-center justify-between gap-1.5 rounded-[2px] px-2 py-1 cursor-pointer transition ${
-      isActive ? 'bg-[#f8f9fa]' : 'hover:bg-[#f8f9fa]'
+      isActive ? 'bg-[var(--ui-subtle)]' : 'hover:bg-[var(--ui-subtle)]'
     }`;
 
     item.innerHTML = `
       <div class="min-w-0 flex-1">
         <div class="truncate text-[12.5px] ${
-          isActive ? 'font-bold text-[#202122]' : 'text-[#3366cc] group-hover:text-[#2a4b8d] group-hover:underline'
+          isActive ? 'font-bold text-[var(--ui-text)]' : 'text-[var(--ui-accent)] group-hover:text-[var(--ui-accent-hover)] group-hover:underline'
         }">${escapeHtml(model.name)}</div>
-        <div class="text-[10.5px] text-[#54595d] font-mono">
+        <div class="text-[10.5px] text-[var(--ui-muted)] font-mono">
           ${escapeHtml(model.sizeLabel)}${model.animations.length > 0 ? ` · ${model.animations.length} anim` : ''}
         </div>
       </div>
       ${
         !model.isDefault
           ? `<button type="button" data-delete-id="${model.id}" title="Remove Model"
-              class="delete-model-btn rounded-[2px] px-1.5 py-0.5 text-xs text-[#54595d] hover:bg-[#eaecf0] hover:text-[#202122] transition">
+              class="delete-model-btn rounded-[2px] px-1.5 py-0.5 text-xs text-[var(--ui-muted)] hover:bg-[var(--ui-hover)] hover:text-[var(--ui-text)] transition">
               ×
             </button>`
-          : `<span class="text-[10px] text-[#72777d]">demo</span>`
+          : `<span class="text-[10px] text-[var(--ui-muted)]">demo</span>`
       }
     `;
 
@@ -816,7 +816,7 @@ function renderModelsList() {
       if (e.target.closest('.delete-model-btn')) return;
       activateModel(model.id);
       if (window.innerWidth < 768) {
-        modelsPanel.classList.add('hidden');
+        setModelsPanelOpen(false);
       }
     });
 
@@ -1111,19 +1111,19 @@ function updateScrubberKeyframeMarkers() {
   }
 
   const duration = state.activeAction ? state.activeAction.getClip().duration : state.manualDuration;
-  const stops = ['#c8ccd1 0%'];
+  const stops = ['var(--ui-track) 0%'];
   const sorted = Array.from(allTimes).sort((a, b) => a - b);
 
   sorted.forEach((t) => {
     const pct = Math.max(0, Math.min(100, (t / (duration || 1)) * 100));
     const start = Math.max(0, pct - 0.8).toFixed(2);
     const end = Math.min(100, pct + 0.8).toFixed(2);
-    stops.push(`#c8ccd1 ${start}%`);
-    stops.push(`#3366cc ${start}%`);
-    stops.push(`#3366cc ${end}%`);
-    stops.push(`#c8ccd1 ${end}%`);
+    stops.push(`var(--ui-track) ${start}%`);
+    stops.push(`var(--ui-accent) ${start}%`);
+    stops.push(`var(--ui-accent) ${end}%`);
+    stops.push(`var(--ui-track) ${end}%`);
   });
-  stops.push('#c8ccd1 100%');
+  stops.push('var(--ui-track) 100%');
 
   animScrubber.classList.add('has-manual-keys');
   animScrubber.style.setProperty('--kf-track', `linear-gradient(90deg, ${stops.join(', ')})`);
@@ -1261,8 +1261,8 @@ document.querySelectorAll('.anim-speed-btn').forEach((btn) => {
     document.querySelectorAll('.anim-speed-btn').forEach((b) => {
       const active = parseFloat(b.dataset.speed) === speed;
       b.className = active
-        ? 'anim-speed-btn rounded-[2px] bg-[#3366cc] px-2 py-0.5 font-mono text-[11px] font-semibold text-white transition'
-        : 'anim-speed-btn rounded-[2px] px-2 py-0.5 font-mono text-[11px] text-[#54595d] hover:text-[#202122] transition';
+        ? 'anim-speed-btn rounded-[2px] bg-[var(--ui-accent)] px-2 py-0.5 font-mono text-[11px] font-semibold text-[var(--ui-btn-text)] transition'
+        : 'anim-speed-btn rounded-[2px] px-2 py-0.5 font-mono text-[11px] text-[var(--ui-muted)] hover:text-[var(--ui-text)] transition';
     });
   });
 });
@@ -1385,14 +1385,9 @@ fileInput.addEventListener('change', (e) => {
 document.getElementById('header-export-btn').addEventListener('click', exportAnimatedGLB);
 document.getElementById('sidebar-export-btn').addEventListener('click', exportAnimatedGLB);
 document.getElementById('header-fit-btn').addEventListener('click', () => setCameraPreset('fit', true));
-document.getElementById('brand-reset-link').addEventListener('click', (e) => {
-  e.preventDefault();
-  setCameraPreset('fit', true);
-});
 document.getElementById('sidebar-keyframe-btn').addEventListener('click', recordManualKeyframe);
 document.getElementById('sidebar-reset-pose-btn').addEventListener('click', resetSelectedPose);
 
-// Functional Wikipedia Search Bar
 const searchForm = document.getElementById('header-search-form');
 const searchInput = document.getElementById('header-search-input');
 
@@ -1419,8 +1414,8 @@ searchForm.addEventListener('submit', (e) => {
     activateModel(matchedModel.id);
     showToast(`Switched to "${matchedModel.name}"`, 'info');
   } else {
-    modelsPanel.classList.remove('hidden');
-    studioPanel.classList.remove('hidden');
+    setModelsPanelOpen(true);
+    setStudioPanelOpen(true);
   }
 });
 
@@ -1559,36 +1554,37 @@ rotateSpeedSlider.addEventListener('input', (e) => {
   rotateSpeedVal.textContent = `${val.toFixed(1)}x`;
 });
 
-document.querySelectorAll('.bg-preset-btn').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const key = btn.dataset.bg;
-    const preset = BG_PRESETS[key];
-    if (!preset) return;
+function applyStudioTheme(key) {
+  const preset = BG_PRESETS[key];
+  if (!preset) return;
 
-    state.bgPreset = key;
-    scene.background = new THREE.Color(preset.color);
-    container.style.backgroundColor = `#${preset.color.toString(16).padStart(6, '0')}`;
-    document.getElementById('bg-label').textContent = preset.label;
+  state.bgPreset = key;
+  document.documentElement.dataset.theme = key;
+  scene.background = new THREE.Color(preset.color);
+  document.getElementById('bg-label').textContent = preset.label;
 
-    scene.remove(gridHelper);
-    gridHelper.geometry.dispose();
-    gridHelper.material.dispose();
-    gridHelper = new THREE.GridHelper(10, 20, preset.gridCenter, preset.gridLine);
-    gridHelper.material.opacity = key === 'light-gray' ? 0.85 : 0.65;
-    gridHelper.material.transparent = true;
-    gridHelper.visible = state.showGrid;
-    scene.add(gridHelper);
+  scene.remove(gridHelper);
+  gridHelper.geometry.dispose();
+  gridHelper.material.dispose();
+  gridHelper = new THREE.GridHelper(10, 20, preset.gridCenter, preset.gridLine);
+  gridHelper.material.opacity = key === 'light-gray' ? 0.85 : 0.65;
+  gridHelper.material.transparent = true;
+  gridHelper.visible = state.showGrid;
+  scene.add(gridHelper);
 
-    shadowPlane.material.opacity = key === 'light-gray' ? 0.18 : 0.35;
+  shadowPlane.material.opacity = key === 'light-gray' ? 0.18 : 0.35;
 
-    document.querySelectorAll('.bg-preset-btn').forEach((b) => {
-      const active = b.dataset.bg === key;
-      const radio = b.querySelector('.wiki-radio');
-      if (radio) {
-        radio.classList.toggle('is-checked', active);
-      }
-    });
+  document.querySelectorAll('.bg-preset-btn').forEach((b) => {
+    const active = b.dataset.bg === key;
+    const radio = b.querySelector('.wiki-radio');
+    if (radio) {
+      radio.classList.toggle('is-checked', active);
+    }
   });
+}
+
+document.querySelectorAll('.bg-preset-btn').forEach((btn) => {
+  btn.addEventListener('click', () => applyStudioTheme(btn.dataset.bg));
 });
 
 const exposureSlider = document.getElementById('exposure-slider');
@@ -1703,14 +1699,14 @@ function setLoading(isLoading, message = 'Loading...') {
 
 function showToast(message, type = 'info') {
   const styles = {
-    success: 'border-[#3366cc] bg-white text-[#202122]',
-    error:   'border-[#d33] bg-[#fee7e6] text-[#202122]',
-    info:    'border-[#a2a9b1] bg-white text-[#202122]',
+    success: 'border-[var(--ui-accent)] bg-[var(--ui-bg)] text-[var(--ui-text)]',
+    error:   'border-[#d33] bg-[var(--ui-bg)] text-[var(--ui-text)]',
+    info:    'border-[var(--ui-border)] bg-[var(--ui-bg)] text-[var(--ui-text)]',
   };
   const dotColors = {
-    success: 'bg-[#3366cc]',
+    success: 'bg-[var(--ui-accent)]',
     error:   'bg-[#d33]',
-    info:    'bg-[#54595d]',
+    info:    'bg-[var(--ui-muted)]',
   };
 
   const toast = document.createElement('div');
@@ -1791,6 +1787,8 @@ function animate() {
 }
 
 window.addEventListener('load', () => {
+  applyStudioTheme(state.bgPreset);
+
   const showcase = createShowcaseModel();
   const { wrapper, normalizedHeight, hasShaderMasks, hasAnyTexture, materials, stats } = normalizeAndInspectModel(showcase.group);
 
